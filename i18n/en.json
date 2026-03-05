@@ -3,6 +3,9 @@
     "name": "Ishi no Niwa",
     "tagline": "Arrange sacred stones. Discover your pattern. Find your balance."
   },
+  "common": {
+    "sponsored": "Sponsored"
+  },
   "tabs": {
     "garden": "Garden",
     "stones": "Stones",
@@ -87,6 +90,7 @@
     "supportStones": "Supporting Stones",
     "placeForMe": "Place for Me",
     "customize": "I'll Customize",
+    "chooseShape": "Choose a Shape",
     "chakraBalance": "Chakra Balance",
     "guidedSessions": "Guided Sessions",
     "sessionMinutes": "{{minutes}} min"

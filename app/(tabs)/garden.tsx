@@ -6,7 +6,6 @@ import {
   StyleSheet,
   ScrollView,
   Dimensions,
-  Alert,
   Platform,
 } from "react-native";
 import { useTranslation } from "react-i18next";
@@ -84,7 +83,8 @@ interface DraggableStoneProps {
   stone: { id: string; name_jp: string; color_hex: string };
   canvasSize: number;
   onDragEnd: (index: number, newX: number, newY: number) => void;
-  onRemove: (index: number) => void;
+  onSelect: (index: number) => void;
+  selected: boolean;
   pulsing: boolean;
 }
 
@@ -94,7 +94,8 @@ function DraggableStone({
   stone,
   canvasSize,
   onDragEnd,
-  onRemove,
+  onSelect,
+  selected,
   pulsing,
 }: DraggableStoneProps) {
   const [gemW, gemH] = getGemSize(stone.id);
@@ -134,24 +135,9 @@ function DraggableStone({
     }
   }, [pulsing]);
 
-  const confirmRemove = useCallback(
-    (idx: number) => {
-      if (Platform.OS === "web") {
-        const yes =
-          typeof window !== "undefined" && window.confirm("Remove this stone?");
-        if (yes) onRemove(idx);
-      } else {
-        Alert.alert("Remove Stone", "Remove this stone from the grid?", [
-          { text: "Cancel", style: "cancel" },
-          {
-            text: "Remove",
-            style: "destructive",
-            onPress: () => onRemove(idx),
-          },
-        ]);
-      }
-    },
-    [onRemove]
+  const handleTap = useCallback(
+    (idx: number) => { onSelect(idx); },
+    [onSelect]
   );
 
   const panGesture = Gesture.Pan()
@@ -180,13 +166,12 @@ function DraggableStone({
     })
     .minDistance(5);
 
-  const longPressGesture = Gesture.LongPress()
-    .minDuration(500)
-    .onEnd((_event, success) => {
-      if (success) runOnJS(confirmRemove)(index);
+  const tapGesture = Gesture.Tap()
+    .onEnd(() => {
+      runOnJS(handleTap)(index);
     });
 
-  const composedGesture = Gesture.Race(panGesture, longPressGesture);
+  const composedGesture = Gesture.Race(panGesture, tapGesture);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
@@ -211,6 +196,21 @@ function DraggableStone({
           animatedStyle,
         ]}
       >
+        {selected && (
+          <View
+            style={{
+              position: "absolute",
+              top: -4,
+              left: -4,
+              right: -4,
+              bottom: -4,
+              borderRadius: Math.max(gemW, gemH),
+              borderWidth: 2,
+              borderColor: colors.error,
+              zIndex: -1,
+            }}
+          />
+        )}
         <GemStone
           stoneId={stone.id}
           colorHex={stone.color_hex}
@@ -233,6 +233,7 @@ export default function GardenScreen() {
   const incrementGrids = useProgressionStore((s) => s.incrementGrids);
   const [showTemplates, setShowTemplates] = useState(false);
   const [showSaveAd, setShowSaveAd] = useState(false);
+  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
 
   const [pulsing, setPulsing] = useState(false);
 
@@ -293,24 +294,15 @@ export default function GardenScreen() {
 
   const handleStoneTap = useCallback(
     (stoneId: string) => {
-      if (!activeTemplate || activeTemplate.point_count === 0) {
-        // Free placement with symmetry — offset from center so rotations differ
-        const fold = canvas.symmetryFold;
-        if (fold > 0) {
-          // Place at ~30% from center so rotational copies spread out
-          const pts = withSymmetry(0.5, 0.3);
-          pts.forEach((pt) => {
-            canvas.addPlacement({ stoneId, x: snap(pt.x), y: snap(pt.y), rotation: 0 });
-          });
-        } else {
-          // No symmetry — place at center, user drags to position
-          canvas.addPlacement({ stoneId, x: snap(0.5), y: snap(0.5), rotation: 0 });
-        }
-        return;
-      }
-      // Template mode: place at next guide point
+      const fold = canvas.symmetryFold;
       const filledCount = canvas.placements.length;
-      if (filledCount < activeTemplate.points.length) {
+
+      // If template has unfilled guide points, use next one
+      if (
+        activeTemplate &&
+        activeTemplate.point_count > 0 &&
+        filledCount < activeTemplate.points.length
+      ) {
         const point = activeTemplate.points[filledCount];
         canvas.addPlacement({
           stoneId,
@@ -318,6 +310,17 @@ export default function GardenScreen() {
           y: snap(point.y),
           rotation: 0,
         });
+        return;
+      }
+
+      // Otherwise free-place (works with or without template)
+      if (fold > 0) {
+        const pts = withSymmetry(0.5, 0.3);
+        pts.forEach((pt) => {
+          canvas.addPlacement({ stoneId, x: snap(pt.x), y: snap(pt.y), rotation: 0 });
+        });
+      } else {
+        canvas.addPlacement({ stoneId, x: snap(0.5), y: snap(0.5), rotation: 0 });
       }
     },
     [activeTemplate, canvas, snap, withSymmetry]
@@ -330,12 +333,19 @@ export default function GardenScreen() {
     [canvas, snap]
   );
 
-  const handleRemove = useCallback(
+  const handleSelect = useCallback(
     (index: number) => {
-      canvas.removePlacement(index);
+      setSelectedIdx((prev) => (prev === index ? null : index));
     },
-    [canvas]
+    []
   );
+
+  const handleRemoveSelected = useCallback(() => {
+    if (selectedIdx !== null && selectedIdx < canvas.placements.length) {
+      canvas.removePlacement(selectedIdx);
+      setSelectedIdx(null);
+    }
+  }, [canvas, selectedIdx]);
 
   const handleSaveGrid = () => {
     if (canvas.placements.length === 0) return;
@@ -451,13 +461,32 @@ export default function GardenScreen() {
                 stone={stone}
                 canvasSize={CANVAS_SIZE}
                 onDragEnd={handleDragEnd}
-                onRemove={handleRemove}
+                onSelect={handleSelect}
+                selected={selectedIdx === i}
                 pulsing={pulsing}
               />
             );
           })}
         </View>
       </View>
+
+      {/* Remove bar — shown when a stone is selected */}
+      {selectedIdx !== null && selectedIdx < canvas.placements.length && (
+        <View style={styles.removeBar}>
+          <Text style={styles.removeBarText}>
+            {stones.find((s) => s.id === canvas.placements[selectedIdx]?.stoneId)?.name_jp || ""}
+          </Text>
+          <TouchableOpacity style={styles.removeButton} onPress={handleRemoveSelected}>
+            <Text style={styles.removeButtonText}>{t("garden.removeStone")}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.cancelSelectButton}
+            onPress={() => setSelectedIdx(null)}
+          >
+            <Text style={styles.cancelSelectText}>{t("common.cancel")}</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* Post-save ad */}
       {showSaveAd && (
@@ -615,6 +644,39 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.08)",
     borderWidth: 1,
     borderColor: "rgba(0,0,0,0.12)",
+  },
+  removeBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.md,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    backgroundColor: colors.surface,
+  },
+  removeBarText: {
+    color: colors.textSecondary,
+    fontSize: fontSize.sm,
+    flex: 1,
+  },
+  removeButton: {
+    backgroundColor: colors.error,
+    borderRadius: borderRadius.sm,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.md,
+  },
+  removeButtonText: {
+    color: "#fff",
+    fontSize: fontSize.xs,
+    fontWeight: "600",
+  },
+  cancelSelectButton: {
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+  },
+  cancelSelectText: {
+    color: colors.textMuted,
+    fontSize: fontSize.xs,
   },
   adContainer: {
     paddingHorizontal: spacing.lg,

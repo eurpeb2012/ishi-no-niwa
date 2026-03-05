@@ -3,6 +3,9 @@
     "name": "石の庭",
     "tagline": "聖なる石を並べ、パターンを発見し、バランスを見つける。"
   },
+  "common": {
+    "sponsored": "広告"
+  },
   "tabs": {
     "garden": "庭",
     "stones": "石",
@@ -87,6 +90,7 @@
     "supportStones": "サポートの石",
     "placeForMe": "配置して",
     "customize": "カスタマイズする",
+    "chooseShape": "形を選ぶ",
     "chakraBalance": "チャクラバランス",
     "guidedSessions": "ガイド瞑想",
     "sessionMinutes": "{{minutes}}分"

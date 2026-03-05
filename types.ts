@@ -62,6 +62,7 @@ export interface GridTemplate {
   unlock_level: number;
   required_tier: SubscriptionTier;
   category: TemplateCategory;
+  intentions: string[];
 }
 
 export interface StonePlacement {

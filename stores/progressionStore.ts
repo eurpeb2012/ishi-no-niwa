@@ -17,6 +17,7 @@ interface ProgressionState {
   updateStreak: () => void;
   isStoneUnlocked: (stoneId: string) => boolean;
   isTemplateUnlocked: (templateId: string) => boolean;
+  unlockAll: () => void;
 }
 
 function calculateLevel(xp: number): number {
@@ -164,6 +165,35 @@ export const useProgressionStore = create<ProgressionState>()(
 
       isTemplateUnlocked: (templateId) =>
         get().progress.templatesUnlocked.includes(templateId),
+
+      unlockAll: () =>
+        set(() => ({
+          progress: {
+            xpTotal: 16000,
+            level: 20,
+            currentStreakDays: 7,
+            longestStreakDays: 30,
+            stonesUnlocked: [
+              "rose_quartz", "amethyst", "clear_quartz", "tigers_eye", "black_tourmaline",
+              "lapis_lazuli", "jade_jadeite", "carnelian", "black_obsidian", "citrine",
+              "garnet", "aquamarine", "moonstone", "smoky_quartz", "green_aventurine",
+              "malachite", "turquoise", "rhodonite", "fluorite", "labradorite",
+              "sugilite", "prehnite", "amber", "agate", "chrysanthemum_stone",
+            ],
+            templatesUnlocked: [
+              "sankaku", "shikaku", "enso", "freeform",
+              "diamond", "pentagon", "cross", "vesica", "star_david", "infinity",
+              "asanoha", "kikkou", "seigaiha", "tomoe", "magatama_ring",
+              "flower_of_life", "seed_of_life", "metatrons_cube", "sri_yantra",
+            ],
+            skillsCompleted: ["stone_basics", "grid_intro", "meditation_101"],
+            achievements: ["first_grid", "five_stones", "week_streak"],
+            gridsCompletedCount: 12,
+            guidedSessionsCount: 5,
+            dailyIntentionToday: false,
+            lastActiveDate: new Date().toISOString().split("T")[0],
+          },
+        })),
     }),
     {
       name: "ishi-progression",
