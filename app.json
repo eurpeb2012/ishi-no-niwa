@@ -27,7 +27,11 @@
     },
     "web": {
       "favicon": "./assets/favicon.png",
-      "bundler": "metro"
+      "bundler": "metro",
+      "output": "single"
+    },
+    "experiments": {
+      "baseUrl": "/ishi-no-niwa"
     },
     "plugins": [
       "expo-router"
