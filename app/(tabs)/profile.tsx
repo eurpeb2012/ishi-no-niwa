@@ -37,7 +37,7 @@ export default function ProfileScreen() {
       } catch (_) {
         /* storage might be unavailable */
       }
-      window.location.replace(window.location.pathname);
+      window.location.replace("/ishi-no-niwa/");
     } else {
       await AsyncStorage.multiRemove(["ishi-auth", "ishi-progression", "ishi-canvas"]);
       signOut();
