@@ -27,14 +27,20 @@ export default function ProfileScreen() {
   };
 
   const handleSignOut = async () => {
-    // Clear persisted stores FIRST, before touching Zustand state,
-    // to avoid the persist middleware re-writing the old state back.
-    await AsyncStorage.multiRemove(["ishi-auth", "ishi-progression", "ishi-canvas"]);
-    signOut();
     if (Platform.OS === "web" && typeof window !== "undefined") {
-      // Full reload so Zustand rehydrates from (now-empty) storage
+      // On web, localStorage is synchronous — remove keys directly so
+      // Zustand persist can't race and re-write them before the reload.
+      try {
+        window.localStorage.removeItem("ishi-auth");
+        window.localStorage.removeItem("ishi-progression");
+        window.localStorage.removeItem("ishi-canvas");
+      } catch (_) {
+        /* storage might be unavailable */
+      }
       window.location.replace(window.location.pathname);
     } else {
+      await AsyncStorage.multiRemove(["ishi-auth", "ishi-progression", "ishi-canvas"]);
+      signOut();
       router.replace("/(auth)/login");
     }
   };

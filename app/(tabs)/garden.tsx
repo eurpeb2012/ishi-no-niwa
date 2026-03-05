@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import {
   View,
   Text,
@@ -19,7 +19,6 @@ import Animated, {
   withDelay,
   runOnJS,
   Easing,
-  type SharedValue,
 } from "react-native-reanimated";
 import { colors, spacing, fontSize, borderRadius } from "../../theme";
 import { useCanvasStore } from "../../stores/canvasStore";
@@ -86,7 +85,7 @@ interface DraggableStoneProps {
   canvasSize: number;
   onDragEnd: (index: number, newX: number, newY: number) => void;
   onRemove: (index: number) => void;
-  pulseSignal: SharedValue<number>;
+  pulsing: boolean;
 }
 
 function DraggableStone({
@@ -96,7 +95,7 @@ function DraggableStone({
   canvasSize,
   onDragEnd,
   onRemove,
-  pulseSignal,
+  pulsing,
 }: DraggableStoneProps) {
   const [gemW, gemH] = getGemSize(stone.id);
   const translateX = useSharedValue(0);
@@ -105,9 +104,35 @@ function DraggableStone({
   const zIdx = useSharedValue(0);
   const savedTranslateX = useSharedValue(0);
   const savedTranslateY = useSharedValue(0);
+  const pulseAnim = useSharedValue(1);
 
   const baseLeft = placement.x * canvasSize - gemW / 2;
   const baseTop = placement.y * canvasSize - gemH / 2;
+
+  // Drive pulse animation from the pulsing prop
+  useEffect(() => {
+    if (pulsing) {
+      pulseAnim.value = 1;
+      pulseAnim.value = withSequence(
+        withTiming(1.2, { duration: 180, easing: Easing.out(Easing.quad) }),
+        withTiming(1, { duration: 180, easing: Easing.in(Easing.quad) }),
+        withDelay(
+          40,
+          withSequence(
+            withTiming(1.2, { duration: 180, easing: Easing.out(Easing.quad) }),
+            withTiming(1, { duration: 180, easing: Easing.in(Easing.quad) })
+          )
+        ),
+        withDelay(
+          40,
+          withSequence(
+            withTiming(1.25, { duration: 180, easing: Easing.out(Easing.quad) }),
+            withTiming(1, { duration: 250, easing: Easing.in(Easing.quad) })
+          )
+        )
+      );
+    }
+  }, [pulsing]);
 
   const confirmRemove = useCallback(
     (idx: number) => {
@@ -163,18 +188,14 @@ function DraggableStone({
 
   const composedGesture = Gesture.Race(panGesture, longPressGesture);
 
-  const animatedStyle = useAnimatedStyle(() => {
-    const pulseScale =
-      pulseSignal.value > 0 ? 1 + 0.15 * pulseSignal.value : 1;
-    return {
-      transform: [
-        { translateX: translateX.value },
-        { translateY: translateY.value },
-        { scale: scale.value * pulseScale },
-      ],
-      zIndex: zIdx.value,
-    };
-  });
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: translateX.value },
+      { translateY: translateY.value },
+      { scale: scale.value * pulseAnim.value },
+    ],
+    zIndex: zIdx.value,
+  }));
 
   return (
     <GestureDetector gesture={composedGesture}>
@@ -213,7 +234,7 @@ export default function GardenScreen() {
   const [showTemplates, setShowTemplates] = useState(false);
   const [showSaveAd, setShowSaveAd] = useState(false);
 
-  const pulseSignal = useSharedValue(0);
+  const [pulsing, setPulsing] = useState(false);
 
   const availableStones = stones.filter((s) => unlockedStones.includes(s.id));
   const activeTemplate = templates.find(
@@ -273,13 +294,21 @@ export default function GardenScreen() {
   const handleStoneTap = useCallback(
     (stoneId: string) => {
       if (!activeTemplate || activeTemplate.point_count === 0) {
-        // Free placement with symmetry
-        const pts = withSymmetry(0.5, 0.5);
-        pts.forEach((pt) => {
-          canvas.addPlacement({ stoneId, x: snap(pt.x), y: snap(pt.y), rotation: 0 });
-        });
+        // Free placement with symmetry — offset from center so rotations differ
+        const fold = canvas.symmetryFold;
+        if (fold > 0) {
+          // Place at ~30% from center so rotational copies spread out
+          const pts = withSymmetry(0.5, 0.3);
+          pts.forEach((pt) => {
+            canvas.addPlacement({ stoneId, x: snap(pt.x), y: snap(pt.y), rotation: 0 });
+          });
+        } else {
+          // No symmetry — place at center, user drags to position
+          canvas.addPlacement({ stoneId, x: snap(0.5), y: snap(0.5), rotation: 0 });
+        }
         return;
       }
+      // Template mode: place at next guide point
       const filledCount = canvas.placements.length;
       if (filledCount < activeTemplate.points.length) {
         const point = activeTemplate.points[filledCount];
@@ -319,26 +348,9 @@ export default function GardenScreen() {
 
   const handleEnergize = () => {
     if (canvas.placements.length === 0) return;
-
-    pulseSignal.value = 0;
-    pulseSignal.value = withSequence(
-      withTiming(1, { duration: 200, easing: Easing.out(Easing.quad) }),
-      withTiming(0, { duration: 200, easing: Easing.in(Easing.quad) }),
-      withDelay(
-        50,
-        withSequence(
-          withTiming(1, { duration: 200, easing: Easing.out(Easing.quad) }),
-          withTiming(0, { duration: 200, easing: Easing.in(Easing.quad) })
-        )
-      ),
-      withDelay(
-        50,
-        withSequence(
-          withTiming(1, { duration: 200, easing: Easing.out(Easing.quad) }),
-          withTiming(0, { duration: 300, easing: Easing.in(Easing.quad) })
-        )
-      )
-    );
+    // Toggle pulsing on, then off after the animation duration (~1.3s)
+    setPulsing(true);
+    setTimeout(() => setPulsing(false), 1400);
   };
 
   const handleSelectTemplate = (templateId: string) => {
@@ -440,7 +452,7 @@ export default function GardenScreen() {
                 canvasSize={CANVAS_SIZE}
                 onDragEnd={handleDragEnd}
                 onRemove={handleRemove}
-                pulseSignal={pulseSignal}
+                pulsing={pulsing}
               />
             );
           })}
