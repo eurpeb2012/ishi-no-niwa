@@ -1,10 +1,13 @@
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Platform } from "react-native";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { colors, spacing, fontSize, borderRadius } from "../../theme";
 import { useAuthStore } from "../../stores/authStore";
 import { useStoneStore } from "../../stores/stoneStore";
 import { useProgressionStore } from "../../stores/progressionStore";
+import { useCanvasStore } from "../../stores/canvasStore";
+import { GemStone } from "../../components/common/GemStone";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ProfileScreen() {
   const { t, i18n } = useTranslation();
@@ -23,9 +26,17 @@ export default function ProfileScreen() {
     updateProfile({ language: newLang as "en" | "jp" });
   };
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
+    // Clear persisted stores FIRST, before touching Zustand state,
+    // to avoid the persist middleware re-writing the old state back.
+    await AsyncStorage.multiRemove(["ishi-auth", "ishi-progression", "ishi-canvas"]);
     signOut();
-    router.replace("/(auth)/login");
+    if (Platform.OS === "web" && typeof window !== "undefined") {
+      // Full reload so Zustand rehydrates from (now-empty) storage
+      window.location.replace(window.location.pathname);
+    } else {
+      router.replace("/(auth)/login");
+    }
   };
 
   return (
@@ -37,16 +48,17 @@ export default function ProfileScreen() {
 
       {/* Profile Card */}
       <View style={styles.profileCard}>
-        <View
-          style={[
-            styles.avatar,
-            { backgroundColor: avatarStone?.color_hex || colors.primary },
-          ]}
-        >
-          <Text style={styles.avatarText}>
-            {avatarStone?.name_jp.charAt(0) || "石"}
-          </Text>
-        </View>
+        {avatarStone ? (
+          <GemStone
+            stoneId={avatarStone.id}
+            colorHex={avatarStone.color_hex}
+            size={72}
+          />
+        ) : (
+          <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
+            <Text style={styles.avatarText}>石</Text>
+          </View>
+        )}
         <Text style={styles.displayName}>{user?.displayName || "Guest"}</Text>
         <Text style={styles.email}>{user?.email}</Text>
         <Text style={styles.levelBadge}>{levelTitle}</Text>
