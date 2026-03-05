@@ -6,8 +6,21 @@ import {
   StyleSheet,
   ScrollView,
   Dimensions,
+  Alert,
+  Platform,
 } from "react-native";
 import { useTranslation } from "react-i18next";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSequence,
+  withDelay,
+  runOnJS,
+  Easing,
+  type SharedValue,
+} from "react-native-reanimated";
 import { colors, spacing, fontSize, borderRadius } from "../../theme";
 import { useCanvasStore } from "../../stores/canvasStore";
 import { useStoneStore } from "../../stores/stoneStore";
@@ -19,6 +32,145 @@ import type { GridTemplate, StonePlacement } from "../../types";
 const CANVAS_SIZE = Dimensions.get("window").width - spacing.lg * 2;
 const STONE_RENDER_SIZE = 36;
 
+// ---------------------------------------------------------------------------
+// Draggable stone component using Gesture.Pan + Gesture.LongPress
+// ---------------------------------------------------------------------------
+interface DraggableStoneProps {
+  placement: StonePlacement;
+  index: number;
+  stone: { id: string; name_jp: string; color_hex: string };
+  canvasSize: number;
+  onDragEnd: (index: number, newX: number, newY: number) => void;
+  onRemove: (index: number) => void;
+  pulseSignal: SharedValue<number>;
+}
+
+function DraggableStone({
+  placement,
+  index,
+  stone,
+  canvasSize,
+  onDragEnd,
+  onRemove,
+  pulseSignal,
+}: DraggableStoneProps) {
+  // Shared values for drag translation (offset from original position)
+  const translateX = useSharedValue(0);
+  const translateY = useSharedValue(0);
+  const scale = useSharedValue(1);
+  const zIdx = useSharedValue(0);
+
+  // Context values to track starting offset on each gesture start
+  const savedTranslateX = useSharedValue(0);
+  const savedTranslateY = useSharedValue(0);
+
+  const baseLeft = placement.x * canvasSize - STONE_RENDER_SIZE / 2;
+  const baseTop = placement.y * canvasSize - STONE_RENDER_SIZE / 2;
+
+  const confirmRemove = useCallback(
+    (idx: number) => {
+      if (Platform.OS === "web") {
+        // On web, window.confirm is synchronous and works fine
+        const yes =
+          typeof window !== "undefined" && window.confirm("Remove this stone?");
+        if (yes) onRemove(idx);
+      } else {
+        Alert.alert("Remove Stone", "Remove this stone from the grid?", [
+          { text: "Cancel", style: "cancel" },
+          { text: "Remove", style: "destructive", onPress: () => onRemove(idx) },
+        ]);
+      }
+    },
+    [onRemove]
+  );
+
+  // --- Pan gesture for dragging ---
+  const panGesture = Gesture.Pan()
+    .onStart(() => {
+      savedTranslateX.value = translateX.value;
+      savedTranslateY.value = translateY.value;
+      scale.value = withTiming(1.2, { duration: 100 });
+      zIdx.value = 100;
+    })
+    .onUpdate((event) => {
+      translateX.value = savedTranslateX.value + event.translationX;
+      translateY.value = savedTranslateY.value + event.translationY;
+    })
+    .onEnd(() => {
+      scale.value = withTiming(1, { duration: 100 });
+      zIdx.value = 0;
+
+      // Calculate new normalised position (0..1)
+      const newPixelX = baseLeft + STONE_RENDER_SIZE / 2 + translateX.value;
+      const newPixelY = baseTop + STONE_RENDER_SIZE / 2 + translateY.value;
+
+      // Clamp to canvas bounds
+      const clampedX = Math.max(0, Math.min(newPixelX / canvasSize, 1));
+      const clampedY = Math.max(0, Math.min(newPixelY / canvasSize, 1));
+
+      runOnJS(onDragEnd)(index, clampedX, clampedY);
+
+      // Reset translation since the store position will be updated
+      translateX.value = 0;
+      translateY.value = 0;
+      savedTranslateX.value = 0;
+      savedTranslateY.value = 0;
+    })
+    .minDistance(5);
+
+  // --- Long-press gesture to remove ---
+  const longPressGesture = Gesture.LongPress()
+    .minDuration(500)
+    .onEnd((_event, success) => {
+      if (success) {
+        runOnJS(confirmRemove)(index);
+      }
+    });
+
+  // Compose: long-press and pan run simultaneously so a quick drag doesn't
+  // get blocked, and a long hold still triggers removal.
+  const composedGesture = Gesture.Race(panGesture, longPressGesture);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    // Pulse animation: pulseSignal goes from 0 -> 1 when energize fires
+    const pulseScale =
+      pulseSignal.value > 0
+        ? 1 + 0.15 * pulseSignal.value
+        : 1;
+
+    return {
+      transform: [
+        { translateX: translateX.value },
+        { translateY: translateY.value },
+        { scale: scale.value * pulseScale },
+      ],
+      zIndex: zIdx.value,
+    };
+  });
+
+  return (
+    <GestureDetector gesture={composedGesture}>
+      <Animated.View
+        style={[
+          styles.placedStone,
+          {
+            backgroundColor: stone.color_hex,
+            left: baseLeft,
+            top: baseTop,
+          },
+          animatedStyle,
+        ]}
+      >
+        <Text style={styles.placedStoneText}>{stone.name_jp.charAt(0)}</Text>
+      </Animated.View>
+    </GestureDetector>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Main Garden Screen
+// ---------------------------------------------------------------------------
+
 export default function GardenScreen() {
   const { t } = useTranslation();
   const canvas = useCanvasStore();
@@ -28,11 +180,15 @@ export default function GardenScreen() {
   const incrementGrids = useProgressionStore((s) => s.incrementGrids);
   const [showTemplates, setShowTemplates] = useState(false);
 
+  // Shared value that drives pulse animation on all placed stones
+  const pulseSignal = useSharedValue(0);
+
   const availableStones = stones.filter((s) => unlockedStones.includes(s.id));
   const activeTemplate = templates.find(
     (tmpl) => tmpl.id === canvas.activeTemplateId
   ) as GridTemplate | undefined;
 
+  // --- Tap stone in tray -> place at next template point (unchanged) ---
   const handleStoneTap = useCallback(
     (stoneId: string) => {
       if (!activeTemplate || activeTemplate.point_count === 0) {
@@ -61,6 +217,23 @@ export default function GardenScreen() {
     [activeTemplate, canvas]
   );
 
+  // --- Drag end: update store position ---
+  const handleDragEnd = useCallback(
+    (index: number, newX: number, newY: number) => {
+      canvas.updatePlacement(index, { x: newX, y: newY });
+    },
+    [canvas]
+  );
+
+  // --- Remove placed stone ---
+  const handleRemove = useCallback(
+    (index: number) => {
+      canvas.removePlacement(index);
+    },
+    [canvas]
+  );
+
+  // --- Save grid ---
   const handleSaveGrid = () => {
     if (canvas.placements.length === 0) return;
     canvas.saveGrid();
@@ -68,11 +241,49 @@ export default function GardenScreen() {
     incrementGrids();
   };
 
+  // --- Energize: pulse all placed stones when grid is complete ---
+  const handleEnergize = () => {
+    const isComplete =
+      activeTemplate &&
+      activeTemplate.point_count > 0 &&
+      canvas.placements.length >= activeTemplate.points.length;
+
+    if (!isComplete) return;
+
+    // Fire a quick pulse: ramp up then back down, repeated 3 times
+    pulseSignal.value = 0;
+    pulseSignal.value = withSequence(
+      withTiming(1, { duration: 200, easing: Easing.out(Easing.quad) }),
+      withTiming(0, { duration: 200, easing: Easing.in(Easing.quad) }),
+      withDelay(
+        50,
+        withSequence(
+          withTiming(1, { duration: 200, easing: Easing.out(Easing.quad) }),
+          withTiming(0, { duration: 200, easing: Easing.in(Easing.quad) })
+        )
+      ),
+      withDelay(
+        50,
+        withSequence(
+          withTiming(1, { duration: 200, easing: Easing.out(Easing.quad) }),
+          withTiming(0, { duration: 300, easing: Easing.in(Easing.quad) })
+        )
+      )
+    );
+  };
+
+  // --- Select template ---
   const handleSelectTemplate = (templateId: string) => {
     canvas.clearCanvas();
     canvas.setTemplate(templateId);
     setShowTemplates(false);
   };
+
+  // Determine if grid is complete (for Energize button state)
+  const gridComplete =
+    activeTemplate &&
+    activeTemplate.point_count > 0 &&
+    canvas.placements.length >= activeTemplate.points.length;
 
   return (
     <View style={styles.container}>
@@ -134,27 +345,21 @@ export default function GardenScreen() {
             />
           ))}
 
-          {/* Placed stones */}
+          {/* Placed stones - now draggable */}
           {canvas.placements.map((placement, i) => {
             const stone = stones.find((s) => s.id === placement.stoneId);
             if (!stone) return null;
             return (
-              <TouchableOpacity
+              <DraggableStone
                 key={`stone-${i}`}
-                style={[
-                  styles.placedStone,
-                  {
-                    backgroundColor: stone.color_hex,
-                    left: placement.x * CANVAS_SIZE - STONE_RENDER_SIZE / 2,
-                    top: placement.y * CANVAS_SIZE - STONE_RENDER_SIZE / 2,
-                  },
-                ]}
-                onLongPress={() => canvas.removePlacement(i)}
-              >
-                <Text style={styles.placedStoneText}>
-                  {stone.name_jp.charAt(0)}
-                </Text>
-              </TouchableOpacity>
+                placement={placement}
+                index={i}
+                stone={stone}
+                canvasSize={CANVAS_SIZE}
+                onDragEnd={handleDragEnd}
+                onRemove={handleRemove}
+                pulseSignal={pulseSignal}
+              />
             );
           })}
         </View>
@@ -180,6 +385,26 @@ export default function GardenScreen() {
         >
           <Text style={styles.toolText}>{t("garden.sound")}</Text>
         </TouchableOpacity>
+
+        {/* Energize button */}
+        <TouchableOpacity
+          style={[
+            styles.toolButton,
+            gridComplete ? styles.energizeActive : styles.energizeDisabled,
+          ]}
+          onPress={handleEnergize}
+          disabled={!gridComplete}
+        >
+          <Text
+            style={[
+              styles.toolText,
+              gridComplete && styles.energizeText,
+            ]}
+          >
+            Energize
+          </Text>
+        </TouchableOpacity>
+
         <TouchableOpacity style={styles.toolButton} onPress={canvas.clearCanvas}>
           <Text style={styles.toolTextDanger}>Clear</Text>
         </TouchableOpacity>
@@ -316,6 +541,7 @@ const styles = StyleSheet.create({
   tools: {
     flexDirection: "row",
     justifyContent: "center",
+    flexWrap: "wrap",
     gap: spacing.sm,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
@@ -339,6 +565,17 @@ const styles = StyleSheet.create({
   toolTextDanger: {
     color: colors.error,
     fontSize: fontSize.xs,
+  },
+  energizeActive: {
+    borderColor: colors.primary,
+    backgroundColor: colors.primary,
+  },
+  energizeDisabled: {
+    opacity: 0.4,
+  },
+  energizeText: {
+    color: "#fff",
+    fontWeight: "600",
   },
   trayContainer: {
     flex: 1,

@@ -20,9 +20,10 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
 
   const handleLogin = () => {
+    if (!email.trim()) return;
     // TODO: Replace with Supabase auth
     setUser({
-      id: "demo",
+      id: "demo-" + Date.now(),
       email,
       displayName: email.split("@")[0],
       avatarStoneId: "amethyst",
@@ -30,6 +31,20 @@ export default function LoginScreen() {
       birthMonth: 1,
       subscriptionTier: "free",
       subscriptionExpires: null,
+    });
+    router.replace("/(tabs)/garden");
+  };
+
+  const handleDemoLogin = (tier: "free" | "tsuki" | "hoshi") => {
+    setUser({
+      id: "demo-" + tier,
+      email: `demo-${tier}@ishinoniwa.app`,
+      displayName: `Demo (${tier === "free" ? "Free" : tier === "tsuki" ? "Tsuki" : "Hoshi"})`,
+      avatarStoneId: tier === "free" ? "clear_quartz" : tier === "tsuki" ? "amethyst" : "jade_jadeite",
+      language: "en",
+      birthMonth: 5,
+      subscriptionTier: tier,
+      subscriptionExpires: tier === "free" ? null : "2027-01-01",
     });
     router.replace("/(tabs)/garden");
   };
@@ -92,6 +107,31 @@ export default function LoginScreen() {
               <Text style={styles.switchLink}>{t("auth.signUp")}</Text>
             </TouchableOpacity>
           </Link>
+        </View>
+
+        {/* Demo login buttons for testing */}
+        <View style={styles.demoSection}>
+          <Text style={styles.demoLabel}>Quick Demo Access</Text>
+          <View style={styles.demoRow}>
+            <TouchableOpacity
+              style={styles.demoButton}
+              onPress={() => handleDemoLogin("free")}
+            >
+              <Text style={styles.demoButtonText}>Free</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.demoButton, styles.demoTsuki]}
+              onPress={() => handleDemoLogin("tsuki")}
+            >
+              <Text style={styles.demoButtonText}>Tsuki</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.demoButton, styles.demoHoshi]}
+              onPress={() => handleDemoLogin("hoshi")}
+            >
+              <Text style={styles.demoButtonText}>Hoshi</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </KeyboardAvoidingView>
@@ -196,5 +236,43 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontSize: fontSize.sm,
     fontWeight: "600",
+  },
+  demoSection: {
+    marginTop: spacing.xl,
+    paddingTop: spacing.lg,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  demoLabel: {
+    color: colors.textMuted,
+    fontSize: fontSize.xs,
+    textAlign: "center",
+    marginBottom: spacing.sm,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+  },
+  demoRow: {
+    flexDirection: "row",
+    gap: spacing.sm,
+  },
+  demoButton: {
+    flex: 1,
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.sm,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: colors.textMuted,
+  },
+  demoTsuki: {
+    borderColor: colors.secondary,
+  },
+  demoHoshi: {
+    borderColor: colors.primary,
+  },
+  demoButtonText: {
+    color: colors.textSecondary,
+    fontSize: fontSize.sm,
+    fontWeight: "500",
   },
 });

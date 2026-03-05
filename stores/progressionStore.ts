@@ -1,4 +1,6 @@
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+import { asyncStorage } from "./asyncStorageAdapter";
 import type { UserProgress } from "../types";
 import { XP_TABLE } from "../types";
 
@@ -49,115 +51,126 @@ const initialProgress: UserProgress = {
   lastActiveDate: new Date().toISOString().split("T")[0],
 };
 
-export const useProgressionStore = create<ProgressionState>((set, get) => ({
-  progress: initialProgress,
+export const useProgressionStore = create<ProgressionState>()(
+  persist(
+    (set, get) => ({
+      progress: initialProgress,
 
-  addXP: (amount) =>
-    set((state) => {
-      const newXP = state.progress.xpTotal + amount;
-      return {
-        progress: {
-          ...state.progress,
-          xpTotal: newXP,
-          level: calculateLevel(newXP),
-        },
-      };
+      addXP: (amount) =>
+        set((state) => {
+          const newXP = state.progress.xpTotal + amount;
+          return {
+            progress: {
+              ...state.progress,
+              xpTotal: newXP,
+              level: calculateLevel(newXP),
+            },
+          };
+        }),
+
+      unlockStone: (stoneId) =>
+        set((state) => ({
+          progress: {
+            ...state.progress,
+            stonesUnlocked: state.progress.stonesUnlocked.includes(stoneId)
+              ? state.progress.stonesUnlocked
+              : [...state.progress.stonesUnlocked, stoneId],
+          },
+        })),
+
+      unlockTemplate: (templateId) =>
+        set((state) => ({
+          progress: {
+            ...state.progress,
+            templatesUnlocked: state.progress.templatesUnlocked.includes(
+              templateId
+            )
+              ? state.progress.templatesUnlocked
+              : [...state.progress.templatesUnlocked, templateId],
+          },
+        })),
+
+      completeAchievement: (achievementId) =>
+        set((state) => ({
+          progress: {
+            ...state.progress,
+            achievements: state.progress.achievements.includes(achievementId)
+              ? state.progress.achievements
+              : [...state.progress.achievements, achievementId],
+          },
+        })),
+
+      completeSkill: (skillId) =>
+        set((state) => ({
+          progress: {
+            ...state.progress,
+            skillsCompleted: state.progress.skillsCompleted.includes(skillId)
+              ? state.progress.skillsCompleted
+              : [...state.progress.skillsCompleted, skillId],
+          },
+        })),
+
+      incrementGrids: () =>
+        set((state) => ({
+          progress: {
+            ...state.progress,
+            gridsCompletedCount: state.progress.gridsCompletedCount + 1,
+          },
+        })),
+
+      incrementSessions: () =>
+        set((state) => ({
+          progress: {
+            ...state.progress,
+            guidedSessionsCount: state.progress.guidedSessionsCount + 1,
+          },
+        })),
+
+      setDailyIntention: (done) =>
+        set((state) => ({
+          progress: { ...state.progress, dailyIntentionToday: done },
+        })),
+
+      updateStreak: () =>
+        set((state) => {
+          const today = new Date().toISOString().split("T")[0];
+          const yesterday = new Date(Date.now() - 86400000)
+            .toISOString()
+            .split("T")[0];
+          const last = state.progress.lastActiveDate;
+
+          let newStreak = state.progress.currentStreakDays;
+          if (last === yesterday) {
+            newStreak += 1;
+          } else if (last !== today) {
+            newStreak = 1;
+          }
+
+          return {
+            progress: {
+              ...state.progress,
+              currentStreakDays: newStreak,
+              longestStreakDays: Math.max(
+                newStreak,
+                state.progress.longestStreakDays
+              ),
+              lastActiveDate: today,
+            },
+          };
+        }),
+
+      isStoneUnlocked: (stoneId) =>
+        get().progress.stonesUnlocked.includes(stoneId),
+
+      isTemplateUnlocked: (templateId) =>
+        get().progress.templatesUnlocked.includes(templateId),
     }),
-
-  unlockStone: (stoneId) =>
-    set((state) => ({
-      progress: {
-        ...state.progress,
-        stonesUnlocked: state.progress.stonesUnlocked.includes(stoneId)
-          ? state.progress.stonesUnlocked
-          : [...state.progress.stonesUnlocked, stoneId],
-      },
-    })),
-
-  unlockTemplate: (templateId) =>
-    set((state) => ({
-      progress: {
-        ...state.progress,
-        templatesUnlocked: state.progress.templatesUnlocked.includes(
-          templateId
-        )
-          ? state.progress.templatesUnlocked
-          : [...state.progress.templatesUnlocked, templateId],
-      },
-    })),
-
-  completeAchievement: (achievementId) =>
-    set((state) => ({
-      progress: {
-        ...state.progress,
-        achievements: state.progress.achievements.includes(achievementId)
-          ? state.progress.achievements
-          : [...state.progress.achievements, achievementId],
-      },
-    })),
-
-  completeSkill: (skillId) =>
-    set((state) => ({
-      progress: {
-        ...state.progress,
-        skillsCompleted: state.progress.skillsCompleted.includes(skillId)
-          ? state.progress.skillsCompleted
-          : [...state.progress.skillsCompleted, skillId],
-      },
-    })),
-
-  incrementGrids: () =>
-    set((state) => ({
-      progress: {
-        ...state.progress,
-        gridsCompletedCount: state.progress.gridsCompletedCount + 1,
-      },
-    })),
-
-  incrementSessions: () =>
-    set((state) => ({
-      progress: {
-        ...state.progress,
-        guidedSessionsCount: state.progress.guidedSessionsCount + 1,
-      },
-    })),
-
-  setDailyIntention: (done) =>
-    set((state) => ({
-      progress: { ...state.progress, dailyIntentionToday: done },
-    })),
-
-  updateStreak: () =>
-    set((state) => {
-      const today = new Date().toISOString().split("T")[0];
-      const yesterday = new Date(Date.now() - 86400000)
-        .toISOString()
-        .split("T")[0];
-      const last = state.progress.lastActiveDate;
-
-      let newStreak = state.progress.currentStreakDays;
-      if (last === yesterday) {
-        newStreak += 1;
-      } else if (last !== today) {
-        newStreak = 1;
-      }
-
-      return {
-        progress: {
-          ...state.progress,
-          currentStreakDays: newStreak,
-          longestStreakDays: Math.max(
-            newStreak,
-            state.progress.longestStreakDays
-          ),
-          lastActiveDate: today,
-        },
-      };
-    }),
-
-  isStoneUnlocked: (stoneId) =>
-    get().progress.stonesUnlocked.includes(stoneId),
-
-  isTemplateUnlocked: (templateId) =>
-    get().progress.templatesUnlocked.includes(templateId),
-}));
+    {
+      name: "ishi-progression",
+      storage: createJSONStorage(() => asyncStorage),
+      partialize: (state) => ({
+        progress: state.progress,
+      }),
+    }
+  )
+);

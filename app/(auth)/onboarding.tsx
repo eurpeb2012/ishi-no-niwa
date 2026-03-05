@@ -118,12 +118,44 @@ export default function OnboardingScreen() {
     </View>
   );
 
+  const chosenStoneData = stones.find((s) => s.id === chosenStone);
+
   const renderBegin = () => (
     <View style={styles.stepContent}>
       <Text style={styles.question}>{t("onboarding.starterKit")}</Text>
-      <Text style={styles.subtitle}>
-        {t("onboarding.birthstone")}: {t("onboarding.q3Title")}
-      </Text>
+
+      {chosenStoneData && (
+        <View style={styles.kitCard}>
+          <View
+            style={[
+              styles.kitStoneDot,
+              { backgroundColor: chosenStoneData.color_hex },
+            ]}
+          />
+          <Text style={styles.kitStoneName}>{chosenStoneData.name_en}</Text>
+          <Text style={styles.kitStoneNameJp}>{chosenStoneData.name_jp}</Text>
+          <Text style={styles.kitDesc}>{chosenStoneData.description_en}</Text>
+        </View>
+      )}
+
+      <View style={styles.kitStarters}>
+        <Text style={styles.kitLabel}>Your starter stones:</Text>
+        <View style={styles.kitRow}>
+          {stones.map((s) => (
+            <View key={s.id} style={styles.kitMiniStone}>
+              <View
+                style={[
+                  styles.kitMiniDot,
+                  { backgroundColor: s.color_hex },
+                  s.id === chosenStone && styles.kitMiniSelected,
+                ]}
+              />
+              <Text style={styles.kitMiniName}>{s.name_jp}</Text>
+            </View>
+          ))}
+        </View>
+      </View>
+
       <TouchableOpacity style={styles.beginButton} onPress={next}>
         <Text style={styles.beginButtonText}>{t("onboarding.begin")}</Text>
       </TouchableOpacity>
@@ -250,6 +282,69 @@ const styles = StyleSheet.create({
   stoneNameJp: {
     color: colors.textSecondary,
     fontSize: fontSize.xs,
+  },
+  kitCard: {
+    backgroundColor: colors.surfaceLight,
+    borderRadius: borderRadius.lg,
+    padding: spacing.xl,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: colors.primary,
+  },
+  kitStoneDot: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    marginBottom: spacing.md,
+  },
+  kitStoneName: {
+    color: colors.textPrimary,
+    fontSize: fontSize.lg,
+    fontWeight: "700",
+  },
+  kitStoneNameJp: {
+    color: colors.textSecondary,
+    fontSize: fontSize.md,
+    marginBottom: spacing.sm,
+  },
+  kitDesc: {
+    color: colors.textSecondary,
+    fontSize: fontSize.sm,
+    textAlign: "center",
+    lineHeight: 20,
+  },
+  kitStarters: {
+    marginTop: spacing.md,
+  },
+  kitLabel: {
+    color: colors.textMuted,
+    fontSize: fontSize.xs,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    marginBottom: spacing.sm,
+    textAlign: "center",
+  },
+  kitRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: spacing.md,
+  },
+  kitMiniStone: {
+    alignItems: "center",
+  },
+  kitMiniDot: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    marginBottom: 2,
+  },
+  kitMiniSelected: {
+    borderWidth: 2,
+    borderColor: colors.primary,
+  },
+  kitMiniName: {
+    color: colors.textMuted,
+    fontSize: 8,
   },
   beginButton: {
     backgroundColor: colors.primary,

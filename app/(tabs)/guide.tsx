@@ -6,10 +6,13 @@ import {
   StyleSheet,
   ScrollView,
 } from "react-native";
+import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { colors, spacing, fontSize, borderRadius } from "../../theme";
 import { useStoneStore } from "../../stores/stoneStore";
+import { useCanvasStore } from "../../stores/canvasStore";
 import type { IntentionId } from "../../types";
+import templates from "../../data/templates.json";
 
 const INTENTIONS: IntentionId[] = [
   "love",
@@ -31,8 +34,39 @@ export default function GuideScreen() {
     ? stones.filter((s) => s.intentions.includes(selectedIntention)).slice(0, 5)
     : [];
 
+  const canvas = useCanvasStore();
   const centerStone = recommendedStones[0];
   const supportStones = recommendedStones.slice(1);
+
+  const handlePlaceForMe = () => {
+    if (!recommendedStones.length) return;
+    // Pick a template that fits the stone count
+    const stoneCount = recommendedStones.length;
+    const bestTemplate =
+      templates.find((t) => t.point_count === stoneCount && t.required_tier === "free") ||
+      templates.find((t) => t.point_count <= stoneCount && t.point_count > 0 && t.required_tier === "free") ||
+      templates[0];
+
+    canvas.clearCanvas();
+    canvas.setTemplate(bestTemplate.id);
+    canvas.setIntention(selectedIntention);
+    canvas.setGridName(`${selectedIntention} Grid`);
+
+    // Place stones on template points
+    const points = bestTemplate.points;
+    recommendedStones.forEach((stone, i) => {
+      if (i < points.length) {
+        canvas.addPlacement({
+          stoneId: stone.id,
+          x: points[i].x,
+          y: points[i].y,
+          rotation: 0,
+        });
+      }
+    });
+
+    router.navigate("/(tabs)/garden");
+  };
 
   return (
     <ScrollView
@@ -102,7 +136,7 @@ export default function GuideScreen() {
             ))}
           </View>
 
-          <TouchableOpacity style={styles.placeButton}>
+          <TouchableOpacity style={styles.placeButton} onPress={handlePlaceForMe}>
             <Text style={styles.placeButtonText}>
               {t("guide.placeForMe")}
             </Text>

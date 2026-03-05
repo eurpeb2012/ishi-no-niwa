@@ -1,4 +1,6 @@
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+import { asyncStorage } from "./asyncStorageAdapter";
 import type { UserProfile, SubscriptionTier } from "../types";
 
 interface AuthState {
@@ -18,23 +20,35 @@ const TIER_RANK: Record<SubscriptionTier, number> = {
   hoshi: 2,
 };
 
-export const useAuthStore = create<AuthState>((set, get) => ({
-  user: null,
-  isAuthenticated: false,
-  isLoading: true,
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set, get) => ({
+      user: null,
+      isAuthenticated: false,
+      isLoading: true,
 
-  setUser: (user) => set({ user, isAuthenticated: !!user }),
-  setLoading: (isLoading) => set({ isLoading }),
-  signOut: () => set({ user: null, isAuthenticated: false }),
+      setUser: (user) => set({ user, isAuthenticated: !!user }),
+      setLoading: (isLoading) => set({ isLoading }),
+      signOut: () => set({ user: null, isAuthenticated: false }),
 
-  updateProfile: (updates) =>
-    set((state) => ({
-      user: state.user ? { ...state.user, ...updates } : null,
-    })),
+      updateProfile: (updates) =>
+        set((state) => ({
+          user: state.user ? { ...state.user, ...updates } : null,
+        })),
 
-  hasAccess: (requiredTier) => {
-    const user = get().user;
-    if (!user) return requiredTier === "free";
-    return TIER_RANK[user.subscriptionTier] >= TIER_RANK[requiredTier];
-  },
-}));
+      hasAccess: (requiredTier) => {
+        const user = get().user;
+        if (!user) return requiredTier === "free";
+        return TIER_RANK[user.subscriptionTier] >= TIER_RANK[requiredTier];
+      },
+    }),
+    {
+      name: "ishi-auth",
+      storage: createJSONStorage(() => asyncStorage),
+      partialize: (state) => ({
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+      }),
+    }
+  )
+);
