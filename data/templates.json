@@ -1,0 +1,266 @@
+[
+  {
+    "id": "sankaku",
+    "name_en": "Triangle",
+    "name_jp": "三角",
+    "geometry_type": "triangle",
+    "point_count": 3,
+    "points": [
+      { "x": 0.5, "y": 0.15 },
+      { "x": 0.15, "y": 0.85 },
+      { "x": 0.85, "y": 0.85 }
+    ],
+    "symmetry_axes": 3,
+    "unlock_level": 1,
+    "required_tier": "free",
+    "category": "basic"
+  },
+  {
+    "id": "shikaku",
+    "name_en": "Square",
+    "name_jp": "四角",
+    "geometry_type": "square",
+    "point_count": 4,
+    "points": [
+      { "x": 0.2, "y": 0.2 },
+      { "x": 0.8, "y": 0.2 },
+      { "x": 0.8, "y": 0.8 },
+      { "x": 0.2, "y": 0.8 }
+    ],
+    "symmetry_axes": 4,
+    "unlock_level": 1,
+    "required_tier": "free",
+    "category": "basic"
+  },
+  {
+    "id": "enso",
+    "name_en": "Circle",
+    "name_jp": "円相",
+    "geometry_type": "circle",
+    "point_count": 6,
+    "points": [
+      { "x": 0.5, "y": 0.1 },
+      { "x": 0.85, "y": 0.3 },
+      { "x": 0.85, "y": 0.7 },
+      { "x": 0.5, "y": 0.9 },
+      { "x": 0.15, "y": 0.7 },
+      { "x": 0.15, "y": 0.3 }
+    ],
+    "symmetry_axes": 6,
+    "unlock_level": 2,
+    "required_tier": "free",
+    "category": "basic"
+  },
+  {
+    "id": "freeform",
+    "name_en": "Freeform",
+    "name_jp": "自由",
+    "geometry_type": "freeform",
+    "point_count": 0,
+    "points": [],
+    "symmetry_axes": 0,
+    "unlock_level": 1,
+    "required_tier": "free",
+    "category": "basic"
+  },
+  {
+    "id": "asanoha",
+    "name_en": "Hemp Leaf Star",
+    "name_jp": "麻の葉",
+    "geometry_type": "star",
+    "point_count": 7,
+    "points": [
+      { "x": 0.5, "y": 0.5 },
+      { "x": 0.5, "y": 0.1 },
+      { "x": 0.85, "y": 0.3 },
+      { "x": 0.85, "y": 0.7 },
+      { "x": 0.5, "y": 0.9 },
+      { "x": 0.15, "y": 0.7 },
+      { "x": 0.15, "y": 0.3 }
+    ],
+    "symmetry_axes": 6,
+    "unlock_level": 4,
+    "required_tier": "tsuki",
+    "category": "japanese"
+  },
+  {
+    "id": "kikkou",
+    "name_en": "Turtle Shell Hexagon",
+    "name_jp": "亀甲",
+    "geometry_type": "hexagonal",
+    "point_count": 7,
+    "points": [
+      { "x": 0.5, "y": 0.5 },
+      { "x": 0.5, "y": 0.15 },
+      { "x": 0.8, "y": 0.325 },
+      { "x": 0.8, "y": 0.675 },
+      { "x": 0.5, "y": 0.85 },
+      { "x": 0.2, "y": 0.675 },
+      { "x": 0.2, "y": 0.325 }
+    ],
+    "symmetry_axes": 6,
+    "unlock_level": 5,
+    "required_tier": "tsuki",
+    "category": "japanese"
+  },
+  {
+    "id": "seigaiha",
+    "name_en": "Wave Pattern",
+    "name_jp": "青海波",
+    "geometry_type": "wave",
+    "point_count": 9,
+    "points": [
+      { "x": 0.2, "y": 0.3 },
+      { "x": 0.5, "y": 0.2 },
+      { "x": 0.8, "y": 0.3 },
+      { "x": 0.15, "y": 0.5 },
+      { "x": 0.5, "y": 0.5 },
+      { "x": 0.85, "y": 0.5 },
+      { "x": 0.2, "y": 0.7 },
+      { "x": 0.5, "y": 0.8 },
+      { "x": 0.8, "y": 0.7 }
+    ],
+    "symmetry_axes": 1,
+    "unlock_level": 6,
+    "required_tier": "tsuki",
+    "category": "japanese"
+  },
+  {
+    "id": "tomoe",
+    "name_en": "Triple Spiral",
+    "name_jp": "巴",
+    "geometry_type": "spiral",
+    "point_count": 9,
+    "points": [
+      { "x": 0.5, "y": 0.5 },
+      { "x": 0.5, "y": 0.15 },
+      { "x": 0.75, "y": 0.25 },
+      { "x": 0.8, "y": 0.55 },
+      { "x": 0.65, "y": 0.8 },
+      { "x": 0.35, "y": 0.8 },
+      { "x": 0.2, "y": 0.55 },
+      { "x": 0.25, "y": 0.25 },
+      { "x": 0.5, "y": 0.35 }
+    ],
+    "symmetry_axes": 3,
+    "unlock_level": 7,
+    "required_tier": "tsuki",
+    "category": "japanese"
+  },
+  {
+    "id": "magatama_ring",
+    "name_en": "Magatama Ring",
+    "name_jp": "勾玉陣",
+    "geometry_type": "ring",
+    "point_count": 9,
+    "points": [
+      { "x": 0.5, "y": 0.5 },
+      { "x": 0.5, "y": 0.1 },
+      { "x": 0.78, "y": 0.2 },
+      { "x": 0.9, "y": 0.5 },
+      { "x": 0.78, "y": 0.8 },
+      { "x": 0.5, "y": 0.9 },
+      { "x": 0.22, "y": 0.8 },
+      { "x": 0.1, "y": 0.5 },
+      { "x": 0.22, "y": 0.2 }
+    ],
+    "symmetry_axes": 8,
+    "unlock_level": 8,
+    "required_tier": "tsuki",
+    "category": "japanese"
+  },
+  {
+    "id": "flower_of_life",
+    "name_en": "Flower of Life",
+    "name_jp": "生命の花",
+    "geometry_type": "sacred",
+    "point_count": 13,
+    "points": [
+      { "x": 0.5, "y": 0.5 },
+      { "x": 0.5, "y": 0.18 },
+      { "x": 0.78, "y": 0.34 },
+      { "x": 0.78, "y": 0.66 },
+      { "x": 0.5, "y": 0.82 },
+      { "x": 0.22, "y": 0.66 },
+      { "x": 0.22, "y": 0.34 },
+      { "x": 0.64, "y": 0.26 },
+      { "x": 0.78, "y": 0.5 },
+      { "x": 0.64, "y": 0.74 },
+      { "x": 0.36, "y": 0.74 },
+      { "x": 0.22, "y": 0.5 },
+      { "x": 0.36, "y": 0.26 }
+    ],
+    "symmetry_axes": 6,
+    "unlock_level": 10,
+    "required_tier": "hoshi",
+    "category": "sacred"
+  },
+  {
+    "id": "seed_of_life",
+    "name_en": "Seed of Life",
+    "name_jp": "生命の種",
+    "geometry_type": "sacred",
+    "point_count": 7,
+    "points": [
+      { "x": 0.5, "y": 0.5 },
+      { "x": 0.5, "y": 0.2 },
+      { "x": 0.76, "y": 0.35 },
+      { "x": 0.76, "y": 0.65 },
+      { "x": 0.5, "y": 0.8 },
+      { "x": 0.24, "y": 0.65 },
+      { "x": 0.24, "y": 0.35 }
+    ],
+    "symmetry_axes": 6,
+    "unlock_level": 12,
+    "required_tier": "hoshi",
+    "category": "sacred"
+  },
+  {
+    "id": "metatrons_cube",
+    "name_en": "Metatron's Cube",
+    "name_jp": "メタトロンの立方体",
+    "geometry_type": "sacred",
+    "point_count": 13,
+    "points": [
+      { "x": 0.5, "y": 0.5 },
+      { "x": 0.5, "y": 0.1 },
+      { "x": 0.85, "y": 0.3 },
+      { "x": 0.85, "y": 0.7 },
+      { "x": 0.5, "y": 0.9 },
+      { "x": 0.15, "y": 0.7 },
+      { "x": 0.15, "y": 0.3 },
+      { "x": 0.5, "y": 0.25 },
+      { "x": 0.72, "y": 0.375 },
+      { "x": 0.72, "y": 0.625 },
+      { "x": 0.5, "y": 0.75 },
+      { "x": 0.28, "y": 0.625 },
+      { "x": 0.28, "y": 0.375 }
+    ],
+    "symmetry_axes": 6,
+    "unlock_level": 15,
+    "required_tier": "hoshi",
+    "category": "sacred"
+  },
+  {
+    "id": "sri_yantra",
+    "name_en": "Sri Yantra",
+    "name_jp": "シュリーヤントラ",
+    "geometry_type": "sacred",
+    "point_count": 9,
+    "points": [
+      { "x": 0.5, "y": 0.5 },
+      { "x": 0.5, "y": 0.12 },
+      { "x": 0.83, "y": 0.68 },
+      { "x": 0.17, "y": 0.68 },
+      { "x": 0.5, "y": 0.88 },
+      { "x": 0.83, "y": 0.32 },
+      { "x": 0.17, "y": 0.32 },
+      { "x": 0.32, "y": 0.5 },
+      { "x": 0.68, "y": 0.5 }
+    ],
+    "symmetry_axes": 3,
+    "unlock_level": 18,
+    "required_tier": "hoshi",
+    "category": "sacred"
+  }
+]
