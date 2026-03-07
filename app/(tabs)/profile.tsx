@@ -2,6 +2,7 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Platform } from "
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { colors, spacing, fontSize, borderRadius } from "../../theme";
+import { useResponsive } from "../../hooks/useResponsive";
 import { useAuthStore } from "../../stores/authStore";
 import { useStoneStore } from "../../stores/stoneStore";
 import { useProgressionStore } from "../../stores/progressionStore";
@@ -14,6 +15,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ProfileScreen() {
   const { t, i18n } = useTranslation();
+  const responsive = useResponsive();
+  const { contentPadding, isTablet, isDesktop } = responsive;
   const user = useAuthStore((s) => s.user);
   const signOut = useAuthStore((s) => s.signOut);
   const updateProfile = useAuthStore((s) => s.updateProfile);
@@ -72,8 +75,8 @@ export default function ProfileScreen() {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>{t("profile.title")}</Text>
+    <ScrollView style={styles.container} contentContainerStyle={[styles.content, { paddingHorizontal: contentPadding }]}>
+      <Text style={[styles.title, (isTablet || isDesktop) && { fontSize: 32 }]}>{t("profile.title")}</Text>
 
       {/* Profile Card */}
       <View style={styles.profileCard}>

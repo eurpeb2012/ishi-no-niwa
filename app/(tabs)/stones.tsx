@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { colors, spacing, fontSize, borderRadius } from "../../theme";
+import { useResponsive } from "../../hooks/useResponsive";
 import { useStoneStore } from "../../stores/stoneStore";
 import { useProgressionStore } from "../../stores/progressionStore";
 import { useAuthStore } from "../../stores/authStore";
@@ -45,6 +46,7 @@ const CHAKRA_BODY = [
 
 export default function StonesScreen() {
   const { t, i18n } = useTranslation();
+  const { contentPadding, stoneColumns, isTablet, isDesktop } = useResponsive();
   const stoneStore = useStoneStore();
   const allStones = useStoneStore((s) => s.stones);
   const isUnlocked = useProgressionStore((s) => s.isStoneUnlocked);
@@ -164,7 +166,7 @@ export default function StonesScreen() {
       {/* Grid View */}
       {viewMode === "grid" && (
         <>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow} contentContainerStyle={styles.filterContent}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow} contentContainerStyle={[styles.filterContent, { paddingHorizontal: contentPadding - 8 }]}>
             <TouchableOpacity
               style={[styles.filterChip, !stoneStore.filterChakra && styles.filterChipActive]}
               onPress={() => stoneStore.setFilterChakra(null)}
@@ -189,11 +191,12 @@ export default function StonesScreen() {
             </TouchableOpacity>
           </ScrollView>
           <FlatList
+            key={`grid-${stoneColumns}`}
             data={filteredStones}
             renderItem={renderStoneCard}
             keyExtractor={(item) => item.id}
-            numColumns={3}
-            contentContainerStyle={styles.grid}
+            numColumns={stoneColumns}
+            contentContainerStyle={[styles.grid, { paddingHorizontal: contentPadding - 8 }]}
             columnWrapperStyle={styles.gridRow}
             ListFooterComponent={
               <View style={styles.footerAd}>
@@ -259,11 +262,12 @@ export default function StonesScreen() {
             ))}
           </View>
           <FlatList
+            key={`coll-${stoneColumns}`}
             data={getCollectionStones()}
             renderItem={renderStoneCard}
             keyExtractor={(item) => item.id}
-            numColumns={3}
-            contentContainerStyle={styles.grid}
+            numColumns={stoneColumns}
+            contentContainerStyle={[styles.grid, { paddingHorizontal: contentPadding - 8 }]}
             columnWrapperStyle={styles.gridRow}
             ListEmptyComponent={
               <View style={styles.emptyCollection}>

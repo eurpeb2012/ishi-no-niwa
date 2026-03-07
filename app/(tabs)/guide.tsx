@@ -11,6 +11,7 @@ import {
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { colors, spacing, fontSize, borderRadius } from "../../theme";
+import { useResponsive } from "../../hooks/useResponsive";
 import { useStoneStore } from "../../stores/stoneStore";
 import { useCanvasStore } from "../../stores/canvasStore";
 import { useProgressionStore } from "../../stores/progressionStore";
@@ -46,6 +47,7 @@ const SHAPE_GLYPHS: Record<string, string> = {
 
 export default function GuideScreen() {
   const { t, i18n } = useTranslation();
+  const { contentPadding, isTablet, isDesktop, fontScale } = useResponsive();
   const stones = useStoneStore((s) => s.stones);
   const getStone = useStoneStore((s) => s.getStone);
   const generateInsights = useInsightStore((s) => s.generateInsights);
@@ -152,8 +154,8 @@ export default function GuideScreen() {
   const allMoons = getAllMoonPhases();
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>{t("guide.title")}</Text>
+    <ScrollView style={styles.container} contentContainerStyle={[styles.content, { paddingHorizontal: contentPadding }]}>
+      <Text style={[styles.title, (isTablet || isDesktop) && { fontSize: 32 }]}>{t("guide.title")}</Text>
 
       {/* Moon Phase Card */}
       <View style={styles.moonCard}>

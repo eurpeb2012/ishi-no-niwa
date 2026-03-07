@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { colors, spacing, fontSize, borderRadius } from "../../theme";
+import { useResponsive } from "../../hooks/useResponsive";
 import { useProgressionStore } from "../../stores/progressionStore";
 import { useCanvasStore } from "../../stores/canvasStore";
 import { useStoneStore } from "../../stores/stoneStore";
@@ -50,6 +51,7 @@ const ALL_CHALLENGES = [
 
 export default function JourneyScreen() {
   const { t, i18n } = useTranslation();
+  const { contentPadding, isTablet, isDesktop } = useResponsive();
   const progress = useProgressionStore((s) => s.progress);
   const addXP = useProgressionStore((s) => s.addXP);
   const unlockStone = useProgressionStore((s) => s.unlockStone);
@@ -122,8 +124,8 @@ export default function JourneyScreen() {
   const dailyAd = getAdForPlacement("daily_intention");
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>{t("journey.title")}</Text>
+    <ScrollView style={styles.container} contentContainerStyle={[styles.content, { paddingHorizontal: contentPadding }]}>
+      <Text style={[styles.title, (isTablet || isDesktop) && { fontSize: 32 }]}>{t("journey.title")}</Text>
 
       {/* Streak Banner */}
       {progress.currentStreakDays >= 3 && (

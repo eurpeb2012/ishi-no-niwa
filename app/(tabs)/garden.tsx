@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Dimensions,
   Platform,
   Vibration,
 } from "react-native";
@@ -26,6 +25,7 @@ import { useStoneStore } from "../../stores/stoneStore";
 import { useProgressionStore } from "../../stores/progressionStore";
 import { useInsightStore } from "../../stores/insightStore";
 import { useAuthStore } from "../../stores/authStore";
+import { useResponsive } from "../../hooks/useResponsive";
 import { XP_REWARDS } from "../../types";
 import { GemStone, getGemSize } from "../../components/common/GemStone";
 import { CrystalFairy } from "../../components/common/CrystalFairy";
@@ -34,8 +34,6 @@ import { getAdForPlacement } from "../../data/mockAds";
 import { getCurrentSeasonalItems } from "../../data/seasonalItems";
 import templates from "../../data/templates.json";
 import type { GridTemplate, StonePlacement } from "../../types";
-
-const CANVAS_SIZE = Dimensions.get("window").width - spacing.lg * 2;
 
 // Environment evolution colors based on level
 function getEvolutionStyle(level: number) {
@@ -242,6 +240,8 @@ const AMBIENT_SOUNDS = ["off", "singing_bowl", "nature", "rain", "wind_chimes"] 
 
 export default function GardenScreen() {
   const { t, i18n } = useTranslation();
+  const responsive = useResponsive();
+  const CANVAS_SIZE = responsive.canvasSize;
   const canvas = useCanvasStore();
   const stones = useStoneStore((s) => s.stones);
   const user = useAuthStore((s) => s.user);

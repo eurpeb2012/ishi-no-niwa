@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { colors, spacing, fontSize, borderRadius } from "../../theme";
+import { useResponsive } from "../../hooks/useResponsive";
 import { useCanvasStore } from "../../stores/canvasStore";
 import { useStoneStore } from "../../stores/stoneStore";
 import { GemStone } from "../../components/common/GemStone";
@@ -35,6 +36,8 @@ const WORKSHOPS = [
 export default function CommunityScreen() {
   const { t, i18n } = useTranslation();
   const isJp = i18n.language === "jp";
+  const responsive = useResponsive();
+  const { contentPadding, isTablet, isDesktop } = responsive;
   const savedGrids = useCanvasStore((s) => s.savedGrids);
   const shareGrid = useCanvasStore((s) => s.shareGrid);
   const getStone = useStoneStore((s) => s.getStone);
@@ -54,10 +57,12 @@ export default function CommunityScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{isJp ? "コミュニティ" : "Community"}</Text>
+      <Text style={[styles.title, { paddingHorizontal: contentPadding }, (isTablet || isDesktop) && { fontSize: 32 }]}>
+        {isJp ? "コミュニティ" : "Community"}
+      </Text>
 
       {/* Tab bar */}
-      <View style={styles.tabBar}>
+      <View style={[styles.tabBar, { paddingHorizontal: contentPadding }]}>
         {(["gallery", "shared", "workshops"] as Tab[]).map((tab) => (
           <TouchableOpacity
             key={tab}
@@ -75,7 +80,7 @@ export default function CommunityScreen() {
         ))}
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={[styles.content, { paddingHorizontal: contentPadding }]}>
         {/* Community Gallery */}
         {activeTab === "gallery" && (
           <>
