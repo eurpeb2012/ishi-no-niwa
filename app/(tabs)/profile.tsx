@@ -7,6 +7,7 @@ import { useStoneStore } from "../../stores/stoneStore";
 import { useProgressionStore } from "../../stores/progressionStore";
 import { useCanvasStore } from "../../stores/canvasStore";
 import { GemStone } from "../../components/common/GemStone";
+import { CrystalFairy } from "../../components/common/CrystalFairy";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ProfileScreen() {
@@ -34,12 +35,13 @@ export default function ProfileScreen() {
         window.localStorage.removeItem("ishi-auth");
         window.localStorage.removeItem("ishi-progression");
         window.localStorage.removeItem("ishi-canvas");
+        window.localStorage.removeItem("ishi-insights");
       } catch (_) {
         /* storage might be unavailable */
       }
       window.location.replace("/ishi-no-niwa/");
     } else {
-      await AsyncStorage.multiRemove(["ishi-auth", "ishi-progression", "ishi-canvas"]);
+      await AsyncStorage.multiRemove(["ishi-auth", "ishi-progression", "ishi-canvas", "ishi-insights"]);
       signOut();
       router.replace("/(auth)/login");
     }
@@ -55,11 +57,16 @@ export default function ProfileScreen() {
       {/* Profile Card */}
       <View style={styles.profileCard}>
         {avatarStone ? (
-          <GemStone
-            stoneId={avatarStone.id}
-            colorHex={avatarStone.color_hex}
-            size={72}
-          />
+          <View style={{ alignItems: "center" }}>
+            <CrystalFairy colorHex={avatarStone.color_hex} size={80} />
+            <View style={{ marginTop: 4 }}>
+              <GemStone
+                stoneId={avatarStone.id}
+                colorHex={avatarStone.color_hex}
+                size={36}
+              />
+            </View>
+          </View>
         ) : (
           <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
             <Text style={styles.avatarText}>石</Text>

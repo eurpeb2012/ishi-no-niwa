@@ -13,6 +13,9 @@ import { colors, spacing, fontSize, borderRadius } from "../../theme";
 import { useStoneStore } from "../../stores/stoneStore";
 import { useProgressionStore } from "../../stores/progressionStore";
 import { useAuthStore } from "../../stores/authStore";
+import { GemStone } from "../../components/common/GemStone";
+import { SponsoredAd } from "../../components/common/SponsoredAd";
+import { getAdForPlacement } from "../../data/mockAds";
 import type { Stone, ChakraId } from "../../types";
 
 const CHAKRA_FILTERS: { id: ChakraId; color: string }[] = [
@@ -28,12 +31,29 @@ const CHAKRA_FILTERS: { id: ChakraId; color: string }[] = [
 export default function StonesScreen() {
   const { t, i18n } = useTranslation();
   const stoneStore = useStoneStore();
+  const allStones = useStoneStore((s) => s.stones);
   const isUnlocked = useProgressionStore((s) => s.isStoneUnlocked);
   const userLang = i18n.language;
   const [selectedStone, setSelectedStone] = useState<Stone | null>(null);
-  const [detailTab, setDetailTab] = useState<"properties" | "lore" | "pairings">("properties");
+  const [detailTab, setDetailTab] = useState<
+    "properties" | "lore" | "pairings"
+  >("properties");
 
   const filteredStones = stoneStore.getFilteredStones();
+
+  // Compute pairings: stones sharing chakras or intentions with selected stone
+  const getPairings = (stone: Stone) => {
+    return allStones
+      .filter((s) => {
+        if (s.id === stone.id) return false;
+        const sharedChakra = s.chakras.some((c) => stone.chakras.includes(c));
+        const sharedIntention = s.intentions.some((i) =>
+          stone.intentions.includes(i)
+        );
+        return sharedChakra || sharedIntention;
+      })
+      .slice(0, 6);
+  };
 
   const renderStoneCard = ({ item }: { item: Stone }) => {
     const unlocked = isUnlocked(item.id);
@@ -42,14 +62,17 @@ export default function StonesScreen() {
         style={[styles.card, !unlocked && styles.cardLocked]}
         onPress={() => unlocked && setSelectedStone(item)}
       >
-        <View
-          style={[
-            styles.cardDot,
-            {
-              backgroundColor: unlocked ? item.color_hex : colors.textMuted,
-            },
-          ]}
-        />
+        <View style={styles.cardGemWrap}>
+          {unlocked ? (
+            <GemStone
+              stoneId={item.id}
+              colorHex={item.color_hex}
+              size={32}
+            />
+          ) : (
+            <View style={styles.cardDotLocked} />
+          )}
+        </View>
         <Text style={[styles.cardName, !unlocked && styles.textLocked]}>
           {item.name_en}
         </Text>
@@ -58,11 +81,18 @@ export default function StonesScreen() {
         </Text>
         <View style={styles.cardMeta}>
           <Text style={styles.cardRarity}>{item.rarity}</Text>
-          {!unlocked && <Text style={styles.lockIcon}>Lv{item.unlock_level}</Text>}
+          {!unlocked && (
+            <Text style={styles.lockIcon}>Lv{item.unlock_level}</Text>
+          )}
         </View>
       </TouchableOpacity>
     );
   };
+
+  const stoneDetailAd = selectedStone
+    ? getAdForPlacement("stone_detail", selectedStone.id)
+    : null;
+  const libraryAd = getAdForPlacement("library_footer");
 
   return (
     <View style={styles.container}>
@@ -124,6 +154,11 @@ export default function StonesScreen() {
         numColumns={3}
         contentContainerStyle={styles.grid}
         columnWrapperStyle={styles.gridRow}
+        ListFooterComponent={
+          <View style={styles.footerAd}>
+            <SponsoredAd ad={libraryAd} placement="library_footer" />
+          </View>
+        }
       />
 
       {/* Stone Detail Modal */}
@@ -143,12 +178,13 @@ export default function StonesScreen() {
                 <Text style={styles.modalCloseText}>X</Text>
               </TouchableOpacity>
 
-              <View
-                style={[
-                  styles.modalDot,
-                  { backgroundColor: selectedStone.color_hex },
-                ]}
-              />
+              <View style={styles.modalGemWrap}>
+                <GemStone
+                  stoneId={selectedStone.id}
+                  colorHex={selectedStone.color_hex}
+                  size={72}
+                />
+              </View>
               <Text style={styles.modalName}>{selectedStone.name_en}</Text>
               <Text style={styles.modalNameJp}>{selectedStone.name_jp}</Text>
               <Text style={styles.modalRarity}>{selectedStone.rarity}</Text>
@@ -218,9 +254,54 @@ export default function StonesScreen() {
                   </Text>
                 )}
                 {detailTab === "pairings" && (
-                  <Text style={styles.loreText}>
-                    Pairing suggestions coming in v1.1
-                  </Text>
+                  <View style={styles.pairingsGrid}>
+                    <Text style={styles.pairingsIntro}>
+                      {userLang === "jp"
+                        ? "チャクラや意図を共有する石との組み合わせ"
+                        : "Stones that share chakras or intentions"}
+                    </Text>
+                    {getPairings(selectedStone).map((pair) => (
+                      <TouchableOpacity
+                        key={pair.id}
+                        style={styles.pairingCard}
+                        onPress={() => {
+                          setSelectedStone(pair);
+                          setDetailTab("properties");
+                        }}
+                      >
+                        <GemStone
+                          stoneId={pair.id}
+                          colorHex={pair.color_hex}
+                          size={28}
+                        />
+                        <View style={styles.pairingInfo}>
+                          <Text style={styles.pairingName}>
+                            {pair.name_en}
+                          </Text>
+                          <Text style={styles.pairingNameJp}>
+                            {pair.name_jp}
+                          </Text>
+                        </View>
+                        <Text style={styles.pairingMatch}>
+                          {pair.chakras.filter((c) =>
+                            selectedStone.chakras.includes(c)
+                          ).length > 0
+                            ? t("stones.chakra")
+                            : t("stones.intention")}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+
+                {/* Ad in stone detail */}
+                {stoneDetailAd && detailTab === "properties" && (
+                  <View style={styles.detailAd}>
+                    <SponsoredAd
+                      ad={stoneDetailAd}
+                      placement="stone_detail"
+                    />
+                  </View>
                 )}
               </ScrollView>
             </View>
@@ -287,6 +368,7 @@ const styles = StyleSheet.create({
   },
   grid: {
     paddingHorizontal: spacing.md,
+    paddingBottom: spacing.lg,
   },
   gridRow: {
     gap: spacing.sm,
@@ -304,11 +386,14 @@ const styles = StyleSheet.create({
   cardLocked: {
     opacity: 0.5,
   },
-  cardDot: {
+  cardGemWrap: {
+    marginBottom: spacing.xs,
+  },
+  cardDotLocked: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    marginBottom: spacing.xs,
+    backgroundColor: colors.textMuted,
   },
   cardName: {
     color: colors.textPrimary,
@@ -339,6 +424,11 @@ const styles = StyleSheet.create({
   textLocked: {
     color: colors.textMuted,
   },
+  footerAd: {
+    paddingHorizontal: spacing.sm,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xl,
+  },
   modal: {
     flex: 1,
     backgroundColor: colors.overlay,
@@ -362,12 +452,9 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     fontSize: fontSize.lg,
   },
-  modalDot: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    marginBottom: spacing.md,
+  modalGemWrap: {
     marginTop: spacing.md,
+    marginBottom: spacing.md,
   },
   modalName: {
     fontSize: fontSize.xl,
@@ -442,5 +529,43 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontSize: fontSize.sm,
     lineHeight: 22,
+  },
+  detailAd: {
+    marginTop: spacing.lg,
+  },
+  pairingsGrid: {
+    gap: spacing.sm,
+  },
+  pairingsIntro: {
+    color: colors.textMuted,
+    fontSize: fontSize.sm,
+    marginBottom: spacing.sm,
+  },
+  pairingCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.surfaceLight,
+    borderRadius: borderRadius.md,
+    padding: spacing.sm,
+    gap: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  pairingInfo: {
+    flex: 1,
+  },
+  pairingName: {
+    color: colors.textPrimary,
+    fontSize: fontSize.sm,
+    fontWeight: "500",
+  },
+  pairingNameJp: {
+    color: colors.textMuted,
+    fontSize: fontSize.xs,
+  },
+  pairingMatch: {
+    color: colors.primary,
+    fontSize: fontSize.xs,
+    fontWeight: "600",
   },
 });

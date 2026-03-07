@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -17,6 +17,7 @@ import { useProgressionStore } from "../../stores/progressionStore";
 import { GemStone } from "../../components/common/GemStone";
 import { SponsoredAd } from "../../components/common/SponsoredAd";
 import { getAdForPlacement } from "../../data/mockAds";
+import { useInsightStore } from "../../stores/insightStore";
 import { XP_REWARDS } from "../../types";
 import type { IntentionId, GridTemplate } from "../../types";
 import templates from "../../data/templates.json";
@@ -64,10 +65,18 @@ const SHAPE_GLYPHS: Record<string, string> = {
 export default function GuideScreen() {
   const { t, i18n } = useTranslation();
   const stones = useStoneStore((s) => s.stones);
+  const generateInsights = useInsightStore((s) => s.generateInsights);
+  const trackIntention = useInsightStore((s) => s.trackIntention);
+  const topStones = useInsightStore((s) => s.getTopStones)(3);
+  const [insights, setInsights] = useState<string[]>([]);
   const [selectedIntention, setSelectedIntention] =
     useState<IntentionId | null>(null);
   const [selectedTemplate, setSelectedTemplate] =
     useState<GridTemplate | null>(null);
+
+  useEffect(() => {
+    setInsights(generateInsights());
+  }, []);
 
   const canvas = useCanvasStore();
   const addXP = useProgressionStore((s) => s.addXP);
@@ -168,10 +177,10 @@ export default function GuideScreen() {
               selectedIntention === intention && styles.intentionActive,
             ]}
             onPress={() => {
-              setSelectedIntention(
-                selectedIntention === intention ? null : intention
-              );
+              const next = selectedIntention === intention ? null : intention;
+              setSelectedIntention(next);
               setSelectedTemplate(null);
+              if (next) trackIntention(next);
             }}
           >
             <Text
@@ -289,6 +298,41 @@ export default function GuideScreen() {
               </Text>
             </TouchableOpacity>
           </View>
+        </View>
+      )}
+
+      {/* AI Insights */}
+      {insights.length > 0 && (
+        <View style={styles.insightsSection}>
+          <Text style={styles.sectionTitle}>
+            {isJp ? "あなたの傾向" : "Your Crystal Insights"}
+          </Text>
+          {insights.map((msg, i) => (
+            <View key={i} style={styles.insightCard}>
+              <Text style={styles.insightText}>{msg}</Text>
+            </View>
+          ))}
+          {topStones.length > 0 && (
+            <View style={styles.topStonesRow}>
+              <Text style={styles.recLabel}>
+                {isJp ? "よく使う石" : "MOST USED STONES"}
+              </Text>
+              <View style={{ flexDirection: "row", gap: spacing.md, marginTop: spacing.xs }}>
+                {topStones.map((ts) => {
+                  const stone = stones.find((s) => s.id === ts.id);
+                  if (!stone) return null;
+                  return (
+                    <View key={ts.id} style={{ alignItems: "center" }}>
+                      <GemStone stoneId={stone.id} colorHex={stone.color_hex} size={28} />
+                      <Text style={{ color: colors.textMuted, fontSize: 9, marginTop: 2 }}>
+                        {isJp ? stone.name_jp : stone.name_en} ({ts.uses})
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
+            </View>
+          )}
         </View>
       )}
 
@@ -495,6 +539,34 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontSize: fontSize.md,
     fontWeight: "600",
+  },
+  insightsSection: {
+    backgroundColor: colors.surfaceLight,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    marginBottom: spacing.xl,
+    borderWidth: 1,
+    borderColor: colors.primary + "40",
+  },
+  insightCard: {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    marginTop: spacing.sm,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.primary,
+  },
+  insightText: {
+    color: colors.textSecondary,
+    fontSize: fontSize.sm,
+    fontStyle: "italic",
+    lineHeight: 20,
+  },
+  topStonesRow: {
+    marginTop: spacing.md,
+    paddingTop: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
   },
   sessionsSection: {
     gap: spacing.sm,

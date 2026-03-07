@@ -1,36 +1,80 @@
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { useState, useCallback } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Platform } from "react-native";
 import { useTranslation } from "react-i18next";
 import { colors, spacing, fontSize, borderRadius } from "../../theme";
 import { useProgressionStore } from "../../stores/progressionStore";
+import { useCanvasStore } from "../../stores/canvasStore";
+import { useStoneStore } from "../../stores/stoneStore";
+import { GemStone } from "../../components/common/GemStone";
+import { SponsoredAd } from "../../components/common/SponsoredAd";
+import { getAdForPlacement } from "../../data/mockAds";
 import { XP_TABLE, XP_REWARDS } from "../../types";
 
+// Blue-toned stone IDs for the weekly challenge
+const BLUE_STONES = [
+  "lapis_lazuli",
+  "aquamarine",
+  "turquoise",
+  "labradorite",
+];
+
 export default function JourneyScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const progress = useProgressionStore((s) => s.progress);
   const addXP = useProgressionStore((s) => s.addXP);
+  const unlockStone = useProgressionStore((s) => s.unlockStone);
   const setDailyIntention = useProgressionStore((s) => s.setDailyIntention);
   const updateStreak = useProgressionStore((s) => s.updateStreak);
+  const savedGrids = useCanvasStore((s) => s.savedGrids);
+  const allStones = useStoneStore((s) => s.stones);
+  const [dailyReward, setDailyReward] = useState<string | null>(null);
+  const isJp = i18n.language === "jp";
 
-  // Calculate XP progress to next level
+  // Daily login gem reward
+  const claimDailyGem = useCallback(() => {
+    const locked = allStones.filter((s) => !progress.stonesUnlocked.includes(s.id));
+    const pool = locked.length > 0 ? locked : allStones;
+    const randomStone = pool[Math.floor(Math.random() * pool.length)];
+    unlockStone(randomStone.id);
+    addXP(XP_REWARDS.NEW_STONE_USED);
+    setDailyReward(randomStone.id);
+  }, [allStones, progress.stonesUnlocked, unlockStone, addXP]);
+
+  // XP progress to next level
   const sortedLevels = Object.entries(XP_TABLE)
     .map(([lvl, xp]) => ({ level: Number(lvl), xp }))
     .sort((a, b) => a.xp - b.xp);
 
-  const currentLevelEntry = sortedLevels.filter(
-    (l) => l.xp <= progress.xpTotal
-  ).pop() || sortedLevels[0];
-
-  const nextLevelEntry = sortedLevels.find(
-    (l) => l.xp > progress.xpTotal
-  );
-
+  const currentLevelEntry =
+    sortedLevels.filter((l) => l.xp <= progress.xpTotal).pop() ||
+    sortedLevels[0];
+  const nextLevelEntry = sortedLevels.find((l) => l.xp > progress.xpTotal);
   const xpInLevel = progress.xpTotal - currentLevelEntry.xp;
   const xpForNext = nextLevelEntry
     ? nextLevelEntry.xp - currentLevelEntry.xp
     : 1;
   const progressPercent = Math.min(xpInLevel / xpForNext, 1);
-
   const levelTitle = t(`levels.${progress.level}`) || `Level ${progress.level}`;
+
+  // Skill tree progress based on actual stats
+  const stoneWisdomProgress = Math.min(
+    5,
+    Math.floor(progress.stonesUnlocked.length / 5)
+  );
+  const gridMasteryProgress = Math.min(
+    5,
+    Math.floor(progress.gridsCompletedCount / 3)
+  );
+  const spiritualPathProgress = Math.min(
+    5,
+    Math.floor(progress.guidedSessionsCount / 2)
+  );
+
+  // Weekly challenge: check if any saved grid uses only blue stones
+  const blueGridCount = savedGrids.filter((grid) =>
+    grid.placements.length > 0 &&
+    grid.placements.every((p) => BLUE_STONES.includes(p.stoneId))
+  ).length;
 
   const handleDailyIntention = () => {
     if (!progress.dailyIntentionToday) {
@@ -39,6 +83,8 @@ export default function JourneyScreen() {
       updateStreak();
     }
   };
+
+  const dailyAd = getAdForPlacement("daily_intention");
 
   return (
     <ScrollView
@@ -55,7 +101,10 @@ export default function JourneyScreen() {
         </Text>
         <View style={styles.xpBarBg}>
           <View
-            style={[styles.xpBarFill, { width: `${progressPercent * 100}%` }]}
+            style={[
+              styles.xpBarFill,
+              { width: `${progressPercent * 100}%` },
+            ]}
           />
         </View>
         <Text style={styles.xpText}>
@@ -65,6 +114,36 @@ export default function JourneyScreen() {
         <Text style={styles.streakText}>
           {progress.currentStreakDays} {t("journey.streak")}
         </Text>
+      </View>
+
+      {/* Daily Login Gem Reward */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>
+          {isJp ? "毎日のクリスタル" : "Daily Crystal"}
+        </Text>
+        {dailyReward ? (
+          <View style={styles.rewardCard}>
+            <GemStone
+              stoneId={dailyReward}
+              colorHex={allStones.find((s) => s.id === dailyReward)?.color_hex || "#888"}
+              size={48}
+            />
+            <Text style={styles.rewardText}>
+              {isJp ? "新しい石を獲得！" : "You received a new stone!"}
+            </Text>
+            <Text style={styles.rewardName}>
+              {isJp
+                ? allStones.find((s) => s.id === dailyReward)?.name_jp
+                : allStones.find((s) => s.id === dailyReward)?.name_en}
+            </Text>
+          </View>
+        ) : (
+          <TouchableOpacity style={styles.rewardButton} onPress={claimDailyGem}>
+            <Text style={styles.rewardButtonText}>
+              {isJp ? "今日のクリスタルを受け取る" : "Claim Today's Crystal"}
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Daily Intention */}
@@ -89,18 +168,46 @@ export default function JourneyScreen() {
               : t("journey.setIntention")}
           </Text>
         </TouchableOpacity>
+
+        {/* Ad after daily intention */}
+        {progress.dailyIntentionToday && (
+          <View style={styles.adWrap}>
+            <SponsoredAd ad={dailyAd} placement="daily_intention" />
+          </View>
+        )}
       </View>
 
       {/* Skill Trees */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>{t("journey.skillTrees")}</Text>
         {[
-          { key: "stoneWisdom", label: t("journey.stoneWisdom"), progress: 0, max: 5 },
-          { key: "gridMastery", label: t("journey.gridMastery"), progress: 0, max: 5 },
-          { key: "spiritualPath", label: t("journey.spiritualPath"), progress: 0, max: 5 },
+          {
+            key: "stoneWisdom",
+            label: t("journey.stoneWisdom"),
+            progress: stoneWisdomProgress,
+            max: 5,
+            detail: `${progress.stonesUnlocked.length} / ${allStones.length}`,
+          },
+          {
+            key: "gridMastery",
+            label: t("journey.gridMastery"),
+            progress: gridMasteryProgress,
+            max: 5,
+            detail: `${progress.gridsCompletedCount} grids`,
+          },
+          {
+            key: "spiritualPath",
+            label: t("journey.spiritualPath"),
+            progress: spiritualPathProgress,
+            max: 5,
+            detail: `${progress.guidedSessionsCount} sessions`,
+          },
         ].map((tree) => (
           <View key={tree.key} style={styles.skillRow}>
-            <Text style={styles.skillLabel}>{tree.label}</Text>
+            <View style={styles.skillInfo}>
+              <Text style={styles.skillLabel}>{tree.label}</Text>
+              <Text style={styles.skillDetail}>{tree.detail}</Text>
+            </View>
             <View style={styles.skillDots}>
               {Array.from({ length: tree.max }).map((_, i) => (
                 <View
@@ -114,20 +221,61 @@ export default function JourneyScreen() {
             </View>
           </View>
         ))}
-        <Text style={styles.comingSoon}>
-          Full skill trees coming in v1.2
-        </Text>
       </View>
 
       {/* Stats */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Stats</Text>
         <View style={styles.statsGrid}>
-          <StatBox label="Grids Created" value={progress.gridsCompletedCount} />
-          <StatBox label="Stones Unlocked" value={progress.stonesUnlocked.length} />
+          <StatBox
+            label="Grids Created"
+            value={progress.gridsCompletedCount}
+          />
+          <StatBox
+            label="Stones Unlocked"
+            value={progress.stonesUnlocked.length}
+          />
           <StatBox label="Best Streak" value={progress.longestStreakDays} />
-          <StatBox label="Achievements" value={progress.achievements.length} />
+          <StatBox
+            label="Achievements"
+            value={progress.achievements.length}
+          />
         </View>
+      </View>
+
+      {/* Achievements */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Achievements</Text>
+        {[
+          { id: "first_grid", label: "First Grid", desc: "Complete your first crystal grid" },
+          { id: "five_stones", label: "Stone Collector", desc: "Unlock 5 different stones" },
+          { id: "week_streak", label: "Week Warrior", desc: "Maintain a 7-day streak" },
+          { id: "ten_grids", label: "Grid Master", desc: "Complete 10 grids" },
+          { id: "all_stones", label: "Complete Collection", desc: "Unlock all 24 stones" },
+        ].map((ach) => {
+          const earned = progress.achievements.includes(ach.id);
+          return (
+            <View
+              key={ach.id}
+              style={[styles.achievementCard, earned && styles.achievementEarned]}
+            >
+              <Text style={styles.achievementIcon}>
+                {earned ? "★" : "☆"}
+              </Text>
+              <View style={styles.achievementInfo}>
+                <Text
+                  style={[
+                    styles.achievementLabel,
+                    earned && styles.achievementLabelEarned,
+                  ]}
+                >
+                  {ach.label}
+                </Text>
+                <Text style={styles.achievementDesc}>{ach.desc}</Text>
+              </View>
+            </View>
+          );
+        })}
       </View>
 
       {/* Weekly Challenge */}
@@ -136,9 +284,25 @@ export default function JourneyScreen() {
         <View style={styles.challengeCard}>
           <Text style={styles.challengeName}>Blue Harmony</Text>
           <Text style={styles.challengeDesc}>
-            Build a grid using only blue-toned stones
+            Build a grid using only blue-toned stones (Lapis Lazuli,
+            Aquamarine, Turquoise, or Labradorite)
           </Text>
-          <Text style={styles.challengeProgress}>0 / 1</Text>
+          <View style={styles.challengeProgressRow}>
+            <View style={styles.challengeBar}>
+              <View
+                style={[
+                  styles.challengeBarFill,
+                  { width: `${Math.min(blueGridCount, 1) * 100}%` },
+                ]}
+              />
+            </View>
+            <Text style={styles.challengeProgress}>
+              {Math.min(blueGridCount, 1)} / 1
+            </Text>
+          </View>
+          {blueGridCount >= 1 && (
+            <Text style={styles.challengeComplete}>Challenge Complete!</Text>
+          )}
         </View>
       </View>
     </ScrollView>
@@ -155,6 +319,35 @@ function StatBox({ label, value }: { label: string; value: number }) {
 }
 
 const styles = StyleSheet.create({
+  rewardCard: {
+    backgroundColor: colors.surfaceLight,
+    borderRadius: borderRadius.md,
+    padding: spacing.lg,
+    alignItems: "center",
+    gap: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.primary + "60",
+  },
+  rewardText: {
+    color: colors.primary,
+    fontSize: fontSize.md,
+    fontWeight: "600",
+  },
+  rewardName: {
+    color: colors.textSecondary,
+    fontSize: fontSize.sm,
+  },
+  rewardButton: {
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.md,
+    alignItems: "center",
+  },
+  rewardButtonText: {
+    color: colors.background,
+    fontSize: fontSize.md,
+    fontWeight: "600",
+  },
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -240,6 +433,9 @@ const styles = StyleSheet.create({
   intentionDoneText: {
     color: colors.success,
   },
+  adWrap: {
+    marginTop: spacing.md,
+  },
   skillRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -248,9 +444,17 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
+  skillInfo: {
+    flex: 1,
+  },
   skillLabel: {
     color: colors.textPrimary,
     fontSize: fontSize.md,
+  },
+  skillDetail: {
+    color: colors.textMuted,
+    fontSize: fontSize.xs,
+    marginTop: 1,
   },
   skillDots: {
     flexDirection: "row",
@@ -267,13 +471,6 @@ const styles = StyleSheet.create({
   skillDotFilled: {
     backgroundColor: colors.primary,
     borderColor: colors.primary,
-  },
-  comingSoon: {
-    color: colors.textMuted,
-    fontSize: fontSize.xs,
-    fontStyle: "italic",
-    textAlign: "center",
-    marginTop: spacing.sm,
   },
   statsGrid: {
     flexDirection: "row",
@@ -300,6 +497,42 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     marginTop: spacing.xs,
   },
+  achievementCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.surfaceLight,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    marginBottom: spacing.xs,
+    gap: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    opacity: 0.5,
+  },
+  achievementEarned: {
+    opacity: 1,
+    borderColor: colors.primary,
+  },
+  achievementIcon: {
+    fontSize: fontSize.xl,
+    color: colors.primary,
+  },
+  achievementInfo: {
+    flex: 1,
+  },
+  achievementLabel: {
+    color: colors.textMuted,
+    fontSize: fontSize.md,
+    fontWeight: "600",
+  },
+  achievementLabelEarned: {
+    color: colors.textPrimary,
+  },
+  achievementDesc: {
+    color: colors.textMuted,
+    fontSize: fontSize.xs,
+    marginTop: 2,
+  },
   challengeCard: {
     backgroundColor: colors.surfaceLight,
     borderRadius: borderRadius.md,
@@ -316,11 +549,36 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontSize: fontSize.sm,
     marginTop: spacing.xs,
+    lineHeight: 20,
+  },
+  challengeProgressRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
+    marginTop: spacing.md,
+  },
+  challengeBar: {
+    flex: 1,
+    height: 6,
+    backgroundColor: colors.background,
+    borderRadius: 3,
+    overflow: "hidden",
+  },
+  challengeBarFill: {
+    height: 6,
+    backgroundColor: colors.primary,
+    borderRadius: 3,
   },
   challengeProgress: {
     color: colors.primary,
     fontSize: fontSize.sm,
     fontWeight: "600",
+  },
+  challengeComplete: {
+    color: colors.success,
+    fontSize: fontSize.sm,
+    fontWeight: "600",
     marginTop: spacing.sm,
+    textAlign: "center",
   },
 });
