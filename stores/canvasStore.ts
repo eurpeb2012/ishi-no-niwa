@@ -13,6 +13,10 @@ interface CanvasState {
   gridName: string;
   intention: string | null;
 
+  // Undo/redo history
+  history: StonePlacement[][];
+  historyIndex: number;
+
   setTemplate: (templateId: string | null) => void;
   setGridName: (name: string) => void;
   setIntention: (intention: string | null) => void;
@@ -26,6 +30,21 @@ interface CanvasState {
   saveGrid: () => SavedGrid;
   loadGrid: (grid: SavedGrid) => void;
   deleteGrid: (gridId: string) => void;
+  shareGrid: (gridId: string) => void;
+
+  // Undo/redo
+  undo: () => void;
+  redo: () => void;
+  canUndo: () => boolean;
+  canRedo: () => boolean;
+}
+
+function pushHistory(state: { placements: StonePlacement[]; history: StonePlacement[][]; historyIndex: number }) {
+  const newHistory = state.history.slice(0, state.historyIndex + 1);
+  newHistory.push([...state.placements]);
+  // Keep max 30 history entries
+  if (newHistory.length > 30) newHistory.shift();
+  return { history: newHistory, historyIndex: newHistory.length - 1 };
 }
 
 export const useCanvasStore = create<CanvasState>()(
@@ -39,28 +58,51 @@ export const useCanvasStore = create<CanvasState>()(
       soundEnabled: false,
       gridName: "New Grid",
       intention: null,
+      history: [[]],
+      historyIndex: 0,
 
       setTemplate: (templateId) => set({ activeTemplateId: templateId }),
       setGridName: (name) => set({ gridName: name }),
       setIntention: (intention) => set({ intention }),
 
       addPlacement: (placement) =>
-        set((state) => ({ placements: [...state.placements, placement] })),
+        set((state) => {
+          const newPlacements = [...state.placements, placement];
+          return {
+            placements: newPlacements,
+            ...pushHistory({ ...state, placements: newPlacements }),
+          };
+        }),
 
       updatePlacement: (index, updates) =>
-        set((state) => ({
-          placements: state.placements.map((p, i) =>
+        set((state) => {
+          const newPlacements = state.placements.map((p, i) =>
             i === index ? { ...p, ...updates } : p
-          ),
-        })),
+          );
+          return {
+            placements: newPlacements,
+            ...pushHistory({ ...state, placements: newPlacements }),
+          };
+        }),
 
       removePlacement: (index) =>
-        set((state) => ({
-          placements: state.placements.filter((_, i) => i !== index),
-        })),
+        set((state) => {
+          const newPlacements = state.placements.filter((_, i) => i !== index);
+          return {
+            placements: newPlacements,
+            ...pushHistory({ ...state, placements: newPlacements }),
+          };
+        }),
 
       clearCanvas: () =>
-        set({ placements: [], activeTemplateId: null, gridName: "New Grid", intention: null }),
+        set({
+          placements: [],
+          activeTemplateId: null,
+          gridName: "New Grid",
+          intention: null,
+          history: [[]],
+          historyIndex: 0,
+        }),
 
       toggleSnap: () => set((state) => ({ snapEnabled: !state.snapEnabled })),
 
@@ -96,12 +138,51 @@ export const useCanvasStore = create<CanvasState>()(
           gridName: grid.name,
           intention: grid.intention,
           placements: [...grid.placements],
+          history: [[...grid.placements]],
+          historyIndex: 0,
         }),
 
       deleteGrid: (gridId) =>
         set((state) => ({
           savedGrids: state.savedGrids.filter((g) => g.id !== gridId),
         })),
+
+      shareGrid: (gridId) =>
+        set((state) => ({
+          savedGrids: state.savedGrids.map((g) =>
+            g.id === gridId ? { ...g, isShared: true } : g
+          ),
+        })),
+
+      undo: () =>
+        set((state) => {
+          if (state.historyIndex <= 0) return state;
+          const newIndex = state.historyIndex - 1;
+          return {
+            placements: [...state.history[newIndex]],
+            historyIndex: newIndex,
+          };
+        }),
+
+      redo: () =>
+        set((state) => {
+          if (state.historyIndex >= state.history.length - 1) return state;
+          const newIndex = state.historyIndex + 1;
+          return {
+            placements: [...state.history[newIndex]],
+            historyIndex: newIndex,
+          };
+        }),
+
+      canUndo: () => {
+        const state = get();
+        return state.historyIndex > 0;
+      },
+
+      canRedo: () => {
+        const state = get();
+        return state.historyIndex < state.history.length - 1;
+      },
     }),
     {
       name: "ishi-canvas",

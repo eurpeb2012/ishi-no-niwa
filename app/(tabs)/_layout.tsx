@@ -59,6 +59,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="community"
+        options={{
+          title: t("tabs.community"),
+          tabBarIcon: ({ focused }) => (
+            <TabIcon label="輪" focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: t("tabs.profile"),
@@ -85,7 +94,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   icon: {
-    fontSize: 22,
+    fontSize: 20,
     color: colors.textMuted,
   },
   iconFocused: {

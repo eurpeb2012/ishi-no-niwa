@@ -3,14 +3,12 @@
     "name": "Ishi no Niwa",
     "tagline": "Arrange sacred stones. Discover your pattern. Find your balance."
   },
-  "common": {
-    "sponsored": "Sponsored"
-  },
   "tabs": {
     "garden": "Garden",
     "stones": "Stones",
     "guide": "Guide",
     "journey": "Journey",
+    "community": "Community",
     "profile": "Profile"
   },
   "auth": {
@@ -59,7 +57,13 @@
     "gridComplete": "Grid Complete!",
     "intentionSummary": "Your Grid's Intention",
     "removeStone": "Remove",
-    "stoneTray": "Your Stones"
+    "stoneTray": "Your Stones",
+    "undo": "Undo",
+    "redo": "Redo",
+    "ar": "AR View",
+    "replay": "Replay",
+    "export": "Export",
+    "ambient": "Ambient"
   },
   "stones": {
     "title": "Stone Collection",
@@ -78,7 +82,16 @@
     "intention": "Intention",
     "origin": "Origin",
     "hardness": "Hardness",
-    "rarity": "Rarity"
+    "rarity": "Rarity",
+    "owned": "I Own This",
+    "wishlist": "Wishlist",
+    "favorite": "Favorite",
+    "identify": "Identify Crystal",
+    "buyStone": "Buy Real Stone",
+    "chakraView": "Chakra View",
+    "collectionTab": "Collection",
+    "wishlistTab": "Wishlist",
+    "favoritesTab": "Favorites"
   },
   "guide": {
     "title": "Stone Guide",
@@ -93,7 +106,14 @@
     "chooseShape": "Choose a Shape",
     "chakraBalance": "Chakra Balance",
     "guidedSessions": "Guided Sessions",
-    "sessionMinutes": "{{minutes}} min"
+    "sessionMinutes": "{{minutes}} min",
+    "moonPhase": "Moon Phase",
+    "dailyCrystal": "Crystal of the Day",
+    "dailyReason": "Today's recommended crystal based on the moon phase",
+    "meditationTimer": "Meditation Timer",
+    "startTimer": "Start",
+    "stopTimer": "Stop",
+    "workshops": "Live Workshops"
   },
   "journey": {
     "title": "Your Journey",
@@ -108,7 +128,18 @@
     "weeklyChallenge": "Weekly Challenge",
     "dailyIntention": "Daily Intention",
     "setIntention": "Set Today's Intention",
-    "intentionComplete": "Intention Complete!"
+    "intentionComplete": "Intention Complete!",
+    "journal": "Crystal Journal",
+    "addEntry": "Add Entry",
+    "mood": "How do you feel?",
+    "moodWonderful": "Wonderful",
+    "moodGood": "Good",
+    "moodNeutral": "Neutral",
+    "moodLow": "Low",
+    "moodStressed": "Stressed",
+    "journalNote": "Notes (optional)",
+    "moodTrend": "Mood Trend (30 days)",
+    "challenges": "Challenges"
   },
   "profile": {
     "title": "Profile",
@@ -120,7 +151,16 @@
     "notifications": "Notifications",
     "about": "About",
     "signOut": "Sign Out",
-    "deleteAccount": "Delete Account"
+    "deleteAccount": "Delete Account",
+    "zodiac": "Zodiac",
+    "birthCrystals": "Birth Crystals",
+    "collectionStats": "Collection Stats",
+    "owned": "Owned",
+    "wishlisted": "Wishlisted",
+    "favorited": "Favorited",
+    "haptics": "Haptic Feedback",
+    "printGrid": "Print Grid Template",
+    "shop": "Crystal Shop"
   },
   "subscription": {
     "free": "Free",
@@ -144,7 +184,8 @@
     "loading": "Loading...",
     "error": "Something went wrong",
     "retry": "Retry",
-    "sponsored": "Sponsored"
+    "sponsored": "Sponsored",
+    "comingSoon": "Coming Soon"
   },
   "chakras": {
     "root": "Root",
@@ -186,5 +227,19 @@
     "15": "2nd Dan",
     "18": "3rd Dan",
     "20": "Master"
+  },
+  "moods": {
+    "wonderful": "Wonderful",
+    "good": "Good",
+    "neutral": "Neutral",
+    "low": "Low",
+    "stressed": "Stressed"
+  },
+  "ambient": {
+    "off": "Off",
+    "singing_bowl": "Singing Bowl",
+    "nature": "Nature",
+    "rain": "Rain",
+    "wind_chimes": "Wind Chimes"
   }
 }

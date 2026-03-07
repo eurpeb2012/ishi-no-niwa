@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   ScrollView,
   Dimensions,
   Platform,
+  Vibration,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -36,9 +37,24 @@ import type { GridTemplate, StonePlacement } from "../../types";
 
 const CANVAS_SIZE = Dimensions.get("window").width - spacing.lg * 2;
 
-// ---------------------------------------------------------------------------
+// Environment evolution colors based on level
+function getEvolutionStyle(level: number) {
+  if (level >= 15) return { borderColor: "#FFD700", borderWidth: 3, shadowColor: "#FFD700" }; // Gold
+  if (level >= 10) return { borderColor: "#C0C0C0", borderWidth: 2, shadowColor: "#C0C0C0" }; // Silver
+  if (level >= 5) return { borderColor: "#CD7F32", borderWidth: 2, shadowColor: "#CD7F32" }; // Bronze
+  return {};
+}
+
+function getCanvasDecor(level: number): string[] {
+  const decor: string[] = [];
+  if (level >= 3) decor.push("grass"); // Small dots around edges
+  if (level >= 6) decor.push("flowers");
+  if (level >= 10) decor.push("butterflies");
+  if (level >= 15) decor.push("glow");
+  return decor;
+}
+
 // Connection line between two stones
-// ---------------------------------------------------------------------------
 function ConnectionLine({
   x1, y1, x2, y2, canvasSize,
 }: {
@@ -69,9 +85,7 @@ function ConnectionLine({
   );
 }
 
-// ---------------------------------------------------------------------------
-// Draggable gem on canvas — with glow on drag & rotation
-// ---------------------------------------------------------------------------
+// Draggable gem on canvas
 interface DraggableStoneProps {
   placement: StonePlacement;
   index: number;
@@ -82,10 +96,11 @@ interface DraggableStoneProps {
   selected: boolean;
   pulsing: boolean;
   photoMode: boolean;
+  hapticsEnabled: boolean;
 }
 
 function DraggableStone({
-  placement, index, stone, canvasSize, onDragEnd, onSelect, selected, pulsing, photoMode,
+  placement, index, stone, canvasSize, onDragEnd, onSelect, selected, pulsing, photoMode, hapticsEnabled,
 }: DraggableStoneProps) {
   const [gemW, gemH] = getGemSize(stone.id);
   const translateX = useSharedValue(0);
@@ -119,6 +134,12 @@ function DraggableStone({
     }
   }, [pulsing]);
 
+  const triggerHaptic = useCallback(() => {
+    if (hapticsEnabled && Platform.OS !== "web") {
+      Vibration.vibrate(10);
+    }
+  }, [hapticsEnabled]);
+
   const handleTap = useCallback(
     (idx: number) => { if (!photoMode) onSelect(idx); },
     [onSelect, photoMode]
@@ -131,11 +152,11 @@ function DraggableStone({
       scale.value = withTiming(1.15, { duration: 100 });
       glowOpacity.value = withTiming(1, { duration: 150 });
       zIdx.value = 100;
+      runOnJS(triggerHaptic)();
     })
     .onUpdate((event) => {
       translateX.value = savedTranslateX.value + event.translationX;
       translateY.value = savedTranslateY.value + event.translationY;
-      // Slight rotation based on drag movement
       rotation.value = event.translationX * 0.15;
     })
     .onEnd(() => {
@@ -148,6 +169,7 @@ function DraggableStone({
       const clampedX = Math.max(0, Math.min(newPixelX / canvasSize, 1));
       const clampedY = Math.max(0, Math.min(newPixelY / canvasSize, 1));
       runOnJS(onDragEnd)(index, clampedX, clampedY);
+      runOnJS(triggerHaptic)();
       translateX.value = 0;
       translateY.value = 0;
       savedTranslateX.value = 0;
@@ -182,7 +204,6 @@ function DraggableStone({
           animatedStyle,
         ]}
       >
-        {/* Glow / shine effect on drag */}
         <Animated.View
           style={[
             {
@@ -198,7 +219,6 @@ function DraggableStone({
             glowStyle,
           ]}
         />
-        {/* Selection ring */}
         {selected && !photoMode && (
           <View
             style={{
@@ -217,9 +237,9 @@ function DraggableStone({
   );
 }
 
-// ---------------------------------------------------------------------------
-// Main Garden Screen
-// ---------------------------------------------------------------------------
+// Ambient sound options
+const AMBIENT_SOUNDS = ["off", "singing_bowl", "nature", "rain", "wind_chimes"] as const;
+
 export default function GardenScreen() {
   const { t, i18n } = useTranslation();
   const canvas = useCanvasStore();
@@ -227,6 +247,7 @@ export default function GardenScreen() {
   const user = useAuthStore((s) => s.user);
   const getStone = useStoneStore((s) => s.getStone);
   const unlockedStones = useProgressionStore((s) => s.progress.stonesUnlocked);
+  const level = useProgressionStore((s) => s.progress.level);
   const addXP = useProgressionStore((s) => s.addXP);
   const incrementGrids = useProgressionStore((s) => s.incrementGrids);
   const trackStonePlaced = useInsightStore((s) => s.trackStonePlaced);
@@ -236,9 +257,15 @@ export default function GardenScreen() {
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const [pulsing, setPulsing] = useState(false);
   const [photoMode, setPhotoMode] = useState(false);
+  const [hapticsEnabled, setHapticsEnabled] = useState(true);
+  const [ambientSound, setAmbientSound] = useState<typeof AMBIENT_SOUNDS[number]>("off");
+  const [showAmbientPicker, setShowAmbientPicker] = useState(false);
+  const [replaying, setReplaying] = useState(false);
 
   const seasonalItems = useMemo(() => getCurrentSeasonalItems(), []);
   const avatarStone = user ? getStone(user.avatarStoneId) : null;
+  const evolutionStyle = getEvolutionStyle(level);
+  const canvasDecor = getCanvasDecor(level);
 
   const availableStones = stones.filter((s) => unlockedStones.includes(s.id));
   const activeTemplate = templates.find(
@@ -292,6 +319,8 @@ export default function GardenScreen() {
   const handleStoneTap = useCallback(
     (stoneId: string, colorHex: string) => {
       trackStonePlaced(stoneId, colorHex);
+      if (hapticsEnabled && Platform.OS !== "web") Vibration.vibrate(10);
+
       const fold = canvas.symmetryFold;
       const filledCount = canvas.placements.length;
 
@@ -310,10 +339,9 @@ export default function GardenScreen() {
         canvas.addPlacement({ stoneId, x: snap(0.5), y: snap(0.5), rotation: 0 });
       }
     },
-    [activeTemplate, canvas, snap, withSymmetry, trackStonePlaced]
+    [activeTemplate, canvas, snap, withSymmetry, trackStonePlaced, hapticsEnabled]
   );
 
-  // Handle seasonal item placement (as a decorative "stone")
   const handleSeasonalTap = useCallback(
     (itemId: string) => {
       canvas.addPlacement({ stoneId: `seasonal:${itemId}`, x: snap(0.5), y: snap(0.5), rotation: 0 });
@@ -371,16 +399,51 @@ export default function GardenScreen() {
     }
   };
 
+  const handleExport = () => {
+    if (Platform.OS === "web" && typeof window !== "undefined") {
+      window.alert(
+        i18n.language === "jp"
+          ? "グリッドテンプレートをPDFで書き出し（近日対応）"
+          : "Export grid template as PDF (coming soon)"
+      );
+    }
+  };
+
+  const handleAR = () => {
+    if (Platform.OS === "web" && typeof window !== "undefined") {
+      window.alert(
+        i18n.language === "jp"
+          ? "ARビュー: カメラでテーブルにグリッドを配置（近日対応）"
+          : "AR View: Place your grid on a real table using camera (coming soon)"
+      );
+    }
+  };
+
+  // Replay: animate stones appearing one by one
+  const handleReplay = useCallback(() => {
+    if (canvas.placements.length === 0) return;
+    const saved = [...canvas.placements];
+    canvas.clearCanvas();
+    setReplaying(true);
+
+    saved.forEach((p, i) => {
+      setTimeout(() => {
+        canvas.addPlacement(p);
+        if (i === saved.length - 1) setReplaying(false);
+      }, (i + 1) * 400);
+    });
+  }, [canvas]);
+
   const canEnergize = canvas.placements.length > 0;
   const postGridAd = getAdForPlacement("post_grid");
   const isJp = i18n.language === "jp";
 
-  // In photo mode, only show the canvas
+  // Photo mode view
   if (photoMode) {
     return (
       <View style={[styles.container, { justifyContent: "center", paddingTop: 0 }]}>
         <View style={styles.canvasContainer}>
-          <View style={styles.canvas}>
+          <View style={[styles.canvas, evolutionStyle]}>
             {connectionLines.map((line, i) => (
               <ConnectionLine key={`line-${i}`} x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} canvasSize={CANVAS_SIZE} />
             ))}
@@ -406,7 +469,7 @@ export default function GardenScreen() {
                 <DraggableStone
                   key={`stone-${i}`} placement={placement} index={i} stone={stone}
                   canvasSize={CANVAS_SIZE} onDragEnd={handleDragEnd} onSelect={handleSelect}
-                  selected={false} pulsing={false} photoMode
+                  selected={false} pulsing={false} photoMode hapticsEnabled={false}
                 />
               );
             })}
@@ -469,9 +532,34 @@ export default function GardenScreen() {
         </ScrollView>
       )}
 
-      {/* Canvas */}
+      {/* Canvas with evolution */}
       <View style={styles.canvasContainer}>
-        <View style={styles.canvas}>
+        <View style={[styles.canvas, evolutionStyle]}>
+          {/* Environment decorations based on level */}
+          {canvasDecor.includes("grass") && (
+            <>
+              {[0.1, 0.3, 0.5, 0.7, 0.9].map((pos, i) => (
+                <View key={`g-${i}`} style={{
+                  position: "absolute", bottom: 8, left: pos * CANVAS_SIZE,
+                  width: 4, height: 8, backgroundColor: "#4a7c4a40", borderRadius: 2,
+                }} />
+              ))}
+            </>
+          )}
+          {canvasDecor.includes("flowers") && (
+            <>
+              {[0.15, 0.45, 0.75].map((pos, i) => (
+                <Text key={`f-${i}`} style={{
+                  position: "absolute", bottom: 12, left: pos * CANVAS_SIZE,
+                  fontSize: 10, opacity: 0.4,
+                }}>
+                  {["*", "+", "*"][i]}
+                </Text>
+              ))}
+            </>
+          )}
+
+          {/* Guide points */}
           {activeTemplate?.points.map((point, i) => (
             <View
               key={`guide-${i}`}
@@ -481,10 +569,13 @@ export default function GardenScreen() {
               }]}
             />
           ))}
+
+          {/* Connection lines */}
           {connectionLines.map((line, i) => (
             <ConnectionLine key={`line-${i}`} x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} canvasSize={CANVAS_SIZE} />
           ))}
-          {/* Placed items (stones + seasonal) */}
+
+          {/* Placed items */}
           {canvas.placements.map((placement, i) => {
             const stoneId = placement.stoneId;
             if (stoneId.startsWith("seasonal:")) {
@@ -508,6 +599,7 @@ export default function GardenScreen() {
                 key={`stone-${i}`} placement={placement} index={i} stone={stone}
                 canvasSize={CANVAS_SIZE} onDragEnd={handleDragEnd} onSelect={handleSelect}
                 selected={selectedIdx === i} pulsing={pulsing} photoMode={false}
+                hapticsEnabled={hapticsEnabled}
               />
             );
           })}
@@ -536,7 +628,24 @@ export default function GardenScreen() {
         </View>
       )}
 
-      {/* Canvas Tools */}
+      {/* Ambient sound picker */}
+      {showAmbientPicker && (
+        <View style={styles.ambientPicker}>
+          {AMBIENT_SOUNDS.map((sound) => (
+            <TouchableOpacity
+              key={sound}
+              style={[styles.ambientOption, ambientSound === sound && styles.ambientOptionActive]}
+              onPress={() => { setAmbientSound(sound); setShowAmbientPicker(false); }}
+            >
+              <Text style={[styles.ambientText, ambientSound === sound && styles.ambientTextActive]}>
+                {t(`ambient.${sound}`)}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
+      {/* Canvas Tools - Row 1: core tools */}
       <View style={styles.tools}>
         <TouchableOpacity style={[styles.toolButton, canvas.snapEnabled && styles.toolActive]} onPress={canvas.toggleSnap}>
           <Text style={styles.toolText}>{t("garden.snapToGrid")}</Text>
@@ -546,14 +655,41 @@ export default function GardenScreen() {
             {t("garden.symmetry")}{canvas.symmetryFold > 0 ? `:${canvas.symmetryFold}` : ""}
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.toolButton, canvas.soundEnabled && styles.toolActive]} onPress={canvas.toggleSound}>
-          <Text style={styles.toolText}>{t("garden.sound")}</Text>
+        <TouchableOpacity style={[styles.toolButton, ambientSound !== "off" && styles.toolActive]} onPress={() => setShowAmbientPicker(!showAmbientPicker)}>
+          <Text style={styles.toolText}>
+            {ambientSound !== "off" ? t(`ambient.${ambientSound}`) : t("garden.ambient")}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.toolButton, canEnergize ? styles.energizeActive : styles.energizeDisabled]}
           onPress={handleEnergize} disabled={!canEnergize}
         >
           <Text style={[styles.toolText, canEnergize && styles.energizeText]}>{t("garden.energize")}</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Canvas Tools - Row 2: undo/redo, extras */}
+      <View style={styles.tools}>
+        <TouchableOpacity
+          style={[styles.toolButton, !canvas.canUndo() && styles.toolDisabled]}
+          onPress={canvas.undo} disabled={!canvas.canUndo()}
+        >
+          <Text style={styles.toolText}>{t("garden.undo")}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.toolButton, !canvas.canRedo() && styles.toolDisabled]}
+          onPress={canvas.redo} disabled={!canvas.canRedo()}
+        >
+          <Text style={styles.toolText}>{t("garden.redo")}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.toolButton} onPress={handleReplay} disabled={replaying || canvas.placements.length === 0}>
+          <Text style={styles.toolText}>{t("garden.replay")}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.toolButton} onPress={handleExport}>
+          <Text style={styles.toolText}>{t("garden.export")}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.toolButton} onPress={handleAR}>
+          <Text style={styles.toolText}>{t("garden.ar")}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.toolButton} onPress={canvas.clearCanvas}>
           <Text style={styles.toolTextDanger}>Clear</Text>
@@ -564,7 +700,6 @@ export default function GardenScreen() {
       <View style={styles.trayContainer}>
         <Text style={styles.trayLabel}>{t("garden.stoneTray")}</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tray}>
-          {/* Seasonal items first */}
           {seasonalItems.map((item) => (
             <TouchableOpacity
               key={item.id}
@@ -582,7 +717,6 @@ export default function GardenScreen() {
           {seasonalItems.length > 0 && (
             <View style={{ width: 1, height: 36, backgroundColor: colors.border, alignSelf: "center" }} />
           )}
-          {/* Regular stones */}
           {availableStones.map((stone) => (
             <TouchableOpacity
               key={stone.id}
@@ -640,21 +774,35 @@ const styles = StyleSheet.create({
   cancelSelectButton: { paddingVertical: spacing.xs, paddingHorizontal: spacing.sm },
   cancelSelectText: { color: colors.textMuted, fontSize: fontSize.xs },
   adContainer: { paddingHorizontal: spacing.lg, paddingVertical: spacing.sm },
+  ambientPicker: {
+    flexDirection: "row", flexWrap: "wrap", justifyContent: "center",
+    gap: spacing.xs, paddingHorizontal: spacing.md, paddingVertical: spacing.xs,
+    backgroundColor: colors.surface, borderRadius: borderRadius.md, marginHorizontal: spacing.lg,
+    marginBottom: spacing.xs,
+  },
+  ambientOption: {
+    paddingVertical: spacing.xs, paddingHorizontal: spacing.sm,
+    borderRadius: borderRadius.sm, borderWidth: 1, borderColor: colors.border,
+  },
+  ambientOptionActive: { borderColor: colors.primary, backgroundColor: colors.surfaceLight },
+  ambientText: { color: colors.textMuted, fontSize: fontSize.xs },
+  ambientTextActive: { color: colors.primary, fontWeight: "600" },
   tools: {
     flexDirection: "row", justifyContent: "center", flexWrap: "wrap",
-    gap: spacing.sm, paddingVertical: spacing.sm, paddingHorizontal: spacing.md,
+    gap: spacing.xs, paddingVertical: 2, paddingHorizontal: spacing.md,
   },
   toolButton: {
     backgroundColor: colors.surfaceLight, borderRadius: borderRadius.sm,
-    paddingVertical: spacing.xs, paddingHorizontal: spacing.md, borderWidth: 1, borderColor: colors.border,
+    paddingVertical: 3, paddingHorizontal: spacing.sm, borderWidth: 1, borderColor: colors.border,
   },
   toolActive: { borderColor: colors.primary, backgroundColor: colors.surface },
-  toolText: { color: colors.textSecondary, fontSize: fontSize.xs },
-  toolTextDanger: { color: colors.error, fontSize: fontSize.xs },
+  toolDisabled: { opacity: 0.3 },
+  toolText: { color: colors.textSecondary, fontSize: 10 },
+  toolTextDanger: { color: colors.error, fontSize: 10 },
   energizeActive: { borderColor: colors.primary, backgroundColor: colors.primary },
   energizeDisabled: { opacity: 0.4 },
   energizeText: { color: "#fff", fontWeight: "600" },
-  trayContainer: { flex: 1, paddingTop: spacing.sm },
+  trayContainer: { flex: 1, paddingTop: spacing.xs },
   trayLabel: { color: colors.textMuted, fontSize: fontSize.xs, paddingHorizontal: spacing.lg, marginBottom: spacing.xs },
   tray: { paddingHorizontal: spacing.md, gap: spacing.sm },
   trayStone: { alignItems: "center", width: 56 },

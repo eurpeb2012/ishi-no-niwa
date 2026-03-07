@@ -3,14 +3,12 @@
     "name": "石の庭",
     "tagline": "聖なる石を並べ、パターンを発見し、バランスを見つける。"
   },
-  "common": {
-    "sponsored": "広告"
-  },
   "tabs": {
     "garden": "庭",
     "stones": "石",
     "guide": "導き",
     "journey": "道",
+    "community": "輪",
     "profile": "私"
   },
   "auth": {
@@ -59,7 +57,13 @@
     "gridComplete": "陣が完成しました！",
     "intentionSummary": "陣の意図",
     "removeStone": "削除",
-    "stoneTray": "あなたの石"
+    "stoneTray": "あなたの石",
+    "undo": "戻す",
+    "redo": "やり直す",
+    "ar": "ARビュー",
+    "replay": "再生",
+    "export": "書き出し",
+    "ambient": "環境音"
   },
   "stones": {
     "title": "石のコレクション",
@@ -78,7 +82,16 @@
     "intention": "意図",
     "origin": "産地",
     "hardness": "硬度",
-    "rarity": "希少性"
+    "rarity": "希少性",
+    "owned": "所持",
+    "wishlist": "欲しいリスト",
+    "favorite": "お気に入り",
+    "identify": "石を識別",
+    "buyStone": "本物の石を購入",
+    "chakraView": "チャクラビュー",
+    "collectionTab": "コレクション",
+    "wishlistTab": "欲しいリスト",
+    "favoritesTab": "お気に入り"
   },
   "guide": {
     "title": "石の導き",
@@ -93,7 +106,14 @@
     "chooseShape": "形を選ぶ",
     "chakraBalance": "チャクラバランス",
     "guidedSessions": "ガイド瞑想",
-    "sessionMinutes": "{{minutes}}分"
+    "sessionMinutes": "{{minutes}}分",
+    "moonPhase": "月相",
+    "dailyCrystal": "今日のクリスタル",
+    "dailyReason": "月相に基づいた今日のおすすめクリスタル",
+    "meditationTimer": "瞑想タイマー",
+    "startTimer": "開始",
+    "stopTimer": "停止",
+    "workshops": "ライブワークショップ"
   },
   "journey": {
     "title": "修行の道",
@@ -108,7 +128,18 @@
     "weeklyChallenge": "週間チャレンジ",
     "dailyIntention": "日々の意図",
     "setIntention": "今日の意図を設定",
-    "intentionComplete": "意図を達成しました！"
+    "intentionComplete": "意図を達成しました！",
+    "journal": "クリスタルジャーナル",
+    "addEntry": "記録する",
+    "mood": "今の気分は？",
+    "moodWonderful": "最高",
+    "moodGood": "良い",
+    "moodNeutral": "普通",
+    "moodLow": "低調",
+    "moodStressed": "ストレス",
+    "journalNote": "メモ（任意）",
+    "moodTrend": "気分の傾向（30日間）",
+    "challenges": "チャレンジ"
   },
   "profile": {
     "title": "プロフィール",
@@ -120,7 +151,16 @@
     "notifications": "通知",
     "about": "アプリについて",
     "signOut": "ログアウト",
-    "deleteAccount": "アカウント削除"
+    "deleteAccount": "アカウント削除",
+    "zodiac": "星座",
+    "birthCrystals": "誕生石",
+    "collectionStats": "コレクション統計",
+    "owned": "所持",
+    "wishlisted": "欲しいリスト",
+    "favorited": "お気に入り",
+    "haptics": "触覚フィードバック",
+    "printGrid": "グリッドテンプレート印刷",
+    "shop": "クリスタルショップ"
   },
   "subscription": {
     "free": "無料",
@@ -144,7 +184,8 @@
     "loading": "読み込み中...",
     "error": "エラーが発生しました",
     "retry": "再試行",
-    "sponsored": "協賛"
+    "sponsored": "協賛",
+    "comingSoon": "近日公開"
   },
   "chakras": {
     "root": "第1チャクラ",
@@ -186,5 +227,19 @@
     "15": "二段",
     "18": "三段",
     "20": "師範"
+  },
+  "moods": {
+    "wonderful": "最高",
+    "good": "良い",
+    "neutral": "普通",
+    "low": "低調",
+    "stressed": "ストレス"
+  },
+  "ambient": {
+    "off": "オフ",
+    "singing_bowl": "シンギングボウル",
+    "nature": "自然",
+    "rain": "雨",
+    "wind_chimes": "風鈴"
   }
 }
