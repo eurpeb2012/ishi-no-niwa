@@ -30,6 +30,10 @@ if (fs.existsSync(jsDir)) {
   });
 }
 
+// Copy index.html to 404.html so GitHub Pages serves the SPA for all routes
+fs.copyFileSync(indexPath, path.join(distDir, "404.html"));
+console.log("Created 404.html for SPA routing");
+
 // Copy testing-guide.html to dist if it exists
 const testGuide = path.join(__dirname, "testing-guide.html");
 if (fs.existsSync(testGuide)) {
