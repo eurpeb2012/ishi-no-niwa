@@ -175,6 +175,25 @@
     "restore": "購入を復元",
     "adFree": "広告非表示"
   },
+  "fairy": {
+    "welcome": "素敵なものを作りましょう！",
+    "stonePlaced": "いい選択ですね！",
+    "rareStone": "わぁ、レアなクリスタル！",
+    "gridGrowing": "陣ができてきました...",
+    "energize": "エネルギーを感じます！",
+    "gridComplete": "素晴らしい作品です！",
+    "gridSaved": "保存しました！特別な陣です。",
+    "firstStone": "最初の石！ワクワクします！",
+    "manyStones": "とても複雑な陣ですね！",
+    "loveStones": "愛のエネルギーを感じます...",
+    "protectionStones": "守護の配置ですね！",
+    "calmStones": "とても穏やかで心が落ち着きます...",
+    "idle1": "ゆっくりどうぞ...",
+    "idle2": "どの石が呼んでいるかな？",
+    "idle3": "クリスタルが待っています...",
+    "templateSelected": "いいパターンですね！",
+    "cleared": "新しいスタート！"
+  },
   "common": {
     "cancel": "キャンセル",
     "confirm": "確認",

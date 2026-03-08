@@ -175,6 +175,25 @@
     "restore": "Restore Purchases",
     "adFree": "Ad-free experience"
   },
+  "fairy": {
+    "welcome": "Let's build something beautiful!",
+    "stonePlaced": "Nice choice!",
+    "rareStone": "Ooh, a rare crystal!",
+    "gridGrowing": "The grid is coming together...",
+    "energize": "I can feel the energy!",
+    "gridComplete": "What a wonderful creation!",
+    "gridSaved": "Saved! This one is special.",
+    "firstStone": "Your first stone! How exciting!",
+    "manyStones": "Such a complex grid!",
+    "loveStones": "I sense love energy...",
+    "protectionStones": "A protective arrangement!",
+    "calmStones": "So peaceful and calming...",
+    "idle1": "Take your time...",
+    "idle2": "I wonder which stone calls to you?",
+    "idle3": "The crystals are waiting...",
+    "templateSelected": "Great pattern choice!",
+    "cleared": "A fresh start!"
+  },
   "common": {
     "cancel": "Cancel",
     "confirm": "Confirm",

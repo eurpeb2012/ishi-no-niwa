@@ -28,7 +28,7 @@ import { useAuthStore } from "../../stores/authStore";
 import { useResponsive } from "../../hooks/useResponsive";
 import { XP_REWARDS } from "../../types";
 import { GemStone, getGemSize } from "../../components/common/GemStone";
-import { CrystalFairy } from "../../components/common/CrystalFairy";
+import { CrystalFairy, type FairyMood } from "../../components/common/CrystalFairy";
 import { SponsoredAd } from "../../components/common/SponsoredAd";
 import { getAdForPlacement } from "../../data/mockAds";
 import { getCurrentSeasonalItems } from "../../data/seasonalItems";
@@ -261,6 +261,32 @@ export default function GardenScreen() {
   const [ambientSound, setAmbientSound] = useState<typeof AMBIENT_SOUNDS[number]>("off");
   const [showAmbientPicker, setShowAmbientPicker] = useState(false);
   const [replaying, setReplaying] = useState(false);
+  const [fairyMood, setFairyMood] = useState<FairyMood>("idle");
+  const [fairyMessage, setFairyMessage] = useState<string | null>(null);
+  const fairyIdleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Fairy message helper — shows message then clears after delay
+  const showFairyMessage = useCallback((msg: string, mood: FairyMood = "happy", duration = 3500) => {
+    setFairyMessage(msg);
+    setFairyMood(mood);
+    if (fairyIdleTimer.current) clearTimeout(fairyIdleTimer.current);
+    fairyIdleTimer.current = setTimeout(() => {
+      setFairyMood("idle");
+      setFairyMessage(null);
+    }, duration);
+  }, []);
+
+  // Random idle fairy chatter every 20-40 seconds
+  useEffect(() => {
+    const idleMessages = [t("fairy.idle1"), t("fairy.idle2"), t("fairy.idle3")];
+    const interval = setInterval(() => {
+      if (fairyMood === "idle" && !fairyMessage) {
+        const msg = idleMessages[Math.floor(Math.random() * idleMessages.length)];
+        showFairyMessage(msg, "thinking", 4000);
+      }
+    }, 25000 + Math.random() * 15000);
+    return () => clearInterval(interval);
+  }, [fairyMood, fairyMessage, t, showFairyMessage]);
 
   const seasonalItems = useMemo(() => getCurrentSeasonalItems(), []);
   const avatarStone = user ? getStone(user.avatarStoneId) : null;
@@ -324,6 +350,24 @@ export default function GardenScreen() {
       const fold = canvas.symmetryFold;
       const filledCount = canvas.placements.length;
 
+      // Fairy reacts to stone placement
+      const stoneData = stones.find((s) => s.id === stoneId);
+      if (filledCount === 0) {
+        showFairyMessage(t("fairy.firstStone"), "excited");
+      } else if (stoneData?.rarity === "rare") {
+        showFairyMessage(t("fairy.rareStone"), "excited");
+      } else if (stoneData?.intentions?.includes("love")) {
+        showFairyMessage(t("fairy.loveStones"), "happy");
+      } else if (stoneData?.intentions?.includes("protection")) {
+        showFairyMessage(t("fairy.protectionStones"), "happy");
+      } else if (stoneData?.intentions?.includes("calm")) {
+        showFairyMessage(t("fairy.calmStones"), "happy");
+      } else if (filledCount >= 5) {
+        showFairyMessage(t("fairy.manyStones"), "happy");
+      } else {
+        showFairyMessage(t("fairy.stonePlaced"), "happy", 2000);
+      }
+
       if (activeTemplate && activeTemplate.point_count > 0 && filledCount < activeTemplate.points.length) {
         const point = activeTemplate.points[filledCount];
         canvas.addPlacement({ stoneId, x: snap(point.x), y: snap(point.y), rotation: 0 });
@@ -375,10 +419,12 @@ export default function GardenScreen() {
     incrementGrids();
     setShowSaveAd(true);
     setTimeout(() => setShowSaveAd(false), 8000);
+    showFairyMessage(t("fairy.gridSaved"), "excited");
   };
 
   const handleEnergize = () => {
     if (canvas.placements.length === 0) return;
+    showFairyMessage(t("fairy.energize"), "excited", 2000);
     setPulsing(true);
     setTimeout(() => setPulsing(false), 1400);
   };
@@ -387,6 +433,7 @@ export default function GardenScreen() {
     canvas.clearCanvas();
     canvas.setTemplate(templateId);
     setShowTemplates(false);
+    showFairyMessage(t("fairy.templateSelected"), "happy", 2500);
   };
 
   const handleShare = () => {
@@ -489,14 +536,9 @@ export default function GardenScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header with fairy */}
+      {/* Header */}
       <View style={styles.header}>
         <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
-          {avatarStone && (
-            <View style={{ marginRight: spacing.sm }}>
-              <CrystalFairy colorHex={avatarStone.color_hex} size={32} />
-            </View>
-          )}
           <TouchableOpacity onPress={() => setShowTemplates(!showTemplates)} style={{ flex: 1 }}>
             <Text style={styles.gridTitle} numberOfLines={1}>
               {activeTemplate
@@ -530,6 +572,19 @@ export default function GardenScreen() {
             </TouchableOpacity>
           ))}
         </ScrollView>
+      )}
+
+      {/* Fairy companion floating above canvas */}
+      {avatarStone && (
+        <View style={{ alignItems: "center", marginBottom: -spacing.sm, zIndex: 10 }}>
+          <CrystalFairy
+            colorHex={avatarStone.color_hex}
+            size={50}
+            mood={fairyMood}
+            level={level}
+            message={fairyMessage}
+          />
+        </View>
       )}
 
       {/* Canvas with evolution */}

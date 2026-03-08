@@ -82,7 +82,7 @@ export default function ProfileScreen() {
       <View style={styles.profileCard}>
         {avatarStone ? (
           <View style={{ alignItems: "center" }}>
-            <CrystalFairy colorHex={avatarStone.color_hex} size={80} />
+            <CrystalFairy colorHex={avatarStone.color_hex} size={80} level={level} isStatic />
             <View style={{ marginTop: 4 }}>
               <GemStone stoneId={avatarStone.id} colorHex={avatarStone.color_hex} size={36} />
             </View>
