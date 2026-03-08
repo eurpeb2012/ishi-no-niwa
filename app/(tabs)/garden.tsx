@@ -443,7 +443,7 @@ export default function GardenScreen() {
     return (
       <View style={[styles.container, { justifyContent: "center", paddingTop: 0 }]}>
         <View style={styles.canvasContainer}>
-          <View style={[styles.canvas, evolutionStyle]}>
+          <View style={[styles.canvas, { width: CANVAS_SIZE, height: CANVAS_SIZE, borderRadius: CANVAS_SIZE / 2 }, evolutionStyle]}>
             {connectionLines.map((line, i) => (
               <ConnectionLine key={`line-${i}`} x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} canvasSize={CANVAS_SIZE} />
             ))}
@@ -534,7 +534,7 @@ export default function GardenScreen() {
 
       {/* Canvas with evolution */}
       <View style={styles.canvasContainer}>
-        <View style={[styles.canvas, evolutionStyle]}>
+        <View style={[styles.canvas, { width: CANVAS_SIZE, height: CANVAS_SIZE, borderRadius: CANVAS_SIZE / 2 }, evolutionStyle]}>
           {/* Environment decorations based on level */}
           {canvasDecor.includes("grass") && (
             <>
@@ -754,8 +754,8 @@ const styles = StyleSheet.create({
   templatePoints: { color: colors.textMuted, fontSize: fontSize.xs, marginTop: 2 },
   canvasContainer: { alignItems: "center", paddingHorizontal: spacing.lg },
   canvas: {
-    width: CANVAS_SIZE, height: CANVAS_SIZE, backgroundColor: colors.canvas,
-    borderRadius: CANVAS_SIZE / 2, position: "relative", overflow: "hidden",
+    backgroundColor: colors.canvas,
+    position: "relative" as const, overflow: "hidden" as const,
   },
   guidePoint: {
     position: "absolute", width: 12, height: 12, borderRadius: 6,
