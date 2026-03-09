@@ -1,13 +1,26 @@
 import { Tabs } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { Text, StyleSheet, useWindowDimensions } from "react-native";
+import { View, StyleSheet, useWindowDimensions } from "react-native";
 import { colors, fontSize } from "../../theme";
+import { GemStone } from "../../components/common/GemStone";
 
-function TabIcon({ label, focused, size }: { label: string; focused: boolean; size: number }) {
+// Map each tab to a representative crystal
+const TAB_STONES: Record<string, { stoneId: string; colorHex: string }> = {
+  garden: { stoneId: "jade_jadeite", colorHex: "#5B8C5A" },
+  stones: { stoneId: "amethyst", colorHex: "#9B59B6" },
+  guide: { stoneId: "clear_quartz", colorHex: "#E8E4E0" },
+  journey: { stoneId: "citrine", colorHex: "#F0C75E" },
+  community: { stoneId: "rose_quartz", colorHex: "#F7CAC9" },
+  profile: { stoneId: "moonstone", colorHex: "#C5D0E6" },
+};
+
+function TabCrystalIcon({ tab, focused, size }: { tab: string; focused: boolean; size: number }) {
+  const stone = TAB_STONES[tab];
+  if (!stone) return null;
   return (
-    <Text style={[{ fontSize: size, color: colors.textMuted }, focused && { color: colors.primary }]}>
-      {label}
-    </Text>
+    <View style={{ opacity: focused ? 1 : 0.45 }}>
+      <GemStone stoneId={stone.stoneId} colorHex={stone.colorHex} size={size} />
+    </View>
   );
 }
 
@@ -15,12 +28,13 @@ export default function TabLayout() {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
   const isWide = width >= 600;
-  const iconSize = isWide ? 24 : 20;
+  const iconSize = isWide ? 22 : 18;
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
+        tabBarPosition: "top",
         tabBarStyle: [
           styles.tabBar,
           isWide && styles.tabBarWide,
@@ -38,7 +52,7 @@ export default function TabLayout() {
         options={{
           title: t("tabs.garden"),
           tabBarIcon: ({ focused }) => (
-            <TabIcon label="庭" focused={focused} size={iconSize} />
+            <TabCrystalIcon tab="garden" focused={focused} size={iconSize} />
           ),
         }}
       />
@@ -47,7 +61,7 @@ export default function TabLayout() {
         options={{
           title: t("tabs.stones"),
           tabBarIcon: ({ focused }) => (
-            <TabIcon label="石" focused={focused} size={iconSize} />
+            <TabCrystalIcon tab="stones" focused={focused} size={iconSize} />
           ),
         }}
       />
@@ -56,7 +70,7 @@ export default function TabLayout() {
         options={{
           title: t("tabs.guide"),
           tabBarIcon: ({ focused }) => (
-            <TabIcon label="導" focused={focused} size={iconSize} />
+            <TabCrystalIcon tab="guide" focused={focused} size={iconSize} />
           ),
         }}
       />
@@ -65,7 +79,7 @@ export default function TabLayout() {
         options={{
           title: t("tabs.journey"),
           tabBarIcon: ({ focused }) => (
-            <TabIcon label="道" focused={focused} size={iconSize} />
+            <TabCrystalIcon tab="journey" focused={focused} size={iconSize} />
           ),
         }}
       />
@@ -74,7 +88,7 @@ export default function TabLayout() {
         options={{
           title: t("tabs.community"),
           tabBarIcon: ({ focused }) => (
-            <TabIcon label="輪" focused={focused} size={iconSize} />
+            <TabCrystalIcon tab="community" focused={focused} size={iconSize} />
           ),
         }}
       />
@@ -83,7 +97,7 @@ export default function TabLayout() {
         options={{
           title: t("tabs.profile"),
           tabBarIcon: ({ focused }) => (
-            <TabIcon label="私" focused={focused} size={iconSize} />
+            <TabCrystalIcon tab="profile" focused={focused} size={iconSize} />
           ),
         }}
       />
@@ -94,15 +108,16 @@ export default function TabLayout() {
 const styles = StyleSheet.create({
   tabBar: {
     backgroundColor: colors.surface,
-    borderTopColor: colors.border,
-    borderTopWidth: 1,
-    height: 80,
-    paddingBottom: 16,
-    paddingTop: 8,
+    borderBottomColor: colors.border,
+    borderBottomWidth: 1,
+    borderTopWidth: 0,
+    height: 72,
+    paddingTop: 28,
+    paddingBottom: 4,
   },
   tabBarWide: {
-    height: 70,
-    paddingBottom: 10,
+    height: 64,
+    paddingTop: 16,
   },
   tabLabel: {
     fontSize: fontSize.xs,

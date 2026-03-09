@@ -132,10 +132,12 @@ export function getDailyCrystal(): { stoneId: string; reason_en: string; reason_
   const stoneIdx = dayOfWeek % phase.recommendedStones.length;
   const stoneId = phase.recommendedStones[stoneIdx];
 
+  const intentionsLabel = phase.bestIntentions.join(" & ");
+
   return {
     stoneId,
-    reason_en: `${phase.name_en} energy aligns with this stone today.`,
-    reason_jp: `${phase.name_jp}のエネルギーが今日この石と調和しています。`,
+    reason_en: `Today's ${phase.name_en} ${phase.glyph} brings ${intentionsLabel} energy. ${phase.description_en} This stone harmonizes with today's lunar cycle.`,
+    reason_jp: `今日は${phase.name_jp}${phase.glyph}。${phase.description_jp} この石は今日の月のサイクルと調和しています。`,
   };
 }
 

@@ -479,7 +479,7 @@ const styles = StyleSheet.create({
     flex: 1, backgroundColor: colors.primary, borderRadius: borderRadius.md,
     paddingVertical: spacing.md, alignItems: "center",
   },
-  placeButtonText: { color: colors.background, fontSize: fontSize.md, fontWeight: "600" },
+  placeButtonText: { color: colors.buttonText, fontSize: fontSize.md, fontWeight: "600" },
   customizeButton: {
     flex: 1, backgroundColor: colors.surface, borderRadius: borderRadius.md,
     paddingVertical: spacing.md, alignItems: "center", borderWidth: 1, borderColor: colors.primary,

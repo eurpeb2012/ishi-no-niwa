@@ -406,7 +406,7 @@ const styles = StyleSheet.create({
   rewardButton: {
     backgroundColor: colors.primary, borderRadius: borderRadius.md, paddingVertical: spacing.md, alignItems: "center",
   },
-  rewardButtonText: { color: colors.background, fontSize: fontSize.md, fontWeight: "600" },
+  rewardButtonText: { color: colors.buttonText, fontSize: fontSize.md, fontWeight: "600" },
 
   // Journal
   sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
@@ -434,7 +434,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary, borderRadius: borderRadius.sm,
     paddingVertical: spacing.sm, alignItems: "center",
   },
-  journalSaveText: { color: colors.background, fontSize: fontSize.sm, fontWeight: "600" },
+  journalSaveText: { color: colors.buttonText, fontSize: fontSize.sm, fontWeight: "600" },
   moodTrendCard: {
     backgroundColor: colors.surfaceLight, borderRadius: borderRadius.md, padding: spacing.md,
     marginTop: spacing.sm, borderWidth: 1, borderColor: colors.border,
@@ -462,7 +462,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary, borderRadius: borderRadius.md, paddingVertical: spacing.md, alignItems: "center",
   },
   intentionDone: { backgroundColor: colors.surfaceLight, borderWidth: 1, borderColor: colors.success },
-  intentionButtonText: { color: colors.background, fontSize: fontSize.md, fontWeight: "600" },
+  intentionButtonText: { color: colors.buttonText, fontSize: fontSize.md, fontWeight: "600" },
   intentionDoneText: { color: colors.success },
   adWrap: { marginTop: spacing.md },
 

@@ -108,6 +108,7 @@ export interface UserProfile {
   birthMonth: number;
   subscriptionTier: SubscriptionTier;
   subscriptionExpires: string | null;
+  profileGridId?: string | null;
 }
 
 export interface GemSellerAd {

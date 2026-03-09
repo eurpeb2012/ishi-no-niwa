@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs, paddingHorizontal: spacing.sm,
     backgroundColor: colors.primary, borderRadius: borderRadius.sm,
   },
-  identifyText: { color: colors.background, fontSize: 10, fontWeight: "600" },
+  identifyText: { color: colors.buttonText, fontSize: 10, fontWeight: "600" },
 
   // Zodiac
   zodiacBar: {

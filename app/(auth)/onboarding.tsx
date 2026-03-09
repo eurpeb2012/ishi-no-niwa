@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.xl,
   },
   beginButtonText: {
-    color: colors.background,
+    color: colors.buttonText,
     fontSize: fontSize.xl,
     fontWeight: "700",
     letterSpacing: 1,

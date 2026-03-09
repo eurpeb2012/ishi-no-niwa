@@ -24,14 +24,12 @@ import { useCanvasStore } from "../../stores/canvasStore";
 import { useStoneStore } from "../../stores/stoneStore";
 import { useProgressionStore } from "../../stores/progressionStore";
 import { useInsightStore } from "../../stores/insightStore";
-import { useAuthStore } from "../../stores/authStore";
 import { useResponsive } from "../../hooks/useResponsive";
 import { XP_REWARDS } from "../../types";
 import { GemStone, getGemSize } from "../../components/common/GemStone";
-import { CrystalFairy, type FairyMood } from "../../components/common/CrystalFairy";
 import { SponsoredAd } from "../../components/common/SponsoredAd";
 import { getAdForPlacement } from "../../data/mockAds";
-import { getCurrentSeasonalItems } from "../../data/seasonalItems";
+import { getCurrentSeasonalItems, getOthersItems } from "../../data/seasonalItems";
 import templates from "../../data/templates.json";
 import type { GridTemplate, StonePlacement } from "../../types";
 
@@ -244,8 +242,6 @@ export default function GardenScreen() {
   const CANVAS_SIZE = responsive.canvasSize;
   const canvas = useCanvasStore();
   const stones = useStoneStore((s) => s.stones);
-  const user = useAuthStore((s) => s.user);
-  const getStone = useStoneStore((s) => s.getStone);
   const unlockedStones = useProgressionStore((s) => s.progress.stonesUnlocked);
   const level = useProgressionStore((s) => s.progress.level);
   const addXP = useProgressionStore((s) => s.addXP);
@@ -261,35 +257,9 @@ export default function GardenScreen() {
   const [ambientSound, setAmbientSound] = useState<typeof AMBIENT_SOUNDS[number]>("off");
   const [showAmbientPicker, setShowAmbientPicker] = useState(false);
   const [replaying, setReplaying] = useState(false);
-  const [fairyMood, setFairyMood] = useState<FairyMood>("idle");
-  const [fairyMessage, setFairyMessage] = useState<string | null>(null);
-  const fairyIdleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Fairy message helper — shows message then clears after delay
-  const showFairyMessage = useCallback((msg: string, mood: FairyMood = "happy", duration = 3500) => {
-    setFairyMessage(msg);
-    setFairyMood(mood);
-    if (fairyIdleTimer.current) clearTimeout(fairyIdleTimer.current);
-    fairyIdleTimer.current = setTimeout(() => {
-      setFairyMood("idle");
-      setFairyMessage(null);
-    }, duration);
-  }, []);
-
-  // Random idle fairy chatter every 20-40 seconds
-  useEffect(() => {
-    const idleMessages = [t("fairy.idle1"), t("fairy.idle2"), t("fairy.idle3")];
-    const interval = setInterval(() => {
-      if (fairyMood === "idle" && !fairyMessage) {
-        const msg = idleMessages[Math.floor(Math.random() * idleMessages.length)];
-        showFairyMessage(msg, "thinking", 4000);
-      }
-    }, 25000 + Math.random() * 15000);
-    return () => clearInterval(interval);
-  }, [fairyMood, fairyMessage, t, showFairyMessage]);
 
   const seasonalItems = useMemo(() => getCurrentSeasonalItems(), []);
-  const avatarStone = user ? getStone(user.avatarStoneId) : null;
+  const othersItems = useMemo(() => getOthersItems(), []);
   const evolutionStyle = getEvolutionStyle(level);
   const canvasDecor = getCanvasDecor(level);
 
@@ -350,24 +320,6 @@ export default function GardenScreen() {
       const fold = canvas.symmetryFold;
       const filledCount = canvas.placements.length;
 
-      // Fairy reacts to stone placement
-      const stoneData = stones.find((s) => s.id === stoneId);
-      if (filledCount === 0) {
-        showFairyMessage(t("fairy.firstStone"), "excited");
-      } else if (stoneData?.rarity === "rare") {
-        showFairyMessage(t("fairy.rareStone"), "excited");
-      } else if (stoneData?.intentions?.includes("love")) {
-        showFairyMessage(t("fairy.loveStones"), "happy");
-      } else if (stoneData?.intentions?.includes("protection")) {
-        showFairyMessage(t("fairy.protectionStones"), "happy");
-      } else if (stoneData?.intentions?.includes("calm")) {
-        showFairyMessage(t("fairy.calmStones"), "happy");
-      } else if (filledCount >= 5) {
-        showFairyMessage(t("fairy.manyStones"), "happy");
-      } else {
-        showFairyMessage(t("fairy.stonePlaced"), "happy", 2000);
-      }
-
       if (activeTemplate && activeTemplate.point_count > 0 && filledCount < activeTemplate.points.length) {
         const point = activeTemplate.points[filledCount];
         canvas.addPlacement({ stoneId, x: snap(point.x), y: snap(point.y), rotation: 0 });
@@ -419,12 +371,10 @@ export default function GardenScreen() {
     incrementGrids();
     setShowSaveAd(true);
     setTimeout(() => setShowSaveAd(false), 8000);
-    showFairyMessage(t("fairy.gridSaved"), "excited");
-  };
+};
 
   const handleEnergize = () => {
     if (canvas.placements.length === 0) return;
-    showFairyMessage(t("fairy.energize"), "excited", 2000);
     setPulsing(true);
     setTimeout(() => setPulsing(false), 1400);
   };
@@ -433,8 +383,7 @@ export default function GardenScreen() {
     canvas.clearCanvas();
     canvas.setTemplate(templateId);
     setShowTemplates(false);
-    showFairyMessage(t("fairy.templateSelected"), "happy", 2500);
-  };
+};
 
   const handleShare = () => {
     if (Platform.OS === "web" && typeof window !== "undefined") {
@@ -485,51 +434,57 @@ export default function GardenScreen() {
   const postGridAd = getAdForPlacement("post_grid");
   const isJp = i18n.language === "jp";
 
-  // Photo mode view
+  // Photo mode — full-screen clean view, no circle, share in corner
   if (photoMode) {
+    const photoSize = Math.min(responsive.canvasSize * 1.3, responsive.canvasSize + 80);
     return (
-      <View style={[styles.container, { justifyContent: "center", paddingTop: 0 }]}>
-        <View style={styles.canvasContainer}>
-          <View style={[styles.canvas, { width: CANVAS_SIZE, height: CANVAS_SIZE, borderRadius: CANVAS_SIZE / 2 }, evolutionStyle]}>
-            {connectionLines.map((line, i) => (
-              <ConnectionLine key={`line-${i}`} x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} canvasSize={CANVAS_SIZE} />
-            ))}
-            {canvas.placements.map((placement, i) => {
-              const stoneId = placement.stoneId;
-              if (stoneId.startsWith("seasonal:")) {
-                const itemId = stoneId.replace("seasonal:", "");
-                const item = seasonalItems.find((si) => si.id === itemId);
-                if (!item) return null;
-                return (
-                  <View key={`seasonal-${i}`} style={{
-                    position: "absolute",
-                    left: placement.x * CANVAS_SIZE - 16,
-                    top: placement.y * CANVAS_SIZE - 16,
-                  }}>
-                    <Text style={{ fontSize: 28 }}>{item.glyph}</Text>
-                  </View>
-                );
-              }
-              const stone = stones.find((s) => s.id === stoneId);
-              if (!stone) return null;
+      <View style={{ flex: 1, backgroundColor: colors.canvas, justifyContent: "center", alignItems: "center" }}>
+        <View style={{ width: photoSize, height: photoSize, position: "relative" }}>
+          {connectionLines.map((line, i) => (
+            <ConnectionLine key={`line-${i}`} x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} canvasSize={photoSize} />
+          ))}
+          {canvas.placements.map((placement, i) => {
+            const stoneId = placement.stoneId;
+            if (stoneId.startsWith("seasonal:")) {
+              const itemId = stoneId.replace("seasonal:", "");
+              const allItems = [...seasonalItems, ...othersItems];
+              const item = allItems.find((si) => si.id === itemId);
+              if (!item) return null;
               return (
-                <DraggableStone
-                  key={`stone-${i}`} placement={placement} index={i} stone={stone}
-                  canvasSize={CANVAS_SIZE} onDragEnd={handleDragEnd} onSelect={handleSelect}
-                  selected={false} pulsing={false} photoMode hapticsEnabled={false}
-                />
+                <View key={`seasonal-${i}`} style={{
+                  position: "absolute",
+                  left: placement.x * photoSize - 16,
+                  top: placement.y * photoSize - 16,
+                }}>
+                  <Text style={{ fontSize: 28 }}>{item.glyph}</Text>
+                </View>
               );
-            })}
-          </View>
+            }
+            const stone = stones.find((s) => s.id === stoneId);
+            if (!stone) return null;
+            return (
+              <DraggableStone
+                key={`stone-${i}`} placement={placement} index={i} stone={stone}
+                canvasSize={photoSize} onDragEnd={handleDragEnd} onSelect={handleSelect}
+                selected={false} pulsing={false} photoMode hapticsEnabled={false}
+              />
+            );
+          })}
         </View>
-        <View style={styles.photoBar}>
-          <TouchableOpacity style={styles.photoBarButton} onPress={() => setPhotoMode(false)}>
-            <Text style={styles.photoBarText}>{isJp ? "戻る" : "Back"}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.photoBarButton} onPress={handleShare}>
-            <Text style={styles.photoBarText}>{t("common.share")}</Text>
-          </TouchableOpacity>
-        </View>
+        {/* Back button — top left */}
+        <TouchableOpacity
+          style={{ position: "absolute", top: 50, left: spacing.lg }}
+          onPress={() => setPhotoMode(false)}
+        >
+          <Text style={{ color: colors.textMuted, fontSize: fontSize.md }}>{isJp ? "✕ 戻る" : "✕ Back"}</Text>
+        </TouchableOpacity>
+        {/* Share button — bottom right corner */}
+        <TouchableOpacity
+          style={{ position: "absolute", bottom: 40, right: spacing.lg, backgroundColor: colors.primary, borderRadius: borderRadius.full, paddingHorizontal: spacing.lg, paddingVertical: spacing.sm }}
+          onPress={handleShare}
+        >
+          <Text style={{ color: colors.buttonText, fontSize: fontSize.sm, fontWeight: "600" }}>{t("common.share")}</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -572,19 +527,6 @@ export default function GardenScreen() {
             </TouchableOpacity>
           ))}
         </ScrollView>
-      )}
-
-      {/* Fairy companion floating above canvas */}
-      {avatarStone && (
-        <View style={{ alignItems: "center", marginBottom: -spacing.sm, zIndex: 10 }}>
-          <CrystalFairy
-            colorHex={avatarStone.color_hex}
-            size={50}
-            mood={fairyMood}
-            level={level}
-            message={fairyMessage}
-          />
-        </View>
       )}
 
       {/* Canvas with evolution */}
@@ -635,7 +577,8 @@ export default function GardenScreen() {
             const stoneId = placement.stoneId;
             if (stoneId.startsWith("seasonal:")) {
               const itemId = stoneId.replace("seasonal:", "");
-              const item = seasonalItems.find((si) => si.id === itemId);
+              const allItems = [...seasonalItems, ...othersItems];
+              const item = allItems.find((si) => si.id === itemId);
               if (!item) return null;
               return (
                 <View key={`seasonal-${i}`} style={{
@@ -782,6 +725,24 @@ export default function GardenScreen() {
                 <GemStone stoneId={stone.id} colorHex={stone.color_hex} size={36} />
               </View>
               <Text style={styles.trayName} numberOfLines={1}>{stone.name_jp}</Text>
+            </TouchableOpacity>
+          ))}
+          {/* Others: flowers, shells, nature */}
+          {othersItems.length > 0 && (
+            <View style={{ width: 1, height: 36, backgroundColor: colors.border, alignSelf: "center" }} />
+          )}
+          {othersItems.map((item) => (
+            <TouchableOpacity
+              key={item.id}
+              style={styles.trayStone}
+              onPress={() => handleSeasonalTap(item.id)}
+            >
+              <View style={styles.trayGemWrap}>
+                <Text style={{ fontSize: 24 }}>{item.glyph}</Text>
+              </View>
+              <Text style={[styles.trayName, { color: colors.secondary }]} numberOfLines={1}>
+                {isJp ? item.name_jp : item.name_en}
+              </Text>
             </TouchableOpacity>
           ))}
         </ScrollView>

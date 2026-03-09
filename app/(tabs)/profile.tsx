@@ -30,6 +30,12 @@ export default function ProfileScreen() {
   const levelTitle = t(`levels.${level}`) || `Level ${level}`;
   const zodiac = user ? getZodiacForBirthMonth(user.birthMonth) : null;
   const allStones = useStoneStore((s) => s.stones);
+  const profileGrid = savedGrids.find((g) => g.id === user?.profileGridId) || null;
+
+  const handleSetWallpaper = (gridId: string) => {
+    const newId = user?.profileGridId === gridId ? null : gridId;
+    updateProfile({ profileGridId: newId });
+  };
 
   const toggleLanguage = () => {
     const newLang = i18n.language === "en" ? "jp" : "en";
@@ -78,23 +84,44 @@ export default function ProfileScreen() {
     <ScrollView style={styles.container} contentContainerStyle={[styles.content, { paddingHorizontal: contentPadding }]}>
       <Text style={[styles.title, (isTablet || isDesktop) && { fontSize: 32 }]}>{t("profile.title")}</Text>
 
-      {/* Profile Card */}
+      {/* Profile Card with optional grid wallpaper */}
       <View style={styles.profileCard}>
+        {/* Grid wallpaper background */}
+        {profileGrid && (
+          <View style={styles.wallpaperBg}>
+            {profileGrid.placements.map((p, i) => {
+              const s = allStones.find((st) => st.id === p.stoneId);
+              if (!s) return null;
+              return (
+                <View key={i} style={{
+                  position: "absolute",
+                  left: `${p.x * 100}%`,
+                  top: `${p.y * 100}%`,
+                  marginLeft: -10,
+                  marginTop: -10,
+                  opacity: 0.35,
+                }}>
+                  <GemStone stoneId={s.id} colorHex={s.color_hex} size={20} />
+                </View>
+              );
+            })}
+          </View>
+        )}
         {avatarStone ? (
-          <View style={{ alignItems: "center" }}>
+          <View style={{ alignItems: "center", zIndex: 2 }}>
             <CrystalFairy colorHex={avatarStone.color_hex} size={80} level={level} isStatic />
             <View style={{ marginTop: 4 }}>
               <GemStone stoneId={avatarStone.id} colorHex={avatarStone.color_hex} size={36} />
             </View>
           </View>
         ) : (
-          <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
+          <View style={[styles.avatar, { backgroundColor: colors.primary, zIndex: 2 }]}>
             <Text style={styles.avatarText}>{"\u77F3"}</Text>
           </View>
         )}
-        <Text style={styles.displayName}>{user?.displayName || "Guest"}</Text>
-        <Text style={styles.email}>{user?.email}</Text>
-        <Text style={styles.levelBadge}>{levelTitle}</Text>
+        <Text style={[styles.displayName, { zIndex: 2 }]}>{user?.displayName || "Guest"}</Text>
+        <Text style={[styles.email, { zIndex: 2 }]}>{user?.email}</Text>
+        <Text style={[styles.levelBadge, { zIndex: 2 }]}>{levelTitle}</Text>
       </View>
 
       {/* Zodiac & Birth Crystals */}
@@ -148,6 +175,46 @@ export default function ProfileScreen() {
           </View>
         </View>
       </View>
+
+      {/* Profile Wallpaper — choose a saved grid */}
+      {savedGrids.length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{isJp ? "プロフィール壁紙" : "Profile Wallpaper"}</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: spacing.sm }}>
+            {savedGrids.map((grid) => (
+              <TouchableOpacity
+                key={grid.id}
+                onPress={() => handleSetWallpaper(grid.id)}
+                style={[
+                  styles.wallpaperThumb,
+                  user?.profileGridId === grid.id && styles.wallpaperThumbActive,
+                ]}
+              >
+                <View style={styles.wallpaperPreview}>
+                  {grid.placements.slice(0, 8).map((p, i) => {
+                    const s = allStones.find((st) => st.id === p.stoneId);
+                    if (!s) return null;
+                    return (
+                      <View key={i} style={{
+                        position: "absolute",
+                        left: `${p.x * 100}%`,
+                        top: `${p.y * 100}%`,
+                        marginLeft: -5,
+                        marginTop: -5,
+                      }}>
+                        <GemStone stoneId={s.id} colorHex={s.color_hex} size={10} />
+                      </View>
+                    );
+                  })}
+                </View>
+                <Text style={styles.wallpaperLabel} numberOfLines={1}>
+                  {grid.name || (isJp ? "グリッド" : "Grid")}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
 
       {/* Subscription */}
       <View style={styles.section}>
@@ -216,6 +283,7 @@ const styles = StyleSheet.create({
   profileCard: {
     backgroundColor: colors.surfaceLight, borderRadius: borderRadius.lg, padding: spacing.xl,
     alignItems: "center", marginBottom: spacing.xl, borderWidth: 1, borderColor: colors.border,
+    position: "relative" as const, overflow: "hidden" as const,
   },
   avatar: { width: 72, height: 72, borderRadius: 36, alignItems: "center", justifyContent: "center", marginBottom: spacing.md },
   avatarText: { color: "#fff", fontSize: fontSize.xxl, fontWeight: "700", textShadowColor: "rgba(0,0,0,0.3)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 },
@@ -267,7 +335,26 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary, borderRadius: borderRadius.md,
     paddingVertical: spacing.md, alignItems: "center", marginTop: spacing.sm,
   },
-  upgradeText: { color: colors.background, fontSize: fontSize.md, fontWeight: "600" },
+  upgradeText: { color: colors.buttonText, fontSize: fontSize.md, fontWeight: "600" },
   signOutText: { color: colors.textSecondary, fontSize: fontSize.md },
   deleteText: { color: colors.error, fontSize: fontSize.md },
+
+  // Wallpaper
+  wallpaperBg: {
+    position: "absolute" as const, top: 0, left: 0, right: 0, bottom: 0,
+    borderRadius: borderRadius.lg, overflow: "hidden" as const, zIndex: 1,
+  },
+  wallpaperThumb: {
+    width: 72, height: 72, borderRadius: borderRadius.md, backgroundColor: colors.canvas,
+    marginRight: spacing.sm, borderWidth: 1, borderColor: colors.border, overflow: "hidden" as const,
+  },
+  wallpaperThumbActive: {
+    borderColor: colors.primary, borderWidth: 2,
+  },
+  wallpaperPreview: {
+    width: "100%" as const, height: 56, position: "relative" as const,
+  },
+  wallpaperLabel: {
+    fontSize: 8, color: colors.textMuted, textAlign: "center" as const, paddingHorizontal: 2,
+  },
 });

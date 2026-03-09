@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xl,
   },
   upgradeText: {
-    color: colors.background,
+    color: colors.buttonText,
     fontSize: fontSize.md,
     fontWeight: "600",
   },

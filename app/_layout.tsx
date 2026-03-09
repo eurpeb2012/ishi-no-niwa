@@ -12,7 +12,7 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={styles.root}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       {isWide ? (
         <View style={styles.wideWrapper}>
           <View style={[styles.contentShell, { maxWidth }]}>

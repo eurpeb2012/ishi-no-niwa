@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary, borderRadius: borderRadius.sm,
     paddingVertical: spacing.xs, paddingHorizontal: spacing.md,
   },
-  shareButtonText: { color: colors.background, fontSize: fontSize.xs, fontWeight: "600" },
+  shareButtonText: { color: colors.buttonText, fontSize: fontSize.xs, fontWeight: "600" },
   mentorSection: { marginTop: spacing.lg },
   mentorDesc: { color: colors.textMuted, fontSize: fontSize.sm, marginBottom: spacing.md },
   mentorCard: {
@@ -327,7 +327,7 @@ const styles = StyleSheet.create({
     width: 40, height: 40, borderRadius: 20,
     backgroundColor: colors.primary, alignItems: "center", justifyContent: "center",
   },
-  mentorAvatarText: { color: colors.background, fontSize: fontSize.lg, fontWeight: "700" },
+  mentorAvatarText: { color: colors.buttonText, fontSize: fontSize.lg, fontWeight: "700" },
   mentorName: { color: colors.textPrimary, fontSize: fontSize.md, fontWeight: "600" },
   mentorSpecialty: { color: colors.textMuted, fontSize: fontSize.xs },
   connectButton: {
@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary, borderRadius: borderRadius.sm,
     paddingVertical: spacing.sm, paddingHorizontal: spacing.md,
   },
-  joinText: { color: colors.background, fontSize: fontSize.sm, fontWeight: "600" },
+  joinText: { color: colors.buttonText, fontSize: fontSize.sm, fontWeight: "600" },
   groupSection: {
     backgroundColor: colors.surfaceLight, borderRadius: borderRadius.lg,
     padding: spacing.lg, marginTop: spacing.lg,
@@ -364,5 +364,5 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary, borderRadius: borderRadius.md,
     paddingVertical: spacing.sm, paddingHorizontal: spacing.xl,
   },
-  notifyText: { color: colors.background, fontSize: fontSize.md, fontWeight: "600" },
+  notifyText: { color: colors.buttonText, fontSize: fontSize.md, fontWeight: "600" },
 });

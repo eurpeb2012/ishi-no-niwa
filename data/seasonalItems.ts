@@ -131,10 +131,30 @@ export const SEASONAL_ITEMS: SeasonalItem[] = [
   },
 ];
 
+/**
+ * Always-available decorative "Others" items — flowers, shells, nature elements.
+ * These appear in the tray alongside crystals at all times.
+ */
+export const OTHERS_ITEMS: SeasonalItem[] = [
+  { id: "rose", name_en: "Rose", name_jp: "薔薇", glyph: "\uD83C\uDF39", color: "#E8507A", season: "spring", availableMonths: [1,2,3,4,5,6,7,8,9,10,11,12] },
+  { id: "sunflower", name_en: "Sunflower", name_jp: "ひまわり", glyph: "\uD83C\uDF3B", color: "#FFD54F", season: "summer", availableMonths: [1,2,3,4,5,6,7,8,9,10,11,12] },
+  { id: "tulip", name_en: "Tulip", name_jp: "チューリップ", glyph: "\uD83C\uDF37", color: "#FF6B81", season: "spring", availableMonths: [1,2,3,4,5,6,7,8,9,10,11,12] },
+  { id: "hibiscus", name_en: "Hibiscus", name_jp: "ハイビスカス", glyph: "\uD83C\uDF3A", color: "#FF6F91", season: "summer", availableMonths: [1,2,3,4,5,6,7,8,9,10,11,12] },
+  { id: "shell_spiral", name_en: "Shell", name_jp: "貝殻", glyph: "\uD83D\uDC1A", color: "#FFD4A8", season: "summer", availableMonths: [1,2,3,4,5,6,7,8,9,10,11,12] },
+  { id: "feather", name_en: "Feather", name_jp: "羽", glyph: "\uD83E\uDEB6", color: "#B0BEC5", season: "autumn", availableMonths: [1,2,3,4,5,6,7,8,9,10,11,12] },
+  { id: "leaf", name_en: "Leaf", name_jp: "葉", glyph: "\uD83C\uDF3F", color: "#66BB6A", season: "spring", availableMonths: [1,2,3,4,5,6,7,8,9,10,11,12] },
+  { id: "star", name_en: "Star", name_jp: "星", glyph: "\u2B50", color: "#FFD700", season: "winter", availableMonths: [1,2,3,4,5,6,7,8,9,10,11,12] },
+];
+
 /** Get items available this month */
 export function getCurrentSeasonalItems(): SeasonalItem[] {
   const month = new Date().getMonth() + 1;
   return SEASONAL_ITEMS.filter((item) => item.availableMonths.includes(month));
+}
+
+/** Get always-available "Others" items */
+export function getOthersItems(): SeasonalItem[] {
+  return OTHERS_ITEMS;
 }
 
 /** Get current season name */
