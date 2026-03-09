@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ishi no Niwa — Release Notes (March 2026)</title>
+<style>
+  :root {
+    --bg: #FFF8F5;
+    --surface: #FFFFFF;
+    --surface-light: #FEF0EC;
+    --primary: #C9917A;
+    --primary-dark: #B07868;
+    --secondary: #7EBEA5;
+    --text: #3D2C2C;
+    --text-dim: #7A6565;
+    --text-muted: #B09898;
+    --border: #F0DDD7;
+    --canvas: #FDF6F0;
+    --wood: #D7B899;
+    --sand: #F5E6D3;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 24px 20px 80px;
+  }
+  h1 {
+    font-size: 28px;
+    color: var(--primary-dark);
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+  }
+  .subtitle {
+    color: var(--text-dim);
+    font-size: 14px;
+    margin-bottom: 32px;
+  }
+  .version-badge {
+    display: inline-block;
+    background: var(--primary);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 8px;
+  }
+  h2 {
+    font-size: 18px;
+    color: var(--primary-dark);
+    margin: 28px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--border);
+  }
+  h2 .emoji { margin-right: 6px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+  }
+  .card-title {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .card-desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+  .tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-right: 4px;
+    margin-top: 6px;
+  }
+  .tag-new { background: #E8F5E9; color: #2E7D32; }
+  .tag-improved { background: #E3F2FD; color: #1565C0; }
+  .tag-changed { background: #FFF3E0; color: #E65100; }
+  .tag-removed { background: #FFEBEE; color: #C62828; }
+
+  .color-row {
+    display: flex;
+    gap: 8px;
+    margin: 8px 0;
+    flex-wrap: wrap;
+  }
+  .color-swatch {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+  }
+  .bg-samples {
+    display: flex;
+    gap: 8px;
+    margin: 8px 0;
+  }
+  .bg-sample {
+    width: 60px;
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    color: var(--text-dim);
+  }
+  .items-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 8px 0;
+  }
+  .item-chip {
+    background: var(--surface-light);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 12px;
+  }
+  .template-preview {
+    background: var(--canvas);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    margin: 8px 0;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+  .cta {
+    display: block;
+    text-align: center;
+    background: var(--primary);
+    color: #fff;
+    font-weight: 600;
+    font-size: 16px;
+    padding: 14px;
+    border-radius: 12px;
+    text-decoration: none;
+    margin-top: 32px;
+  }
+  .cta:hover { background: var(--primary-dark); }
+  .footer {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 11px;
+    margin-top: 24px;
+  }
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 32px 0;
+  }
+  .screenshot-note {
+    background: var(--surface-light);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin: 16px 0;
+    text-align: center;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<span class="version-badge">v2.1 — March 9, 2026</span>
+<h1>石の庭 Release Notes</h1>
+<p class="subtitle">Ishi no Niwa — Stone Garden</p>
+
+<!-- ==================== VISUAL REDESIGN ==================== -->
+<h2><span class="emoji">🎨</span>Visual Redesign</h2>
+
+<div class="card">
+  <div class="card-title">Pastel Feminine Theme</div>
+  <div class="card-desc">
+    Complete color overhaul — the dark masculine palette has been replaced with soft, warm pastel tones
+    throughout the entire app: backgrounds, cards, buttons, and text.
+  </div>
+  <div class="color-row">
+    <div class="color-swatch" style="background:#FFF8F5" title="Background"></div>
+    <div class="color-swatch" style="background:#FEF0EC" title="Surface Light"></div>
+    <div class="color-swatch" style="background:#C9917A" title="Primary"></div>
+    <div class="color-swatch" style="background:#7EBEA5" title="Secondary"></div>
+    <div class="color-swatch" style="background:#F0DDD7" title="Border"></div>
+    <div class="color-swatch" style="background:#E8B86D" title="XP Gold"></div>
+  </div>
+  <span class="tag tag-changed">Theme Change</span>
+</div>
+
+<div class="card">
+  <div class="card-title">Crystal Tab Bar (Top)</div>
+  <div class="card-desc">
+    Tab navigation moved from bottom to top. Kanji characters replaced with unique gemstone crystal icons
+    for each tab — jade (garden), amethyst (stones), clear quartz (guide), citrine (journey),
+    rose quartz (community), moonstone (profile).
+  </div>
+  <span class="tag tag-changed">Changed</span>
+</div>
+
+<div class="card">
+  <div class="card-title">Canvas Backgrounds</div>
+  <div class="card-desc">
+    Cycle through 4 canvas surfaces using the new "BG" tool button. Inspired by real crystal grid surfaces.
+  </div>
+  <div class="bg-samples">
+    <div class="bg-sample" style="background:#FDF6F0">Default</div>
+    <div class="bg-sample" style="background:#D7B899">Wood</div>
+    <div class="bg-sample" style="background:#F5E6D3">Sand</div>
+    <div class="bg-sample" style="background:#F0EDE8">Marble</div>
+  </div>
+  <span class="tag tag-new">New</span>
+</div>
+
+<!-- ==================== WELCOME & AUTH ==================== -->
+<h2><span class="emoji">🚪</span>Welcome Experience</h2>
+
+<div class="card">
+  <div class="card-title">New Landing Page</div>
+  <div class="card-desc">
+    Beautiful welcome screen with an animated crystal grid visual (6 hero gemstones),
+    app title, tagline, and clear "Create Account" / "Sign In" buttons.
+    Language toggle (EN/JP) in the top corner.
+  </div>
+  <span class="tag tag-new">New</span>
+</div>
+
+<!-- ==================== GARDEN ==================== -->
+<h2><span class="emoji">🪴</span>Crystal Garden</h2>
+
+<div class="card">
+  <div class="card-title">"Others" Category — Nature Items</div>
+  <div class="card-desc">
+    Place more than just crystals! A new section in the stone tray offers nature elements
+    to complement your grids — exactly like real crystal grids.
+  </div>
+  <div class="items-grid">
+    <span class="item-chip">⭐ Starfish</span>
+    <span class="item-chip">🐚 Shell</span>
+    <span class="item-chip">🪸 Coral</span>
+    <span class="item-chip">🌾 Lavender</span>
+    <span class="item-chip">🌹 Rose</span>
+    <span class="item-chip">🏵️ White Flower</span>
+    <span class="item-chip">🌷 Tulip</span>
+    <span class="item-chip">🌺 Hibiscus</span>
+    <span class="item-chip">🪵 Driftwood</span>
+    <span class="item-chip">🪶 Feather</span>
+    <span class="item-chip">🌿 Leaf</span>
+  </div>
+  <span class="tag tag-new">New</span>
+</div>
+
+<div class="card">
+  <div class="card-title">New Grid Templates</div>
+  <div class="card-desc">Two new templates inspired by real crystal mandala patterns:</div>
+  <div class="template-preview">
+    <strong>🔮 Moonstone Mandala</strong> (月石の曼荼羅)<br>
+    17-point concentric ring pattern — center + inner ring (6) + outer ring (10)<br>
+    <em>Intentions: spiritual, calm, healing, love</em>
+  </div>
+  <div class="template-preview">
+    <strong>🌊 Ocean Star</strong> (海の星)<br>
+    13-point star-ring pattern — center + inner ring (4) + outer star (7)<br>
+    <em>Intentions: calm, healing, purification</em>
+  </div>
+  <span class="tag tag-new">New</span>
+</div>
+
+<div class="card">
+  <div class="card-title">Improved Photo Mode</div>
+  <div class="card-desc">
+    Full-screen clean view with no circle border — your grid fills the screen like a real photograph.
+    Back button (top-left) and Share button (bottom-right corner) stay subtle and out of the way.
+    Also uses your chosen canvas background.
+  </div>
+  <span class="tag tag-improved">Improved</span>
+</div>
+
+<div class="card">
+  <div class="card-title">Fairy Removed from Garden</div>
+  <div class="card-desc">
+    The fairy companion avatar has been moved off the grid canvas — it now appears only on
+    your Profile page, keeping the garden clean and focused on your crystal arrangement.
+  </div>
+  <span class="tag tag-removed">Removed from Garden</span>
+</div>
+
+<!-- ==================== GUIDE ==================== -->
+<h2><span class="emoji">📖</span>Stones Guide</h2>
+
+<div class="card">
+  <div class="card-title">Crystal of the Day — Now Explains Why</div>
+  <div class="card-desc">
+    The daily crystal recommendation now includes a full explanation:
+    current moon phase, its energy description, and how the recommended stone
+    harmonizes with today's lunar cycle. Example:<br><br>
+    <em>"Today's Waxing Crescent 🌒 brings prosperity & courage energy.
+    Energy is building. Focus on growth and take the first steps toward your goals.
+    This stone harmonizes with today's lunar cycle."</em>
+  </div>
+  <span class="tag tag-improved">Improved</span>
+</div>
+
+<!-- ==================== PROFILE ==================== -->
+<h2><span class="emoji">👤</span>Profile</h2>
+
+<div class="card">
+  <div class="card-title">Grid Wallpaper</div>
+  <div class="card-desc">
+    Set any saved grid as your profile card background! A wallpaper picker appears
+    with thumbnail previews of all your saved grids. Tap to set, tap again to remove.
+    Your crystal fairy and profile info float above the wallpaper.
+  </div>
+  <span class="tag tag-new">New</span>
+</div>
+
+<!-- ==================== BUG FIXES ==================== -->
+<h2><span class="emoji">🔧</span>Bug Fixes & Polish</h2>
+
+<div class="card">
+  <div class="card-title">Button Text Contrast</div>
+  <div class="card-desc">
+    Fixed white-on-white text on buttons across 9 screens that appeared
+    after the pastel theme change.
+  </div>
+  <span class="tag tag-improved">Fixed</span>
+</div>
+
+<div class="divider"></div>
+
+<!-- ==================== WHAT'S NEXT ==================== -->
+<h2><span class="emoji">🔜</span>Coming Soon</h2>
+<div class="card">
+  <div class="card-desc">
+    • Native Android & iOS app versions<br>
+    • AR View — place grids on real surfaces<br>
+    • PDF export of grid templates<br>
+    • Partner crystal shop integration<br>
+    • Social sharing with in-app image generation
+  </div>
+</div>
+
+<a class="cta" href="https://eurpeb2012.github.io/ishi-no-niwa/">Try it now →</a>
+
+<div class="screenshot-note">
+  Demo login: <strong>takae@example.com</strong> / any password<br>
+  Or create a new account to start fresh.
+</div>
+
+<p class="footer">
+  石の庭 Ishi no Niwa — Stone Garden<br>
+  Built with ❤ in Tokyo
+</p>
+
+</body>
+</html>

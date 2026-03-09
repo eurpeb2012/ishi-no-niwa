@@ -34,11 +34,13 @@ if (fs.existsSync(jsDir)) {
 fs.copyFileSync(indexPath, path.join(distDir, "404.html"));
 console.log("Created 404.html for SPA routing");
 
-// Copy testing-guide.html to dist if it exists
-const testGuide = path.join(__dirname, "testing-guide.html");
-if (fs.existsSync(testGuide)) {
-  fs.copyFileSync(testGuide, path.join(distDir, "testing-guide.html"));
-  console.log("Copied testing-guide.html");
-}
+// Copy static HTML pages to dist if they exist
+["testing-guide.html", "release-notes.html"].forEach((file) => {
+  const src = path.join(__dirname, file);
+  if (fs.existsSync(src)) {
+    fs.copyFileSync(src, path.join(distDir, file));
+    console.log(`Copied ${file}`);
+  }
+});
 
 console.log("Done!");
