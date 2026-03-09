@@ -3,6 +3,15 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import { asyncStorage } from "./asyncStorageAdapter";
 import type { StonePlacement, SavedGrid } from "../types";
 
+export type CanvasBg = "default" | "wood" | "sand" | "marble";
+
+export const CANVAS_BG_COLORS: Record<CanvasBg, string> = {
+  default: "#FDF6F0",
+  wood: "#D7B899",
+  sand: "#F5E6D3",
+  marble: "#F0EDE8",
+};
+
 interface CanvasState {
   activeTemplateId: string | null;
   placements: StonePlacement[];
@@ -12,6 +21,7 @@ interface CanvasState {
   soundEnabled: boolean;
   gridName: string;
   intention: string | null;
+  canvasBg: CanvasBg;
 
   // Undo/redo history
   history: StonePlacement[][];
@@ -27,6 +37,7 @@ interface CanvasState {
   toggleSnap: () => void;
   cycleSymmetry: () => void;
   toggleSound: () => void;
+  cycleCanvasBg: () => void;
   saveGrid: () => SavedGrid;
   loadGrid: (grid: SavedGrid) => void;
   deleteGrid: (gridId: string) => void;
@@ -56,6 +67,7 @@ export const useCanvasStore = create<CanvasState>()(
       snapEnabled: true,
       symmetryFold: 0,
       soundEnabled: false,
+      canvasBg: "default" as CanvasBg,
       gridName: "New Grid",
       intention: null,
       history: [[]],
@@ -114,6 +126,13 @@ export const useCanvasStore = create<CanvasState>()(
         }),
 
       toggleSound: () => set((state) => ({ soundEnabled: !state.soundEnabled })),
+
+      cycleCanvasBg: () =>
+        set((state) => {
+          const bgs: CanvasBg[] = ["default", "wood", "sand", "marble"];
+          const idx = bgs.indexOf(state.canvasBg);
+          return { canvasBg: bgs[(idx + 1) % bgs.length] };
+        }),
 
       saveGrid: () => {
         const state = get();

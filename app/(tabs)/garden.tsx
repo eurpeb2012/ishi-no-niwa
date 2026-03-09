@@ -20,7 +20,7 @@ import Animated, {
   Easing,
 } from "react-native-reanimated";
 import { colors, spacing, fontSize, borderRadius } from "../../theme";
-import { useCanvasStore } from "../../stores/canvasStore";
+import { useCanvasStore, CANVAS_BG_COLORS } from "../../stores/canvasStore";
 import { useStoneStore } from "../../stores/stoneStore";
 import { useProgressionStore } from "../../stores/progressionStore";
 import { useInsightStore } from "../../stores/insightStore";
@@ -438,7 +438,7 @@ export default function GardenScreen() {
   if (photoMode) {
     const photoSize = Math.min(responsive.canvasSize * 1.3, responsive.canvasSize + 80);
     return (
-      <View style={{ flex: 1, backgroundColor: colors.canvas, justifyContent: "center", alignItems: "center" }}>
+      <View style={{ flex: 1, backgroundColor: CANVAS_BG_COLORS[canvas.canvasBg], justifyContent: "center", alignItems: "center" }}>
         <View style={{ width: photoSize, height: photoSize, position: "relative" }}>
           {connectionLines.map((line, i) => (
             <ConnectionLine key={`line-${i}`} x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} canvasSize={photoSize} />
@@ -531,7 +531,7 @@ export default function GardenScreen() {
 
       {/* Canvas with evolution */}
       <View style={styles.canvasContainer}>
-        <View style={[styles.canvas, { width: CANVAS_SIZE, height: CANVAS_SIZE, borderRadius: CANVAS_SIZE / 2 }, evolutionStyle]}>
+        <View style={[styles.canvas, { width: CANVAS_SIZE, height: CANVAS_SIZE, borderRadius: CANVAS_SIZE / 2, backgroundColor: CANVAS_BG_COLORS[canvas.canvasBg] }, evolutionStyle]}>
           {/* Environment decorations based on level */}
           {canvasDecor.includes("grass") && (
             <>
@@ -656,6 +656,17 @@ export default function GardenScreen() {
         <TouchableOpacity style={[styles.toolButton, ambientSound !== "off" && styles.toolActive]} onPress={() => setShowAmbientPicker(!showAmbientPicker)}>
           <Text style={styles.toolText}>
             {ambientSound !== "off" ? t(`ambient.${ambientSound}`) : t("garden.ambient")}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.toolButton, canvas.canvasBg !== "default" && styles.toolActive]}
+          onPress={canvas.cycleCanvasBg}
+        >
+          <Text style={styles.toolText}>
+            {canvas.canvasBg === "default" ? (isJp ? "背景" : "BG")
+              : canvas.canvasBg === "wood" ? (isJp ? "木目" : "Wood")
+              : canvas.canvasBg === "sand" ? (isJp ? "砂" : "Sand")
+              : (isJp ? "大理石" : "Marble")}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
