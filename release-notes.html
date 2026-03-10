@@ -51,6 +51,9 @@
     border-radius: 20px;
     margin-bottom: 8px;
   }
+  .version-badge.latest {
+    background: var(--secondary);
+  }
   h2 {
     font-size: 18px;
     color: var(--primary-dark);
@@ -142,6 +145,41 @@
     font-size: 13px;
     color: var(--text-dim);
   }
+  .fairy-stages {
+    display: flex;
+    gap: 6px;
+    margin: 8px 0;
+    flex-wrap: wrap;
+  }
+  .fairy-stage {
+    background: var(--surface-light);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 12px;
+    text-align: center;
+    font-size: 11px;
+    flex: 1;
+    min-width: 90px;
+  }
+  .fairy-stage .glyph { font-size: 20px; display: block; margin-bottom: 4px; }
+  .quest-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0;
+    font-size: 12px;
+  }
+  .quest-table th {
+    text-align: left;
+    padding: 6px 8px;
+    border-bottom: 2px solid var(--border);
+    color: var(--text-dim);
+    font-weight: 600;
+  }
+  .quest-table td {
+    padding: 5px 8px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dim);
+  }
   .cta {
     display: block;
     text-align: center;
@@ -181,9 +219,161 @@
 </head>
 <body>
 
-<span class="version-badge">v2.1 — March 9, 2026</span>
+<!-- ================================================================ -->
+<!--  v2.2 — March 10, 2026                                          -->
+<!-- ================================================================ -->
+<span class="version-badge latest">v2.2 — March 10, 2026</span>
 <h1>石の庭 Release Notes</h1>
-<p class="subtitle">Ishi no Niwa — Stone Garden</p>
+<p class="subtitle">Ishi no Niwa — Crystal Garden</p>
+
+<!-- ==================== FAIRY AVATAR ==================== -->
+<h2><span class="emoji">🧚</span>Crystal Fairy Evolution (#11, #16)</h2>
+
+<div class="card">
+  <div class="card-title">5-Stage Fairy Evolution System</div>
+  <div class="card-desc">
+    Your fairy companion now evolves through 5 distinct stages as you progress through the Kyu/Dan ranking system.
+    Each stage brings larger wings, more detail, more sparkle particles, and a more graceful animation.
+  </div>
+  <div class="fairy-stages">
+    <div class="fairy-stage"><span class="glyph">✧</span>Seed Sprite<br><em>Lv 1</em></div>
+    <div class="fairy-stage"><span class="glyph">🌱</span>Bud Fairy<br><em>Lv 3</em></div>
+    <div class="fairy-stage"><span class="glyph">🌺</span>Bloom Fairy<br><em>Lv 6</em></div>
+    <div class="fairy-stage"><span class="glyph">💎</span>Crystal Fairy<br><em>Lv 9</em></div>
+    <div class="fairy-stage"><span class="glyph">🌟</span>Guardian Spirit<br><em>Lv 12</em></div>
+  </div>
+  <span class="tag tag-new">New</span>
+</div>
+
+<div class="card">
+  <div class="card-title">Fairy Holds Crystals That Upgrade (#16)</div>
+  <div class="card-desc">
+    Your fairy now holds a crystal that visually upgrades as you complete more grids:
+    Rough Chip → Tumbled Stone → Polished Cabochon → Faceted Gem → Radiant Crystal.
+    The crystal type matches your most-used intention (love → rose quartz, calm → amethyst, etc).
+  </div>
+  <span class="tag tag-new">New</span>
+</div>
+
+<div class="card">
+  <div class="card-title">4 Fairy Color Variants</div>
+  <div class="card-desc">
+    Four fairy color variants tied to crystal affinity:
+    Rose Quartz (pink), Amethyst (purple), Jade (green), Onyx (dark blue).
+    Fairy status card on Profile and Journey screens shows evolution stage, bond level, and energy.
+  </div>
+  <span class="tag tag-new">New</span>
+</div>
+
+<!-- ==================== QUEST SYSTEM ==================== -->
+<h2><span class="emoji">📋</span>Quest System (#10)</h2>
+
+<div class="card">
+  <div class="card-title">17 Quests Across 3 Tiers</div>
+  <div class="card-desc">
+    Complete quests to earn XP, Crystal Energy, and Fairy Bond points.
+    Quests auto-track from your gameplay — no manual claiming needed.
+    Higher tier quests unlock as you level up.
+  </div>
+  <table class="quest-table">
+    <tr><th>Example Quest</th><th>Target</th><th>Rewards</th></tr>
+    <tr><td>Love Grid Creator</td><td>3 love grids</td><td>30 XP, 15 Energy, +5 Bond</td></tr>
+    <tr><td>Shield Weaver</td><td>5 protection grids</td><td>50 XP, 30 Energy, +10 Bond</td></tr>
+    <tr><td>Moon Cycle Master</td><td>30-day streak</td><td>200 XP, 100 Energy, +30 Bond</td></tr>
+  </table>
+  <span class="tag tag-new">New</span>
+</div>
+
+<!-- ==================== ENERGY SYSTEM ==================== -->
+<h2><span class="emoji">⚡</span>Crystal Energy System (#12)</h2>
+
+<div class="card">
+  <div class="card-title">Grids Generate Energy</div>
+  <div class="card-desc">
+    Every grid you save now generates Crystal Energy (結晶エネルギー) — 5 base + 2 per crystal placed.
+    Energy also comes from completing quests. Energy powers your fairy's evolution and
+    is displayed on your Journey and Profile screens alongside your bond level.
+  </div>
+  <span class="tag tag-new">New</span>
+</div>
+
+<!-- ==================== WALLPAPER CONTROLS ==================== -->
+<h2><span class="emoji">🖼️</span>Profile Wallpaper Controls (#9)</h2>
+
+<div class="card">
+  <div class="card-title">Size & Angle Adjustments</div>
+  <div class="card-desc">
+    Profile wallpaper now has sizing controls: scale from 50% to 250%, rotate in 15-degree increments,
+    and a Reset button to return to defaults. The wallpaper transforms are applied to the grid display
+    behind your profile card.
+  </div>
+  <span class="tag tag-new">New</span>
+</div>
+
+<!-- ==================== IN-APP PURCHASES ==================== -->
+<h2><span class="emoji">🛍️</span>Crystal Shop (#13)</h2>
+
+<div class="card">
+  <div class="card-title">In-App Purchase Shop</div>
+  <div class="card-desc">
+    New Crystal Shop section on the Profile screen with 3 tabs:
+  </div>
+  <div class="items-grid">
+    <span class="item-chip">💎 Crystal Packs (4)</span>
+    <span class="item-chip">⚡ Energy Packs (2)</span>
+    <span class="item-chip">🧚 Fairy Outfits (2)</span>
+    <span class="item-chip">✨ Rare Crystals (2)</span>
+  </div>
+  <div class="card-desc" style="margin-top:6px">
+    Products include: Starter Pack ($1.99), Chakra Set ($3.99), Japan Native Collection ($4.99),
+    Premium Vault ($7.99), individual rare crystals ($0.99), energy boosts, and fairy outfit sets.
+    <br><em>Note: Purchase flow is placeholder — actual IAP integration coming with native app.</em>
+  </div>
+  <span class="tag tag-new">New</span>
+</div>
+
+<!-- ==================== REAL CRYSTAL PHOTOS ==================== -->
+<h2><span class="emoji">📷</span>Real Crystal Photos (#14)</h2>
+
+<div class="card">
+  <div class="card-title">Photo Support Ready</div>
+  <div class="card-desc">
+    The Stone data model now supports real crystal photographs with <code>photoUrl</code> and
+    <code>photoCredit</code> fields. Awaiting uploads from crystal contributors.
+    When photos arrive, they'll display in the Crystal Collection detail view.
+  </div>
+  <span class="tag tag-improved">Prepared</span>
+</div>
+
+<!-- ==================== HEALING MUSIC ==================== -->
+<h2><span class="emoji">🎵</span>Healing Music (#15)</h2>
+
+<div class="card">
+  <div class="card-title">12 Healing Music Tracks</div>
+  <div class="card-desc">
+    New Healing Music section on the Guide screen with 12 tracks across 4 categories.
+    Each track is tagged with an intention for easy matching with your grid practice.
+  </div>
+  <div class="items-grid">
+    <span class="item-chip">🎶 Meditation (3)</span>
+    <span class="item-chip">🌲 Nature (3)</span>
+    <span class="item-chip">🔔 Crystal Bowls (3)</span>
+    <span class="item-chip">🌀 Binaural (3)</span>
+  </div>
+  <div class="card-desc" style="margin-top:6px">
+    Includes: Zen Garden, Crystal Meditation, Forest Stream, Ocean Waves, Chakra Singing Bowls,
+    Tibetan Bowls, Theta Waves, Deep Relaxation, and more. Play/pause controls with a "Now Playing" card.
+    <br><em>Note: Audio playback is simulated — actual audio files coming soon.</em>
+  </div>
+  <span class="tag tag-new">New</span>
+</div>
+
+<div class="divider"></div>
+
+<!-- ================================================================ -->
+<!--  v2.1 — March 9, 2026  (previous release)                       -->
+<!-- ================================================================ -->
+<span class="version-badge">v2.1 — March 9, 2026</span>
 
 <!-- ==================== VISUAL REDESIGN ==================== -->
 <h2><span class="emoji">🎨</span>Visual Redesign</h2>
@@ -209,7 +399,7 @@
   <div class="card-title">Crystal Tab Bar (Top)</div>
   <div class="card-desc">
     Tab navigation moved from bottom to top. Kanji characters replaced with unique gemstone crystal icons
-    for each tab — jade (garden), amethyst (stones), clear quartz (guide), citrine (journey),
+    for each tab — jade (garden), amethyst (crystals), clear quartz (guide), citrine (journey),
     rose quartz (community), moonstone (profile).
   </div>
   <span class="tag tag-changed">Changed</span>
@@ -246,10 +436,27 @@
 <h2><span class="emoji">🪴</span>Crystal Garden</h2>
 
 <div class="card">
-  <div class="card-title">"Others" Category — Nature Items</div>
+  <div class="card-title">Categorized Item Tray</div>
   <div class="card-desc">
-    Place more than just crystals! A new section in the stone tray offers nature elements
-    to complement your grids — exactly like real crystal grids.
+    The item tray now has 5 category tabs: Crystals, Flowers, Sea, Nature, Seasonal.
+    Drill into each category to find items quickly. Decorative items (flowers, shells, etc.)
+    are draggable and rotatable on the canvas, same as crystals.
+  </div>
+  <span class="tag tag-new">New</span>
+</div>
+
+<div class="card">
+  <div class="card-title">Larger Canvas</div>
+  <div class="card-desc">
+    Canvas area increased from 45% to 55% of screen height (max 560px) for more room to build grids.
+  </div>
+  <span class="tag tag-improved">Improved</span>
+</div>
+
+<div class="card">
+  <div class="card-title">Nature Items</div>
+  <div class="card-desc">
+    Place more than just crystals! 11 always-available nature elements to complement your grids.
   </div>
   <div class="items-grid">
     <span class="item-chip">⭐ Starfish</span>
@@ -272,12 +479,12 @@
   <div class="card-desc">Two new templates inspired by real crystal mandala patterns:</div>
   <div class="template-preview">
     <strong>🔮 Moonstone Mandala</strong> (月石の曼荼羅)<br>
-    17-point concentric ring pattern — center + inner ring (6) + outer ring (10)<br>
+    17-point concentric ring pattern<br>
     <em>Intentions: spiritual, calm, healing, love</em>
   </div>
   <div class="template-preview">
     <strong>🌊 Ocean Star</strong> (海の星)<br>
-    13-point star-ring pattern — center + inner ring (4) + outer star (7)<br>
+    13-point star-ring pattern<br>
     <em>Intentions: calm, healing, purification</em>
   </div>
   <span class="tag tag-new">New</span>
@@ -286,36 +493,60 @@
 <div class="card">
   <div class="card-title">Improved Photo Mode</div>
   <div class="card-desc">
-    Full-screen clean view with no circle border — your grid fills the screen like a real photograph.
-    Back button (top-left) and Share button (bottom-right corner) stay subtle and out of the way.
-    Also uses your chosen canvas background.
+    Full-screen clean view with no circle border. Uses your chosen canvas background.
   </div>
   <span class="tag tag-improved">Improved</span>
 </div>
 
 <div class="card">
-  <div class="card-title">Fairy Removed from Garden</div>
+  <div class="card-title">Fairy Removed from Garden Canvas</div>
   <div class="card-desc">
-    The fairy companion avatar has been moved off the grid canvas — it now appears only on
-    your Profile page, keeping the garden clean and focused on your crystal arrangement.
+    The fairy companion has been moved off the grid canvas — it now appears on
+    Profile and Journey screens, keeping the garden clean and focused.
   </div>
   <span class="tag tag-removed">Removed from Garden</span>
 </div>
 
 <!-- ==================== GUIDE ==================== -->
-<h2><span class="emoji">📖</span>Stones Guide</h2>
+<h2><span class="emoji">📖</span>Crystal Guide</h2>
 
 <div class="card">
   <div class="card-title">Crystal of the Day — Now Explains Why</div>
   <div class="card-desc">
-    The daily crystal recommendation now includes a full explanation:
-    current moon phase, its energy description, and how the recommended stone
-    harmonizes with today's lunar cycle. Example:<br><br>
-    <em>"Today's Waxing Crescent 🌒 brings prosperity & courage energy.
-    Energy is building. Focus on growth and take the first steps toward your goals.
-    This stone harmonizes with today's lunar cycle."</em>
+    Daily crystal recommendation includes moon phase explanation and energy description.
   </div>
   <span class="tag tag-improved">Improved</span>
+</div>
+
+<div class="card">
+  <div class="card-title">Crystal Guides Section Removed</div>
+  <div class="card-desc">
+    Removed the AI Insights / Crystal Guides section to simplify the guide screen.
+  </div>
+  <span class="tag tag-removed">Removed</span>
+</div>
+
+<!-- ==================== COMMUNITY ==================== -->
+<h2><span class="emoji">🤝</span>Community</h2>
+
+<div class="card">
+  <div class="card-title">Cleaned Up Gallery</div>
+  <div class="card-desc">
+    Removed individual stone display from gallery items for a cleaner grid-focused view.
+  </div>
+  <span class="tag tag-improved">Improved</span>
+</div>
+
+<!-- ==================== NAMING ==================== -->
+<h2><span class="emoji">✏️</span>Naming Changes</h2>
+
+<div class="card">
+  <div class="card-title">Stones → Crystals</div>
+  <div class="card-desc">
+    Renamed throughout the app: "Stone Garden" → "Crystal Garden", "Stone Collection" → "Crystal Collection",
+    tab labels, tray labels, and all UI copy in both English and Japanese.
+  </div>
+  <span class="tag tag-changed">Changed</span>
 </div>
 
 <!-- ==================== PROFILE ==================== -->
@@ -324,9 +555,7 @@
 <div class="card">
   <div class="card-title">Grid Wallpaper</div>
   <div class="card-desc">
-    Set any saved grid as your profile card background! A wallpaper picker appears
-    with thumbnail previews of all your saved grids. Tap to set, tap again to remove.
-    Your crystal fairy and profile info float above the wallpaper.
+    Set any saved grid as your profile card background with thumbnail picker.
   </div>
   <span class="tag tag-new">New</span>
 </div>
@@ -337,8 +566,7 @@
 <div class="card">
   <div class="card-title">Button Text Contrast</div>
   <div class="card-desc">
-    Fixed white-on-white text on buttons across 9 screens that appeared
-    after the pastel theme change.
+    Fixed white-on-white text on buttons after the pastel theme change.
   </div>
   <span class="tag tag-improved">Fixed</span>
 </div>
@@ -349,9 +577,12 @@
 <h2><span class="emoji">🔜</span>Coming Soon</h2>
 <div class="card">
   <div class="card-desc">
+    • Crystal Sanctuary (Fairyland) — decoratable fairy habitat<br>
+    • Fairy outfit customization (wings, crown, dress, accessories)<br>
+    • Audio playback for healing music tracks<br>
+    • Real crystal photos from contributors<br>
     • Native Android & iOS app versions<br>
     • AR View — place grids on real surfaces<br>
-    • PDF export of grid templates<br>
     • Partner crystal shop integration<br>
     • Social sharing with in-app image generation
   </div>
@@ -365,8 +596,8 @@
 </div>
 
 <p class="footer">
-  石の庭 Ishi no Niwa — Stone Garden<br>
-  Built with ❤ in Tokyo
+  石の庭 Ishi no Niwa — Crystal Garden<br>
+  Built with love in Tokyo
 </p>
 
 </body>
