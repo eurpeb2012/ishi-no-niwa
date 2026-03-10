@@ -42,8 +42,8 @@ export function useResponsive(): ResponsiveValues {
   // Canvas: square, fits within content width minus padding
   const canvasSize = Math.min(
     contentWidth - contentPadding * 2,
-    height * 0.45, // Don't exceed 45% of screen height
-    500 // Hard cap
+    height * 0.55, // Use more screen height for a larger grid
+    560 // Hard cap
   );
 
   const stoneColumns = isDesktop ? 5 : isTablet ? 4 : 3;

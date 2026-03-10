@@ -5,7 +5,7 @@
   },
   "tabs": {
     "garden": "庭",
-    "stones": "石",
+    "stones": "クリスタル",
     "guide": "導き",
     "journey": "道",
     "community": "輪",
@@ -57,7 +57,7 @@
     "gridComplete": "陣が完成しました！",
     "intentionSummary": "陣の意図",
     "removeStone": "削除",
-    "stoneTray": "あなたの石",
+    "stoneTray": "クリスタル",
     "undo": "戻す",
     "redo": "やり直す",
     "ar": "ARビュー",
@@ -66,7 +66,7 @@
     "ambient": "環境音"
   },
   "stones": {
-    "title": "石のコレクション",
+    "title": "クリスタルコレクション",
     "filterBy": "絞り込み",
     "sortBy": "並び替え",
     "all": "すべて",
@@ -94,7 +94,7 @@
     "favoritesTab": "お気に入り"
   },
   "guide": {
-    "title": "石の導き",
+    "title": "クリスタルガイド",
     "helpMe": "陣の作成を助けて",
     "howFeeling": "今日の気分は？",
     "whatFocus": "何に集中したいですか？",

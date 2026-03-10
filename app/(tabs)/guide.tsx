@@ -321,37 +321,6 @@ export default function GuideScreen() {
         </View>
       )}
 
-      {/* AI Insights */}
-      {insights.length > 0 && (
-        <View style={styles.insightsSection}>
-          <Text style={styles.sectionTitle}>{isJp ? "あなたの傾向" : "Your Crystal Insights"}</Text>
-          {insights.map((msg, i) => (
-            <View key={i} style={styles.insightCard}>
-              <Text style={styles.insightText}>{msg}</Text>
-            </View>
-          ))}
-          {topStones.length > 0 && (
-            <View style={styles.topStonesRow}>
-              <Text style={styles.recLabel}>{isJp ? "よく使う石" : "MOST USED STONES"}</Text>
-              <View style={{ flexDirection: "row", gap: spacing.md, marginTop: spacing.xs }}>
-                {topStones.map((ts) => {
-                  const stone = stones.find((s) => s.id === ts.id);
-                  if (!stone) return null;
-                  return (
-                    <View key={ts.id} style={{ alignItems: "center" }}>
-                      <GemStone stoneId={stone.id} colorHex={stone.color_hex} size={28} />
-                      <Text style={{ color: colors.textMuted, fontSize: 9, marginTop: 2 }}>
-                        {isJp ? stone.name_jp : stone.name_en} ({ts.uses})
-                      </Text>
-                    </View>
-                  );
-                })}
-              </View>
-            </View>
-          )}
-        </View>
-      )}
-
       {/* Guided Sessions */}
       <View style={styles.sessionsSection}>
         <Text style={styles.sectionTitle}>{t("guide.guidedSessions")}</Text>

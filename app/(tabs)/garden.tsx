@@ -429,6 +429,7 @@ export default function GardenScreen() {
   const [ambientSound, setAmbientSound] = useState<typeof AMBIENT_SOUNDS[number]>("off");
   const [showAmbientPicker, setShowAmbientPicker] = useState(false);
   const [replaying, setReplaying] = useState(false);
+  const [trayCategory, setTrayCategory] = useState<"crystals" | "flowers" | "sea" | "nature" | "seasonal">("crystals");
 
   const seasonalItems = useMemo(() => getCurrentSeasonalItems(), []);
   const othersItems = useMemo(() => getOthersItems(), []);
@@ -875,28 +876,30 @@ export default function GardenScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Stone Tray + Seasonal Items */}
+      {/* Category tabs + item tray */}
       <View style={styles.trayContainer}>
-        <Text style={styles.trayLabel}>{t("garden.stoneTray")}</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tray}>
-          {seasonalItems.map((item) => (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryRow}>
+          {([
+            { key: "crystals" as const, label: isJp ? "クリスタル" : "Crystals", icon: "💎" },
+            { key: "flowers" as const, label: isJp ? "花" : "Flowers", icon: "🌹" },
+            { key: "sea" as const, label: isJp ? "海" : "Sea & Shells", icon: "🐚" },
+            { key: "nature" as const, label: isJp ? "自然" : "Nature", icon: "🌿" },
+            ...(seasonalItems.length > 0 ? [{ key: "seasonal" as const, label: isJp ? "季節" : "Seasonal", icon: "🌸" }] : []),
+          ]).map((cat) => (
             <TouchableOpacity
-              key={item.id}
-              style={styles.trayStone}
-              onPress={() => handleSeasonalTap(item.id)}
+              key={cat.key}
+              style={[styles.categoryTab, trayCategory === cat.key && styles.categoryTabActive]}
+              onPress={() => setTrayCategory(cat.key)}
             >
-              <View style={styles.trayGemWrap}>
-                <Text style={{ fontSize: 24 }}>{item.glyph}</Text>
-              </View>
-              <Text style={[styles.trayName, { color: colors.primary }]} numberOfLines={1}>
-                {isJp ? item.name_jp : item.name_en}
+              <Text style={styles.categoryIcon}>{cat.icon}</Text>
+              <Text style={[styles.categoryLabel, trayCategory === cat.key && styles.categoryLabelActive]}>
+                {cat.label}
               </Text>
             </TouchableOpacity>
           ))}
-          {seasonalItems.length > 0 && (
-            <View style={{ width: 1, height: 36, backgroundColor: colors.border, alignSelf: "center" }} />
-          )}
-          {availableStones.map((stone) => (
+        </ScrollView>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tray}>
+          {trayCategory === "crystals" && availableStones.map((stone) => (
             <TouchableOpacity
               key={stone.id}
               style={styles.trayStone}
@@ -905,25 +908,37 @@ export default function GardenScreen() {
               <View style={styles.trayGemWrap}>
                 <GemStone stoneId={stone.id} colorHex={stone.color_hex} size={36} />
               </View>
-              <Text style={styles.trayName} numberOfLines={1}>{stone.name_jp}</Text>
+              <Text style={styles.trayName} numberOfLines={1}>{isJp ? stone.name_jp : stone.name_en}</Text>
             </TouchableOpacity>
           ))}
-          {/* Others: flowers, shells, nature */}
-          {othersItems.length > 0 && (
-            <View style={{ width: 1, height: 36, backgroundColor: colors.border, alignSelf: "center" }} />
-          )}
-          {othersItems.map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              style={styles.trayStone}
-              onPress={() => handleSeasonalTap(item.id)}
-            >
-              <View style={styles.trayGemWrap}>
-                <Text style={{ fontSize: 24 }}>{item.glyph}</Text>
-              </View>
-              <Text style={[styles.trayName, { color: colors.secondary }]} numberOfLines={1}>
-                {isJp ? item.name_jp : item.name_en}
-              </Text>
+          {trayCategory === "flowers" && othersItems
+            .filter((it) => ["rose", "white_flower", "tulip", "hibiscus", "lavender"].includes(it.id))
+            .map((item) => (
+              <TouchableOpacity key={item.id} style={styles.trayStone} onPress={() => handleSeasonalTap(item.id)}>
+                <View style={styles.trayGemWrap}><Text style={{ fontSize: 24 }}>{item.glyph}</Text></View>
+                <Text style={[styles.trayName, { color: colors.secondary }]} numberOfLines={1}>{isJp ? item.name_jp : item.name_en}</Text>
+              </TouchableOpacity>
+            ))}
+          {trayCategory === "sea" && othersItems
+            .filter((it) => ["starfish", "shell_spiral", "coral"].includes(it.id))
+            .map((item) => (
+              <TouchableOpacity key={item.id} style={styles.trayStone} onPress={() => handleSeasonalTap(item.id)}>
+                <View style={styles.trayGemWrap}><Text style={{ fontSize: 24 }}>{item.glyph}</Text></View>
+                <Text style={[styles.trayName, { color: colors.secondary }]} numberOfLines={1}>{isJp ? item.name_jp : item.name_en}</Text>
+              </TouchableOpacity>
+            ))}
+          {trayCategory === "nature" && othersItems
+            .filter((it) => ["driftwood", "feather", "leaf"].includes(it.id))
+            .map((item) => (
+              <TouchableOpacity key={item.id} style={styles.trayStone} onPress={() => handleSeasonalTap(item.id)}>
+                <View style={styles.trayGemWrap}><Text style={{ fontSize: 24 }}>{item.glyph}</Text></View>
+                <Text style={[styles.trayName, { color: colors.secondary }]} numberOfLines={1}>{isJp ? item.name_jp : item.name_en}</Text>
+              </TouchableOpacity>
+            ))}
+          {trayCategory === "seasonal" && seasonalItems.map((item) => (
+            <TouchableOpacity key={item.id} style={styles.trayStone} onPress={() => handleSeasonalTap(item.id)}>
+              <View style={styles.trayGemWrap}><Text style={{ fontSize: 24 }}>{item.glyph}</Text></View>
+              <Text style={[styles.trayName, { color: colors.primary }]} numberOfLines={1}>{isJp ? item.name_jp : item.name_en}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -1001,6 +1016,17 @@ const styles = StyleSheet.create({
   energizeText: { color: "#fff", fontWeight: "600" },
   trayContainer: { flex: 1, paddingTop: spacing.xs },
   trayLabel: { color: colors.textMuted, fontSize: fontSize.xs, paddingHorizontal: spacing.lg, marginBottom: spacing.xs },
+  categoryRow: { paddingHorizontal: spacing.md, gap: spacing.xs, marginBottom: spacing.xs },
+  categoryTab: {
+    flexDirection: "row", alignItems: "center", gap: 4,
+    paddingVertical: 4, paddingHorizontal: spacing.sm,
+    borderRadius: borderRadius.full, borderWidth: 1, borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  categoryTabActive: { borderColor: colors.primary, backgroundColor: colors.surfaceLight },
+  categoryIcon: { fontSize: 14 },
+  categoryLabel: { color: colors.textMuted, fontSize: 10, fontWeight: "500" },
+  categoryLabelActive: { color: colors.primary, fontWeight: "600" },
   tray: { paddingHorizontal: spacing.md, gap: spacing.sm },
   trayStone: { alignItems: "center", width: 56 },
   trayGemWrap: { width: 40, height: 40, alignItems: "center", justifyContent: "center" },

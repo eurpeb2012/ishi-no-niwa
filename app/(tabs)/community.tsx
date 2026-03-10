@@ -103,18 +103,6 @@ export default function CommunityScreen() {
                     </Text>
                   </TouchableOpacity>
                 </View>
-                <View style={styles.gridStones}>
-                  {grid.stones.map((sid) => {
-                    const stone = getStone(sid);
-                    if (!stone) return null;
-                    return (
-                      <View key={sid} style={styles.gridStoneItem}>
-                        <GemStone stoneId={stone.id} colorHex={stone.color_hex} size={28} />
-                        <Text style={styles.gridStoneName}>{isJp ? stone.name_jp : stone.name_en}</Text>
-                      </View>
-                    );
-                  })}
-                </View>
                 <Text style={styles.gridIntention}>
                   {t(`intentions.${grid.intention}`)}
                 </Text>

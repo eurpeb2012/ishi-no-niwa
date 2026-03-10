@@ -5,14 +5,14 @@
   },
   "tabs": {
     "garden": "Garden",
-    "stones": "Stones",
+    "stones": "Crystals",
     "guide": "Guide",
     "journey": "Journey",
     "community": "Community",
     "profile": "Profile"
   },
   "auth": {
-    "welcome": "Welcome to the Stone Garden",
+    "welcome": "Welcome to the Crystal Garden",
     "signIn": "Sign In",
     "signUp": "Sign Up",
     "email": "Email",
@@ -45,7 +45,7 @@
     "begin": "Begin Your Journey"
   },
   "garden": {
-    "title": "Stone Garden",
+    "title": "Crystal Garden",
     "newGrid": "New Grid",
     "saveGrid": "Save",
     "snapToGrid": "Snap",
@@ -57,7 +57,7 @@
     "gridComplete": "Grid Complete!",
     "intentionSummary": "Your Grid's Intention",
     "removeStone": "Remove",
-    "stoneTray": "Your Stones",
+    "stoneTray": "Your Crystals",
     "undo": "Undo",
     "redo": "Redo",
     "ar": "AR View",
@@ -66,7 +66,7 @@
     "ambient": "Ambient"
   },
   "stones": {
-    "title": "Stone Collection",
+    "title": "Crystal Collection",
     "filterBy": "Filter by",
     "sortBy": "Sort by",
     "all": "All",
@@ -94,7 +94,7 @@
     "favoritesTab": "Favorites"
   },
   "guide": {
-    "title": "Stone Guide",
+    "title": "Crystal Guide",
     "helpMe": "Help me build a grid",
     "howFeeling": "How are you feeling today?",
     "whatFocus": "What would you like to focus on?",
