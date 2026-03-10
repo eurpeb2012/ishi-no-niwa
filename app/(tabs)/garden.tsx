@@ -87,7 +87,7 @@ interface DraggableStoneProps {
   index: number;
   stone: { id: string; name_jp: string; color_hex: string };
   canvasSize: number;
-  onDragEnd: (index: number, newX: number, newY: number) => void;
+  onDragEnd: (index: number, newX: number, newY: number, newRotation?: number) => void;
   onSelect: (index: number) => void;
   selected: boolean;
   pulsing: boolean;
@@ -102,7 +102,10 @@ function DraggableStone({
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const scale = useSharedValue(1);
-  const rotation = useSharedValue(0);
+  const persistedRotation = useSharedValue(placement.rotation || 0);
+  const activeRotation = useSharedValue(0);
+  const savedRotation = useSharedValue(placement.rotation || 0);
+  const dragTilt = useSharedValue(0);
   const glowOpacity = useSharedValue(0);
   const zIdx = useSharedValue(0);
   const savedTranslateX = useSharedValue(0);
@@ -111,6 +114,11 @@ function DraggableStone({
 
   const baseLeft = placement.x * canvasSize - gemW / 2;
   const baseTop = placement.y * canvasSize - gemH / 2;
+
+  useEffect(() => {
+    persistedRotation.value = placement.rotation || 0;
+    savedRotation.value = placement.rotation || 0;
+  }, [placement.rotation]);
 
   useEffect(() => {
     if (pulsing) {
@@ -153,18 +161,19 @@ function DraggableStone({
     .onUpdate((event) => {
       translateX.value = savedTranslateX.value + event.translationX;
       translateY.value = savedTranslateY.value + event.translationY;
-      rotation.value = event.translationX * 0.15;
+      dragTilt.value = event.translationX * 0.15;
     })
     .onEnd(() => {
       scale.value = withTiming(1, { duration: 100 });
       glowOpacity.value = withTiming(0, { duration: 300 });
-      rotation.value = withTiming(0, { duration: 200 });
+      dragTilt.value = withTiming(0, { duration: 200 });
       zIdx.value = 0;
       const newPixelX = baseLeft + gemW / 2 + translateX.value;
       const newPixelY = baseTop + gemH / 2 + translateY.value;
       const clampedX = Math.max(0, Math.min(newPixelX / canvasSize, 1));
       const clampedY = Math.max(0, Math.min(newPixelY / canvasSize, 1));
-      runOnJS(onDragEnd)(index, clampedX, clampedY);
+      const finalRot = persistedRotation.value;
+      runOnJS(onDragEnd)(index, clampedX, clampedY, finalRot);
       runOnJS(triggerHaptic)();
       translateX.value = 0;
       translateY.value = 0;
@@ -173,17 +182,37 @@ function DraggableStone({
     })
     .minDistance(5);
 
+  const rotationGesture = Gesture.Rotation()
+    .onStart(() => {
+      savedRotation.value = persistedRotation.value;
+      zIdx.value = 100;
+    })
+    .onUpdate((event) => {
+      activeRotation.value = event.rotation * (180 / Math.PI);
+      persistedRotation.value = savedRotation.value + activeRotation.value;
+    })
+    .onEnd(() => {
+      activeRotation.value = 0;
+      savedRotation.value = persistedRotation.value;
+      zIdx.value = 0;
+      const finalRot = persistedRotation.value;
+      runOnJS(onDragEnd)(index, placement.x, placement.y, finalRot);
+    });
+
   const tapGesture = Gesture.Tap()
     .onEnd(() => { runOnJS(handleTap)(index); });
 
-  const composedGesture = Gesture.Race(panGesture, tapGesture);
+  const composedGesture = Gesture.Race(
+    Gesture.Simultaneous(panGesture, rotationGesture),
+    tapGesture
+  );
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
       { translateX: translateX.value },
       { translateY: translateY.value },
       { scale: scale.value * pulseAnim.value },
-      { rotate: `${rotation.value}deg` },
+      { rotate: `${persistedRotation.value + dragTilt.value}deg` },
     ],
     zIndex: zIdx.value,
   }));
@@ -228,6 +257,149 @@ function DraggableStone({
           />
         )}
         <GemStone stoneId={stone.id} colorHex={stone.color_hex} useNatural />
+      </Animated.View>
+    </GestureDetector>
+  );
+}
+
+// Draggable decorative item (flowers, shells, etc.) on canvas
+interface DraggableDecorProps {
+  placement: StonePlacement;
+  index: number;
+  glyph: string;
+  canvasSize: number;
+  onDragEnd: (index: number, newX: number, newY: number, newRotation?: number) => void;
+  onSelect: (index: number) => void;
+  selected: boolean;
+  photoMode: boolean;
+  hapticsEnabled: boolean;
+}
+
+function DraggableDecorItem({
+  placement, index, glyph, canvasSize, onDragEnd, onSelect, selected, photoMode, hapticsEnabled,
+}: DraggableDecorProps) {
+  const itemSize = 36;
+  const translateX = useSharedValue(0);
+  const translateY = useSharedValue(0);
+  const scale = useSharedValue(1);
+  const persistedRotation = useSharedValue(placement.rotation || 0);
+  const activeRotation = useSharedValue(0);
+  const savedRotation = useSharedValue(placement.rotation || 0);
+  const zIdx = useSharedValue(0);
+  const savedTranslateX = useSharedValue(0);
+  const savedTranslateY = useSharedValue(0);
+
+  const baseLeft = placement.x * canvasSize - itemSize / 2;
+  const baseTop = placement.y * canvasSize - itemSize / 2;
+
+  useEffect(() => {
+    persistedRotation.value = placement.rotation || 0;
+    savedRotation.value = placement.rotation || 0;
+  }, [placement.rotation]);
+
+  const triggerHaptic = useCallback(() => {
+    if (hapticsEnabled && Platform.OS !== "web") {
+      Vibration.vibrate(10);
+    }
+  }, [hapticsEnabled]);
+
+  const handleTap = useCallback(
+    (idx: number) => { if (!photoMode) onSelect(idx); },
+    [onSelect, photoMode]
+  );
+
+  const panGesture = Gesture.Pan()
+    .onStart(() => {
+      savedTranslateX.value = translateX.value;
+      savedTranslateY.value = translateY.value;
+      scale.value = withTiming(1.2, { duration: 100 });
+      zIdx.value = 100;
+      runOnJS(triggerHaptic)();
+    })
+    .onUpdate((event) => {
+      translateX.value = savedTranslateX.value + event.translationX;
+      translateY.value = savedTranslateY.value + event.translationY;
+    })
+    .onEnd(() => {
+      scale.value = withTiming(1, { duration: 100 });
+      zIdx.value = 0;
+      const newPixelX = baseLeft + itemSize / 2 + translateX.value;
+      const newPixelY = baseTop + itemSize / 2 + translateY.value;
+      const clampedX = Math.max(0, Math.min(newPixelX / canvasSize, 1));
+      const clampedY = Math.max(0, Math.min(newPixelY / canvasSize, 1));
+      const finalRot = persistedRotation.value;
+      runOnJS(onDragEnd)(index, clampedX, clampedY, finalRot);
+      runOnJS(triggerHaptic)();
+      translateX.value = 0;
+      translateY.value = 0;
+      savedTranslateX.value = 0;
+      savedTranslateY.value = 0;
+    })
+    .minDistance(5);
+
+  const rotationGesture = Gesture.Rotation()
+    .onStart(() => {
+      savedRotation.value = persistedRotation.value;
+      zIdx.value = 100;
+    })
+    .onUpdate((event) => {
+      activeRotation.value = event.rotation * (180 / Math.PI);
+      persistedRotation.value = savedRotation.value + activeRotation.value;
+    })
+    .onEnd(() => {
+      activeRotation.value = 0;
+      savedRotation.value = persistedRotation.value;
+      zIdx.value = 0;
+      const finalRot = persistedRotation.value;
+      runOnJS(onDragEnd)(index, placement.x, placement.y, finalRot);
+    });
+
+  const tapGesture = Gesture.Tap()
+    .onEnd(() => { runOnJS(handleTap)(index); });
+
+  const composedGesture = Gesture.Race(
+    Gesture.Simultaneous(panGesture, rotationGesture),
+    tapGesture
+  );
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: translateX.value },
+      { translateY: translateY.value },
+      { scale: scale.value },
+      { rotate: `${persistedRotation.value}deg` },
+    ],
+    zIndex: zIdx.value,
+  }));
+
+  return (
+    <GestureDetector gesture={composedGesture}>
+      <Animated.View
+        style={[
+          {
+            position: "absolute",
+            left: baseLeft,
+            top: baseTop,
+            width: itemSize,
+            height: itemSize,
+            alignItems: "center",
+            justifyContent: "center",
+          },
+          animatedStyle,
+        ]}
+      >
+        {selected && !photoMode && (
+          <View
+            style={{
+              position: "absolute",
+              top: -3, left: -3, right: -3, bottom: -3,
+              borderRadius: itemSize,
+              borderWidth: 2,
+              borderColor: colors.error,
+            }}
+          />
+        )}
+        <Text style={{ fontSize: 28 }}>{glyph}</Text>
       </Animated.View>
     </GestureDetector>
   );
@@ -346,8 +518,10 @@ export default function GardenScreen() {
   );
 
   const handleDragEnd = useCallback(
-    (index: number, newX: number, newY: number) => {
-      canvas.updatePlacement(index, { x: snap(newX), y: snap(newY) });
+    (index: number, newX: number, newY: number, newRotation?: number) => {
+      const updates: Partial<StonePlacement> = { x: snap(newX), y: snap(newY) };
+      if (newRotation !== undefined) updates.rotation = newRotation;
+      canvas.updatePlacement(index, updates);
     },
     [canvas, snap]
   );
@@ -451,13 +625,11 @@ export default function GardenScreen() {
               const item = allItems.find((si) => si.id === itemId);
               if (!item) return null;
               return (
-                <View key={`seasonal-${i}`} style={{
-                  position: "absolute",
-                  left: placement.x * photoSize - 16,
-                  top: placement.y * photoSize - 16,
-                }}>
-                  <Text style={{ fontSize: 28 }}>{item.glyph}</Text>
-                </View>
+                <DraggableDecorItem
+                  key={`decor-${i}`} placement={placement} index={i} glyph={item.glyph}
+                  canvasSize={photoSize} onDragEnd={handleDragEnd} onSelect={handleSelect}
+                  selected={false} photoMode hapticsEnabled={false}
+                />
               );
             }
             const stone = stones.find((s) => s.id === stoneId);
@@ -581,13 +753,11 @@ export default function GardenScreen() {
               const item = allItems.find((si) => si.id === itemId);
               if (!item) return null;
               return (
-                <View key={`seasonal-${i}`} style={{
-                  position: "absolute",
-                  left: placement.x * CANVAS_SIZE - 16,
-                  top: placement.y * CANVAS_SIZE - 16,
-                }}>
-                  <Text style={{ fontSize: 28 }}>{item.glyph}</Text>
-                </View>
+                <DraggableDecorItem
+                  key={`decor-${i}`} placement={placement} index={i} glyph={item.glyph}
+                  canvasSize={CANVAS_SIZE} onDragEnd={handleDragEnd} onSelect={handleSelect}
+                  selected={selectedIdx === i} photoMode={false} hapticsEnabled={hapticsEnabled}
+                />
               );
             }
             const stone = stones.find((s) => s.id === stoneId);
