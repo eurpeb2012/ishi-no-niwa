@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -15,7 +15,10 @@ import { useProgressionStore } from "../../stores/progressionStore";
 import { useCanvasStore } from "../../stores/canvasStore";
 import { useStoneStore } from "../../stores/stoneStore";
 import { useJournalStore, type Mood } from "../../stores/journalStore";
+import { useFairyStore, FAIRY_COLORS, EVOLUTION_STAGES } from "../../stores/fairyStore";
+import { useQuestStore } from "../../stores/questStore";
 import { GemStone } from "../../components/common/GemStone";
+import { CrystalFairy } from "../../components/common/CrystalFairy";
 import { SponsoredAd } from "../../components/common/SponsoredAd";
 import { getAdForPlacement } from "../../data/mockAds";
 import { XP_TABLE, XP_REWARDS } from "../../types";
@@ -69,7 +72,52 @@ export default function JourneyScreen() {
   const [journalMood, setJournalMood] = useState<Mood | null>(null);
   const [journalNote, setJournalNote] = useState("");
 
+  const fairy = useFairyStore();
+  const questStore = useQuestStore();
+  const [showCompletedQuests, setShowCompletedQuests] = useState(false);
+
   const isJp = i18n.language === "jp";
+
+  // Sync quest progress from current state
+  useEffect(() => {
+    // Build grid intention counts from saved grids
+    const gridIntentionCounts: Record<string, number> = {};
+    const stoneUseCounts: Record<string, number> = {};
+    for (const grid of savedGrids) {
+      if (grid.intention) {
+        gridIntentionCounts[grid.intention] = (gridIntentionCounts[grid.intention] || 0) + 1;
+      }
+      for (const p of grid.placements) {
+        stoneUseCounts[p.stoneId] = (stoneUseCounts[p.stoneId] || 0) + 1;
+      }
+    }
+
+    const newlyCompleted = questStore.syncFromProgress({
+      gridsCompleted: progress.gridsCompletedCount,
+      sessionsCompleted: progress.guidedSessionsCount,
+      streakDays: progress.currentStreakDays,
+      journalEntries: journalEntries.length,
+      gridIntentionCounts,
+      stoneUseCounts,
+    });
+
+    // Award rewards for newly completed quests
+    for (const questId of newlyCompleted) {
+      const quest = require("../../data/quests").ALL_QUESTS.find((q: any) => q.id === questId);
+      if (quest) {
+        addXP(quest.xpReward);
+        fairy.addEnergy(quest.energyReward);
+        fairy.addBond(quest.bondReward);
+      }
+    }
+
+    // Update fairy evolution based on current level
+    fairy.updateEvolution(progress.level);
+    fairy.updateCrystalStage(progress.gridsCompletedCount);
+  }, [progress.gridsCompletedCount, progress.guidedSessionsCount, progress.currentStreakDays, journalEntries.length, savedGrids.length]);
+
+  const activeQuests = questStore.getActiveQuests(progress.level);
+  const completedQuests = questStore.getCompletedQuests();
 
   const claimDailyGem = useCallback(() => {
     const locked = allStones.filter((s) => !progress.stonesUnlocked.includes(s.id));
@@ -176,6 +224,91 @@ export default function JourneyScreen() {
             </Text>
           </TouchableOpacity>
         )}
+      </View>
+
+      {/* Fairy & Energy (#11, #12, #16) */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t("fairy.title")}</Text>
+        <View style={styles.fairyCard}>
+          <CrystalFairy
+            colorHex={FAIRY_COLORS[fairy.colorVariant].hex}
+            size={72}
+            level={progress.level}
+            evolutionStage={fairy.evolutionStage}
+            crystalStage={fairy.crystalStage}
+            isStatic
+          />
+          <View style={styles.fairyInfo}>
+            <Text style={styles.fairyEvoName}>
+              {isJp ? EVOLUTION_STAGES[fairy.evolutionStage].name_jp : EVOLUTION_STAGES[fairy.evolutionStage].name_en}
+            </Text>
+            <View style={styles.fairyStatRow}>
+              <Text style={styles.fairyStatLabel}>{"\u2764"} {t("fairy.bond")}</Text>
+              <Text style={styles.fairyStatVal}>{fairy.bondLevel}/100</Text>
+            </View>
+            <View style={styles.fairyBondBar}>
+              <View style={[styles.fairyBondFill, { width: `${fairy.bondLevel}%` }]} />
+            </View>
+            <View style={styles.fairyStatRow}>
+              <Text style={styles.fairyStatLabel}>{"\u26A1"} {t("energy.title")}</Text>
+              <Text style={styles.fairyStatVal}>{fairy.totalEnergy}</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+
+      {/* Quests (#10) */}
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>{t("quests.active")}</Text>
+          {completedQuests.length > 0 && (
+            <TouchableOpacity onPress={() => setShowCompletedQuests(!showCompletedQuests)}>
+              <Text style={styles.addButton}>
+                {t("quests.completed")} ({completedQuests.length})
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {activeQuests.length === 0 ? (
+          <Text style={styles.questEmpty}>{t("quests.noActive")}</Text>
+        ) : (
+          activeQuests.slice(0, 5).map(({ quest, progress: qp }) => {
+            const pct = Math.min(qp.current / quest.target, 1);
+            return (
+              <View key={quest.id} style={styles.questCard}>
+                <View style={styles.questHeader}>
+                  <Text style={styles.questName}>{isJp ? quest.name_jp : quest.name_en}</Text>
+                  <Text style={styles.questTier}>
+                    {"★".repeat(quest.tier)}
+                  </Text>
+                </View>
+                <Text style={styles.questDesc}>{isJp ? quest.desc_jp : quest.desc_en}</Text>
+                <View style={styles.questProgressRow}>
+                  <View style={styles.questBar}>
+                    <View style={[styles.questBarFill, { width: `${pct * 100}%` }]} />
+                  </View>
+                  <Text style={styles.questProgressText}>{qp.current}/{quest.target}</Text>
+                </View>
+                <View style={styles.questRewards}>
+                  <Text style={styles.questRewardItem}>{"\u2728"} {quest.xpReward} {t("quests.xp")}</Text>
+                  <Text style={styles.questRewardItem}>{"\u26A1"} {quest.energyReward}</Text>
+                  <Text style={styles.questRewardItem}>{"\u2764"} +{quest.bondReward}</Text>
+                </View>
+              </View>
+            );
+          })
+        )}
+
+        {showCompletedQuests && completedQuests.map(({ quest }) => (
+          <View key={quest.id} style={[styles.questCard, styles.questCompleted]}>
+            <View style={styles.questHeader}>
+              <Text style={[styles.questName, { color: colors.success }]}>{isJp ? quest.name_jp : quest.name_en}</Text>
+              <Text style={styles.questCompleteCheck}>{"\u2713"}</Text>
+            </View>
+            <Text style={styles.questDesc}>{isJp ? quest.desc_jp : quest.desc_en}</Text>
+          </View>
+        ))}
       </View>
 
       {/* Crystal Journal */}
@@ -516,4 +649,37 @@ const styles = StyleSheet.create({
   challengeBarFill: { height: 6, backgroundColor: colors.primary, borderRadius: 3 },
   challengeProgress: { color: colors.primary, fontSize: fontSize.sm, fontWeight: "600" },
   challengeComplete: { color: colors.success, fontSize: fontSize.sm, fontWeight: "600", marginTop: spacing.sm, textAlign: "center" },
+
+  // Fairy (#11, #12)
+  fairyCard: {
+    flexDirection: "row", alignItems: "center", gap: spacing.md,
+    backgroundColor: colors.surfaceLight, borderRadius: borderRadius.lg, padding: spacing.md,
+    borderWidth: 1, borderColor: colors.border,
+  },
+  fairyInfo: { flex: 1 },
+  fairyEvoName: { color: colors.primary, fontSize: fontSize.md, fontWeight: "700", marginBottom: spacing.xs },
+  fairyStatRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  fairyStatLabel: { color: colors.textSecondary, fontSize: fontSize.xs },
+  fairyStatVal: { color: colors.textPrimary, fontSize: fontSize.xs, fontWeight: "600" },
+  fairyBondBar: { width: "100%", height: 4, backgroundColor: colors.background, borderRadius: 2, overflow: "hidden", marginVertical: 4 },
+  fairyBondFill: { height: 4, backgroundColor: colors.primary, borderRadius: 2 },
+
+  // Quests (#10)
+  questEmpty: { color: colors.textMuted, fontSize: fontSize.sm, fontStyle: "italic", textAlign: "center", paddingVertical: spacing.lg },
+  questCard: {
+    backgroundColor: colors.surfaceLight, borderRadius: borderRadius.md, padding: spacing.md,
+    marginBottom: spacing.sm, borderWidth: 1, borderColor: colors.border,
+  },
+  questCompleted: { opacity: 0.6, borderColor: colors.success },
+  questHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  questName: { color: colors.textPrimary, fontSize: fontSize.md, fontWeight: "600", flex: 1 },
+  questTier: { color: colors.xp, fontSize: fontSize.xs },
+  questDesc: { color: colors.textSecondary, fontSize: fontSize.xs, marginTop: 2, marginBottom: spacing.sm },
+  questProgressRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
+  questBar: { flex: 1, height: 6, backgroundColor: colors.background, borderRadius: 3, overflow: "hidden" },
+  questBarFill: { height: 6, backgroundColor: colors.primary, borderRadius: 3 },
+  questProgressText: { color: colors.primary, fontSize: fontSize.xs, fontWeight: "600", minWidth: 40, textAlign: "right" },
+  questRewards: { flexDirection: "row", gap: spacing.md, marginTop: spacing.xs },
+  questRewardItem: { color: colors.textMuted, fontSize: 9 },
+  questCompleteCheck: { color: colors.success, fontSize: fontSize.lg, fontWeight: "700" },
 });

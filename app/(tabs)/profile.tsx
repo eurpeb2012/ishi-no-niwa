@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Platform } from "react-native";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
@@ -8,9 +9,11 @@ import { useStoneStore } from "../../stores/stoneStore";
 import { useProgressionStore } from "../../stores/progressionStore";
 import { useCanvasStore } from "../../stores/canvasStore";
 import { useCollectionStore } from "../../stores/collectionStore";
+import { useFairyStore, FAIRY_COLORS, EVOLUTION_STAGES, CRYSTAL_STAGES } from "../../stores/fairyStore";
 import { GemStone } from "../../components/common/GemStone";
 import { CrystalFairy } from "../../components/common/CrystalFairy";
 import { getZodiacForBirthMonth } from "../../data/zodiac";
+import { IAP_PRODUCTS } from "../../data/iapProducts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ProfileScreen() {
@@ -24,6 +27,7 @@ export default function ProfileScreen() {
   const level = useProgressionStore((s) => s.progress.level);
   const collection = useCollectionStore();
   const savedGrids = useCanvasStore((s) => s.savedGrids);
+  const fairy = useFairyStore();
   const isJp = i18n.language === "jp";
 
   const avatarStone = user ? getStone(user.avatarStoneId) : null;
@@ -32,9 +36,30 @@ export default function ProfileScreen() {
   const allStones = useStoneStore((s) => s.stones);
   const profileGrid = savedGrids.find((g) => g.id === user?.profileGridId) || null;
 
+  // Wallpaper adjustments (#9)
+  const wallpaperScale = user?.wallpaperScale ?? 1;
+  const wallpaperRotation = user?.wallpaperRotation ?? 0;
+
+  const [showShop, setShowShop] = useState(false);
+  const [shopTab, setShopTab] = useState<"crystals" | "energy" | "outfits">("crystals");
+
   const handleSetWallpaper = (gridId: string) => {
     const newId = user?.profileGridId === gridId ? null : gridId;
     updateProfile({ profileGridId: newId });
+  };
+
+  const adjustWallpaperScale = (delta: number) => {
+    const newScale = Math.max(0.5, Math.min(2.5, wallpaperScale + delta));
+    updateProfile({ wallpaperScale: newScale });
+  };
+
+  const adjustWallpaperRotation = (delta: number) => {
+    const newRotation = (wallpaperRotation + delta) % 360;
+    updateProfile({ wallpaperRotation: newRotation });
+  };
+
+  const resetWallpaper = () => {
+    updateProfile({ wallpaperScale: 1, wallpaperRotation: 0, wallpaperOffsetX: 0, wallpaperOffsetY: 0 });
   };
 
   const toggleLanguage = () => {
@@ -52,33 +77,35 @@ export default function ProfileScreen() {
         window.localStorage.removeItem("ishi-insights");
         window.localStorage.removeItem("ishi-collection");
         window.localStorage.removeItem("ishi-journal");
+        window.localStorage.removeItem("ishi-fairy");
+        window.localStorage.removeItem("ishi-quests");
       } catch (_) {}
       window.location.replace("/ishi-no-niwa/");
     } else {
-      await AsyncStorage.multiRemove([
+      const keys = [
         "ishi-auth", "ishi-progression", "ishi-canvas",
         "ishi-insights", "ishi-collection", "ishi-journal",
-      ]);
+        "ishi-fairy", "ishi-quests",
+      ];
+      for (const key of keys) await AsyncStorage.removeItem(key);
       signOut();
       router.replace("/(auth)/login");
     }
   };
 
-  const handleShop = () => {
+  const handleIAPPurchase = (productId: string) => {
+    const product = IAP_PRODUCTS.find((p) => p.id === productId);
+    if (!product) return;
     if (Platform.OS === "web" && typeof window !== "undefined") {
       window.alert(isJp
-        ? "パートナーストアからクリスタルを購入（近日対応）"
-        : "Browse partner crystal shops (coming soon)");
+        ? `${product.name_jp} (${product.price}) — 近日対応`
+        : `${product.name_en} (${product.price}) — Coming soon`);
     }
   };
 
-  const handlePrint = () => {
-    if (Platform.OS === "web" && typeof window !== "undefined") {
-      window.alert(isJp
-        ? "グリッドテンプレートをPDFで印刷（近日対応）"
-        : "Print your grid template as PDF (coming soon)");
-    }
-  };
+  const fairyColorInfo = FAIRY_COLORS[fairy.colorVariant];
+  const evoInfo = EVOLUTION_STAGES[fairy.evolutionStage];
+  const crystalInfo = CRYSTAL_STAGES[fairy.crystalStage];
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={[styles.content, { paddingHorizontal: contentPadding }]}>
@@ -86,9 +113,13 @@ export default function ProfileScreen() {
 
       {/* Profile Card with optional grid wallpaper */}
       <View style={styles.profileCard}>
-        {/* Grid wallpaper background */}
         {profileGrid && (
-          <View style={styles.wallpaperBg}>
+          <View style={[styles.wallpaperBg, {
+            transform: [
+              { scale: wallpaperScale },
+              { rotate: `${wallpaperRotation}deg` },
+            ],
+          }]}>
             {profileGrid.placements.map((p, i) => {
               const s = allStones.find((st) => st.id === p.stoneId);
               if (!s) return null;
@@ -97,8 +128,7 @@ export default function ProfileScreen() {
                   position: "absolute",
                   left: `${p.x * 100}%`,
                   top: `${p.y * 100}%`,
-                  marginLeft: -10,
-                  marginTop: -10,
+                  marginLeft: -10, marginTop: -10,
                   opacity: 0.35,
                 }}>
                   <GemStone stoneId={s.id} colorHex={s.color_hex} size={20} />
@@ -109,7 +139,14 @@ export default function ProfileScreen() {
         )}
         {avatarStone ? (
           <View style={{ alignItems: "center", zIndex: 2 }}>
-            <CrystalFairy colorHex={avatarStone.color_hex} size={80} level={level} isStatic />
+            <CrystalFairy
+              colorHex={fairyColorInfo.hex}
+              size={80}
+              level={level}
+              isStatic
+              evolutionStage={fairy.evolutionStage}
+              crystalStage={fairy.crystalStage}
+            />
             <View style={{ marginTop: 4 }}>
               <GemStone stoneId={avatarStone.id} colorHex={avatarStone.color_hex} size={36} />
             </View>
@@ -122,6 +159,41 @@ export default function ProfileScreen() {
         <Text style={[styles.displayName, { zIndex: 2 }]}>{user?.displayName || "Guest"}</Text>
         <Text style={[styles.email, { zIndex: 2 }]}>{user?.email}</Text>
         <Text style={[styles.levelBadge, { zIndex: 2 }]}>{levelTitle}</Text>
+      </View>
+
+      {/* Fairy Status Card (#11, #12, #16) */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t("fairy.title")}</Text>
+        <View style={styles.fairyStatusCard}>
+          <View style={styles.fairyStatusRow}>
+            <View style={styles.fairyStatItem}>
+              <Text style={styles.fairyStatGlyph}>{evoInfo.glyph}</Text>
+              <Text style={styles.fairyStatValue}>{isJp ? evoInfo.name_jp : evoInfo.name_en}</Text>
+              <Text style={styles.fairyStatLabel}>{t("fairy.evolution")}</Text>
+            </View>
+            <View style={styles.fairyStatItem}>
+              <Text style={styles.fairyStatGlyph}>{"\u{1F48E}"}</Text>
+              <Text style={styles.fairyStatValue}>{isJp ? crystalInfo.name_jp : crystalInfo.name_en}</Text>
+              <Text style={styles.fairyStatLabel}>{t("fairy.crystal" + fairy.crystalStage)}</Text>
+            </View>
+          </View>
+          <View style={styles.fairyStatusRow}>
+            <View style={styles.fairyStatItem}>
+              <Text style={styles.fairyStatGlyph}>{"\u2764"}</Text>
+              <Text style={styles.fairyStatValue}>{fairy.bondLevel}/100</Text>
+              <Text style={styles.fairyStatLabel}>{t("fairy.bond")}</Text>
+            </View>
+            <View style={styles.fairyStatItem}>
+              <Text style={styles.fairyStatGlyph}>{"\u26A1"}</Text>
+              <Text style={styles.fairyStatValue}>{fairy.totalEnergy}</Text>
+              <Text style={styles.fairyStatLabel}>{t("fairy.energy")}</Text>
+            </View>
+          </View>
+          {/* Bond bar */}
+          <View style={styles.bondBarBg}>
+            <View style={[styles.bondBarFill, { width: `${fairy.bondLevel}%` }]} />
+          </View>
+        </View>
       </View>
 
       {/* Zodiac & Birth Crystals */}
@@ -176,7 +248,7 @@ export default function ProfileScreen() {
         </View>
       </View>
 
-      {/* Profile Wallpaper — choose a saved grid */}
+      {/* Profile Wallpaper — choose a saved grid (#9) */}
       {savedGrids.length > 0 && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{isJp ? "プロフィール壁紙" : "Profile Wallpaper"}</Text>
@@ -197,10 +269,8 @@ export default function ProfileScreen() {
                     return (
                       <View key={i} style={{
                         position: "absolute",
-                        left: `${p.x * 100}%`,
-                        top: `${p.y * 100}%`,
-                        marginLeft: -5,
-                        marginTop: -5,
+                        left: `${p.x * 100}%`, top: `${p.y * 100}%`,
+                        marginLeft: -5, marginTop: -5,
                       }}>
                         <GemStone stoneId={s.id} colorHex={s.color_hex} size={10} />
                       </View>
@@ -213,8 +283,99 @@ export default function ProfileScreen() {
               </TouchableOpacity>
             ))}
           </ScrollView>
+
+          {/* Wallpaper size/angle controls (#9) */}
+          {profileGrid && (
+            <View style={styles.wallpaperControls}>
+              <View style={styles.controlRow}>
+                <Text style={styles.controlLabel}>{t("wallpaper.scale")}</Text>
+                <TouchableOpacity style={styles.controlBtn} onPress={() => adjustWallpaperScale(-0.25)}>
+                  <Text style={styles.controlBtnText}>-</Text>
+                </TouchableOpacity>
+                <Text style={styles.controlValue}>{(wallpaperScale * 100).toFixed(0)}%</Text>
+                <TouchableOpacity style={styles.controlBtn} onPress={() => adjustWallpaperScale(0.25)}>
+                  <Text style={styles.controlBtnText}>+</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.controlRow}>
+                <Text style={styles.controlLabel}>{t("wallpaper.rotation")}</Text>
+                <TouchableOpacity style={styles.controlBtn} onPress={() => adjustWallpaperRotation(-15)}>
+                  <Text style={styles.controlBtnText}>{"\u21BA"}</Text>
+                </TouchableOpacity>
+                <Text style={styles.controlValue}>{wallpaperRotation}°</Text>
+                <TouchableOpacity style={styles.controlBtn} onPress={() => adjustWallpaperRotation(15)}>
+                  <Text style={styles.controlBtnText}>{"\u21BB"}</Text>
+                </TouchableOpacity>
+              </View>
+              <TouchableOpacity style={styles.resetBtn} onPress={resetWallpaper}>
+                <Text style={styles.resetBtnText}>{t("wallpaper.reset")}</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       )}
+
+      {/* Crystal Shop (#13) */}
+      <View style={styles.section}>
+        <TouchableOpacity style={styles.sectionHeader} onPress={() => setShowShop(!showShop)}>
+          <Text style={styles.sectionTitle}>{t("shop.title")}</Text>
+          <Text style={styles.expandArrow}>{showShop ? "\u25B2" : "\u25BC"}</Text>
+        </TouchableOpacity>
+
+        {showShop && (
+          <View style={styles.shopContainer}>
+            {/* Shop tabs */}
+            <View style={styles.shopTabs}>
+              {(["crystals", "energy", "outfits"] as const).map((tab) => (
+                <TouchableOpacity
+                  key={tab}
+                  style={[styles.shopTab, shopTab === tab && styles.shopTabActive]}
+                  onPress={() => setShopTab(tab)}
+                >
+                  <Text style={[styles.shopTabText, shopTab === tab && styles.shopTabTextActive]}>
+                    {tab === "crystals" ? t("shop.crystalPacks")
+                      : tab === "energy" ? t("shop.energyPacks")
+                      : t("shop.fairyOutfits")}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Shop items */}
+            {IAP_PRODUCTS
+              .filter((p) =>
+                shopTab === "crystals" ? (p.type === "crystal_pack" || p.type === "rare_crystal")
+                : shopTab === "energy" ? p.type === "energy_pack"
+                : p.type === "fairy_outfit"
+              )
+              .map((product) => (
+                <View key={product.id} style={styles.shopItem}>
+                  <Text style={styles.shopItemGlyph}>{product.glyph}</Text>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.shopItemName}>{isJp ? product.name_jp : product.name_en}</Text>
+                    <Text style={styles.shopItemDesc}>{isJp ? product.desc_jp : product.desc_en}</Text>
+                    {product.stoneIds && (
+                      <View style={styles.shopItemStones}>
+                        {product.stoneIds.slice(0, 5).map((sid) => {
+                          const st = getStone(sid);
+                          return st ? (
+                            <GemStone key={sid} stoneId={st.id} colorHex={st.color_hex} size={16} />
+                          ) : null;
+                        })}
+                        {(product.stoneIds.length > 5) && (
+                          <Text style={styles.shopItemMore}>+{product.stoneIds.length - 5}</Text>
+                        )}
+                      </View>
+                    )}
+                  </View>
+                  <TouchableOpacity style={styles.buyButton} onPress={() => handleIAPPurchase(product.id)}>
+                    <Text style={styles.buyButtonText}>{product.price}</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+          </View>
+        )}
+      </View>
 
       {/* Subscription */}
       <View style={styles.section}>
@@ -230,18 +391,6 @@ export default function ProfileScreen() {
             <Text style={styles.upgradeText}>{t("profile.upgrade")}</Text>
           </TouchableOpacity>
         )}
-      </View>
-
-      {/* Quick Actions */}
-      <View style={styles.section}>
-        <TouchableOpacity style={styles.row} onPress={handleShop}>
-          <Text style={styles.rowLabel}>{t("profile.shop")}</Text>
-          <Text style={styles.rowValue}>{"\u2192"}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.row} onPress={handlePrint}>
-          <Text style={styles.rowLabel}>{t("profile.printGrid")}</Text>
-          <Text style={styles.rowValue}>{"\u2192"}</Text>
-        </TouchableOpacity>
       </View>
 
       {/* Settings */}
@@ -295,6 +444,25 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.full, overflow: "hidden",
   },
 
+  // Fairy status
+  fairyStatusCard: {
+    backgroundColor: colors.surfaceLight, borderRadius: borderRadius.md, padding: spacing.md,
+    borderWidth: 1, borderColor: colors.border,
+  },
+  fairyStatusRow: { flexDirection: "row", gap: spacing.sm, marginBottom: spacing.sm },
+  fairyStatItem: {
+    flex: 1, alignItems: "center", backgroundColor: colors.surface,
+    borderRadius: borderRadius.sm, padding: spacing.sm,
+  },
+  fairyStatGlyph: { fontSize: 18 },
+  fairyStatValue: { fontSize: fontSize.sm, fontWeight: "600", color: colors.textPrimary, marginTop: 2, textAlign: "center" },
+  fairyStatLabel: { fontSize: 8, color: colors.textMuted, marginTop: 1, textAlign: "center" },
+  bondBarBg: {
+    width: "100%", height: 6, backgroundColor: colors.background,
+    borderRadius: 3, overflow: "hidden",
+  },
+  bondBarFill: { height: 6, backgroundColor: colors.primary, borderRadius: 3 },
+
   // Zodiac
   zodiacCard: {
     flexDirection: "row", alignItems: "center", gap: spacing.md,
@@ -324,6 +492,8 @@ const styles = StyleSheet.create({
   // Sections
   section: { marginBottom: spacing.xl },
   sectionTitle: { fontSize: fontSize.lg, fontWeight: "600", color: colors.textPrimary, marginBottom: spacing.sm },
+  sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: spacing.sm },
+  expandArrow: { color: colors.textMuted, fontSize: fontSize.sm },
   row: {
     flexDirection: "row", justifyContent: "space-between", alignItems: "center",
     backgroundColor: colors.surfaceLight, padding: spacing.md, borderRadius: borderRadius.md,
@@ -348,13 +518,53 @@ const styles = StyleSheet.create({
     width: 72, height: 72, borderRadius: borderRadius.md, backgroundColor: colors.canvas,
     marginRight: spacing.sm, borderWidth: 1, borderColor: colors.border, overflow: "hidden" as const,
   },
-  wallpaperThumbActive: {
-    borderColor: colors.primary, borderWidth: 2,
+  wallpaperThumbActive: { borderColor: colors.primary, borderWidth: 2 },
+  wallpaperPreview: { width: "100%" as const, height: 56, position: "relative" as const },
+  wallpaperLabel: { fontSize: 8, color: colors.textMuted, textAlign: "center" as const, paddingHorizontal: 2 },
+
+  // Wallpaper controls (#9)
+  wallpaperControls: {
+    backgroundColor: colors.surfaceLight, borderRadius: borderRadius.md, padding: spacing.md,
+    borderWidth: 1, borderColor: colors.border, gap: spacing.sm,
   },
-  wallpaperPreview: {
-    width: "100%" as const, height: 56, position: "relative" as const,
+  controlRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
+  controlLabel: { color: colors.textSecondary, fontSize: fontSize.sm, width: 50 },
+  controlBtn: {
+    width: 32, height: 32, borderRadius: 16, backgroundColor: colors.surface,
+    alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: colors.border,
   },
-  wallpaperLabel: {
-    fontSize: 8, color: colors.textMuted, textAlign: "center" as const, paddingHorizontal: 2,
+  controlBtnText: { color: colors.primary, fontSize: fontSize.lg, fontWeight: "600" },
+  controlValue: { color: colors.textPrimary, fontSize: fontSize.sm, fontWeight: "600", minWidth: 50, textAlign: "center" },
+  resetBtn: {
+    alignSelf: "center", paddingHorizontal: spacing.md, paddingVertical: spacing.xs,
+    borderRadius: borderRadius.sm, borderWidth: 1, borderColor: colors.border,
   },
+  resetBtnText: { color: colors.textMuted, fontSize: fontSize.xs },
+
+  // Shop (#13)
+  shopContainer: { gap: spacing.sm },
+  shopTabs: { flexDirection: "row", gap: spacing.xs, marginBottom: spacing.sm },
+  shopTab: {
+    flex: 1, paddingVertical: spacing.sm, alignItems: "center",
+    borderRadius: borderRadius.sm, backgroundColor: colors.surfaceLight,
+    borderWidth: 1, borderColor: colors.border,
+  },
+  shopTabActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  shopTabText: { color: colors.textSecondary, fontSize: fontSize.xs, fontWeight: "500" },
+  shopTabTextActive: { color: colors.buttonText },
+  shopItem: {
+    flexDirection: "row", alignItems: "center", gap: spacing.md,
+    backgroundColor: colors.surfaceLight, borderRadius: borderRadius.md, padding: spacing.md,
+    borderWidth: 1, borderColor: colors.border,
+  },
+  shopItemGlyph: { fontSize: 28 },
+  shopItemName: { color: colors.textPrimary, fontSize: fontSize.md, fontWeight: "600" },
+  shopItemDesc: { color: colors.textMuted, fontSize: fontSize.xs, marginTop: 2 },
+  shopItemStones: { flexDirection: "row", gap: 4, marginTop: spacing.xs, alignItems: "center" },
+  shopItemMore: { color: colors.textMuted, fontSize: fontSize.xs },
+  buyButton: {
+    backgroundColor: colors.primary, borderRadius: borderRadius.sm,
+    paddingVertical: spacing.xs, paddingHorizontal: spacing.md,
+  },
+  buyButtonText: { color: colors.buttonText, fontSize: fontSize.sm, fontWeight: "600" },
 });

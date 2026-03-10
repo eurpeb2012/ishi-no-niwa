@@ -24,6 +24,7 @@ import { useCanvasStore, CANVAS_BG_COLORS } from "../../stores/canvasStore";
 import { useStoneStore } from "../../stores/stoneStore";
 import { useProgressionStore } from "../../stores/progressionStore";
 import { useInsightStore } from "../../stores/insightStore";
+import { useFairyStore } from "../../stores/fairyStore";
 import { useResponsive } from "../../hooks/useResponsive";
 import { XP_REWARDS } from "../../types";
 import { GemStone, getGemSize } from "../../components/common/GemStone";
@@ -419,6 +420,9 @@ export default function GardenScreen() {
   const addXP = useProgressionStore((s) => s.addXP);
   const incrementGrids = useProgressionStore((s) => s.incrementGrids);
   const trackStonePlaced = useInsightStore((s) => s.trackStonePlaced);
+  const fairyAddEnergy = useFairyStore((s) => s.addEnergy);
+  const fairyAddBond = useFairyStore((s) => s.addBond);
+  const fairyTrackIntention = useFairyStore((s) => s.trackGridIntention);
 
   const [showTemplates, setShowTemplates] = useState(false);
   const [showSaveAd, setShowSaveAd] = useState(false);
@@ -544,6 +548,11 @@ export default function GardenScreen() {
     canvas.saveGrid();
     addXP(XP_REWARDS.COMPLETE_GRID);
     incrementGrids();
+    // Energy system (#12) — grids generate energy for fairy
+    const energyFromGrid = 5 + canvas.placements.length * 2;
+    fairyAddEnergy(energyFromGrid);
+    fairyAddBond(2);
+    if (canvas.intention) fairyTrackIntention(canvas.intention);
     setShowSaveAd(true);
     setTimeout(() => setShowSaveAd(false), 8000);
 };

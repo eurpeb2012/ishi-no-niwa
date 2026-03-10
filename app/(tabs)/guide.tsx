@@ -20,6 +20,7 @@ import { SponsoredAd } from "../../components/common/SponsoredAd";
 import { getAdForPlacement } from "../../data/mockAds";
 import { useInsightStore } from "../../stores/insightStore";
 import { getCurrentMoonPhase, getDailyCrystal, getAllMoonPhases } from "../../data/moonPhases";
+import { HEALING_TRACKS, MUSIC_CATEGORIES, getTracksByCategory } from "../../data/healingMusic";
 import { XP_REWARDS } from "../../types";
 import type { IntentionId, GridTemplate } from "../../types";
 import templates from "../../data/templates.json";
@@ -57,6 +58,8 @@ export default function GuideScreen() {
   const [selectedIntention, setSelectedIntention] = useState<IntentionId | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<GridTemplate | null>(null);
   const [showAllMoons, setShowAllMoons] = useState(false);
+  const [musicCategory, setMusicCategory] = useState("all");
+  const [nowPlaying, setNowPlaying] = useState<string | null>(null);
 
   // Meditation timer
   const [timerActive, setTimerActive] = useState(false);
@@ -341,6 +344,76 @@ export default function GuideScreen() {
         ))}
       </View>
 
+      {/* Healing Music (#15) */}
+      <View style={styles.musicSection}>
+        <Text style={styles.sectionTitle}>{t("music.title")}</Text>
+
+        {/* Category tabs */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: spacing.sm }}>
+          {MUSIC_CATEGORIES.map((cat) => (
+            <TouchableOpacity
+              key={cat.id}
+              style={[styles.musicCatTab, musicCategory === cat.id && styles.musicCatTabActive]}
+              onPress={() => setMusicCategory(cat.id)}
+            >
+              <Text style={[styles.musicCatText, musicCategory === cat.id && styles.musicCatTextActive]}>
+                {isJp ? cat.name_jp : cat.name_en}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        {/* Now Playing */}
+        {nowPlaying && (() => {
+          const track = HEALING_TRACKS.find((t) => t.id === nowPlaying);
+          if (!track) return null;
+          return (
+            <View style={styles.nowPlayingCard}>
+              <Text style={styles.nowPlayingLabel}>{t("music.nowPlaying")}</Text>
+              <View style={styles.nowPlayingRow}>
+                <Text style={styles.nowPlayingGlyph}>{track.glyph}</Text>
+                <Text style={styles.nowPlayingName}>{isJp ? track.name_jp : track.name_en}</Text>
+                <TouchableOpacity
+                  style={styles.nowPlayingStop}
+                  onPress={() => setNowPlaying(null)}
+                >
+                  <Text style={styles.nowPlayingStopText}>{"\u25A0"}</Text>
+                </TouchableOpacity>
+              </View>
+              {/* Simulated progress bar */}
+              <View style={styles.musicProgressBar}>
+                <View style={[styles.musicProgressFill, { width: "35%" }]} />
+              </View>
+            </View>
+          );
+        })()}
+
+        {/* Track list */}
+        {getTracksByCategory(musicCategory).map((track) => (
+          <TouchableOpacity
+            key={track.id}
+            style={[styles.musicTrack, nowPlaying === track.id && styles.musicTrackPlaying]}
+            onPress={() => {
+              setNowPlaying(nowPlaying === track.id ? null : track.id);
+              if (nowPlaying !== track.id) {
+                addXP(5);
+              }
+            }}
+          >
+            <Text style={styles.musicTrackGlyph}>{track.glyph}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.musicTrackName}>{isJp ? track.name_jp : track.name_en}</Text>
+              <Text style={styles.musicTrackMeta}>
+                {t(`intentions.${track.intention}`)} · {Math.floor(track.duration / 60)}{isJp ? "分" : " min"}
+              </Text>
+            </View>
+            <Text style={styles.musicPlayBtn}>
+              {nowPlaying === track.id ? "\u23F8" : "\u25B6"}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
       {/* Session Ad */}
       <View style={styles.adSection}>
         <SponsoredAd ad={sessionAd} placement="session_end" />
@@ -478,4 +551,43 @@ const styles = StyleSheet.create({
   sessionIntention: { color: colors.textMuted, fontSize: fontSize.xs, marginTop: 2 },
   sessionMeta: { color: colors.textMuted, fontSize: fontSize.sm },
   adSection: { marginTop: spacing.xl },
+
+  // Healing Music (#15)
+  musicSection: { marginTop: spacing.xl, gap: spacing.xs },
+  musicCatTab: {
+    paddingHorizontal: spacing.md, paddingVertical: spacing.xs,
+    borderRadius: borderRadius.full, backgroundColor: colors.surfaceLight,
+    marginRight: spacing.xs, borderWidth: 1, borderColor: colors.border,
+  },
+  musicCatTabActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  musicCatText: { color: colors.textSecondary, fontSize: fontSize.xs },
+  musicCatTextActive: { color: colors.buttonText, fontWeight: "600" },
+  nowPlayingCard: {
+    backgroundColor: colors.primary + "15", borderRadius: borderRadius.md, padding: spacing.md,
+    marginBottom: spacing.sm, borderWidth: 1, borderColor: colors.primary + "40",
+  },
+  nowPlayingLabel: { color: colors.primary, fontSize: fontSize.xs, fontWeight: "600", marginBottom: spacing.xs },
+  nowPlayingRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
+  nowPlayingGlyph: { fontSize: 20 },
+  nowPlayingName: { flex: 1, color: colors.textPrimary, fontSize: fontSize.md, fontWeight: "600" },
+  nowPlayingStop: {
+    width: 28, height: 28, borderRadius: 14, backgroundColor: colors.error,
+    alignItems: "center", justifyContent: "center",
+  },
+  nowPlayingStopText: { color: "#fff", fontSize: 12 },
+  musicProgressBar: {
+    width: "100%", height: 3, backgroundColor: colors.background,
+    borderRadius: 1.5, marginTop: spacing.sm, overflow: "hidden",
+  },
+  musicProgressFill: { height: 3, backgroundColor: colors.primary, borderRadius: 1.5 },
+  musicTrack: {
+    flexDirection: "row", alignItems: "center", gap: spacing.sm,
+    backgroundColor: colors.surfaceLight, borderRadius: borderRadius.md, padding: spacing.md,
+    borderWidth: 1, borderColor: colors.border,
+  },
+  musicTrackPlaying: { borderColor: colors.primary, backgroundColor: colors.primary + "10" },
+  musicTrackGlyph: { fontSize: 22 },
+  musicTrackName: { color: colors.textPrimary, fontSize: fontSize.sm, fontWeight: "500" },
+  musicTrackMeta: { color: colors.textMuted, fontSize: fontSize.xs, marginTop: 1 },
+  musicPlayBtn: { color: colors.primary, fontSize: 18, fontWeight: "700" },
 });

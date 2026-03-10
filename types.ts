@@ -49,6 +49,10 @@ export interface Stone {
   description_jp: string;
   lore_en: string;
   lore_jp: string;
+  /** Real crystal photo URL — populated when contributor uploads (#14) */
+  photoUrl?: string | null;
+  /** Photo contributor name */
+  photoCredit?: string | null;
 }
 
 export interface GridTemplate {
@@ -109,6 +113,18 @@ export interface UserProfile {
   subscriptionTier: SubscriptionTier;
   subscriptionExpires: string | null;
   profileGridId?: string | null;
+  /** Wallpaper display adjustments */
+  wallpaperScale?: number;
+  wallpaperRotation?: number;
+  wallpaperOffsetX?: number;
+  wallpaperOffsetY?: number;
+}
+
+export interface StonePhoto {
+  stoneId: string;
+  photoUrl: string;
+  contributorName: string;
+  isVerified: boolean;
 }
 
 export interface GemSellerAd {

@@ -260,5 +260,81 @@
     "nature": "Nature",
     "rain": "Rain",
     "wind_chimes": "Wind Chimes"
+  },
+  "fairy": {
+    "title": "Crystal Fairy",
+    "evolution": "Evolution",
+    "bond": "Bond Level",
+    "energy": "Crystal Energy",
+    "stage1": "Seed Sprite",
+    "stage2": "Bud Fairy",
+    "stage3": "Bloom Fairy",
+    "stage4": "Crystal Fairy",
+    "stage5": "Guardian Spirit",
+    "crystal1": "Rough Chip",
+    "crystal2": "Tumbled Stone",
+    "crystal3": "Polished Cabochon",
+    "crystal4": "Faceted Gem",
+    "crystal5": "Radiant Crystal",
+    "sleeping": "Your fairy is resting...",
+    "welcome": "Let's build something beautiful!",
+    "happy": "Nice choice!",
+    "evolveReady": "Your fairy is ready to evolve!",
+    "bondMax": "Maximum bond reached!",
+    "chooseColor": "Choose Your Fairy",
+    "colorRoseQuartz": "Rose Quartz",
+    "colorAmethyst": "Amethyst",
+    "colorJade": "Jade",
+    "colorOnyx": "Onyx"
+  },
+  "quests": {
+    "title": "Quests",
+    "active": "Active Quests",
+    "completed": "Completed",
+    "reward": "Reward",
+    "progress": "Progress",
+    "newComplete": "Quest Complete!",
+    "claimReward": "Claim Reward",
+    "noActive": "All quests completed! Check back soon.",
+    "xp": "XP",
+    "energyReward": "Energy",
+    "bondReward": "Bond"
+  },
+  "energy": {
+    "title": "Crystal Energy",
+    "total": "Total Energy",
+    "fromGrids": "From Grids",
+    "fromQuests": "From Quests",
+    "fairyPower": "Fairy Power",
+    "generate": "Build grids to generate energy"
+  },
+  "shop": {
+    "title": "Crystal Shop",
+    "crystalPacks": "Crystal Packs",
+    "rareCrystals": "Rare Crystals",
+    "energyPacks": "Energy Packs",
+    "fairyOutfits": "Fairy Outfits",
+    "buy": "Buy",
+    "owned": "Owned",
+    "includes": "Includes",
+    "comingSoon": "Coming Soon"
+  },
+  "music": {
+    "title": "Healing Music",
+    "nowPlaying": "Now Playing",
+    "categories": "Categories",
+    "all": "All",
+    "meditation": "Meditation",
+    "nature": "Nature",
+    "crystalBowls": "Crystal Bowls",
+    "binaural": "Binaural",
+    "play": "Play",
+    "pause": "Pause",
+    "duration": "{{minutes}} min"
+  },
+  "wallpaper": {
+    "scale": "Size",
+    "rotation": "Angle",
+    "reset": "Reset"
   }
 }

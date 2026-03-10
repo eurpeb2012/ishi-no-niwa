@@ -260,5 +260,81 @@
     "nature": "自然",
     "rain": "雨",
     "wind_chimes": "風鈴"
+  },
+  "fairy": {
+    "title": "クリスタルフェアリー",
+    "evolution": "進化",
+    "bond": "絆レベル",
+    "energy": "結晶エネルギー",
+    "stage1": "種の精",
+    "stage2": "蕾の妖精",
+    "stage3": "花の妖精",
+    "stage4": "水晶の妖精",
+    "stage5": "守護の精霊",
+    "crystal1": "原石のかけら",
+    "crystal2": "タンブルストーン",
+    "crystal3": "磨かれたカボション",
+    "crystal4": "ファセットカットの宝石",
+    "crystal5": "輝くクリスタル",
+    "sleeping": "妖精は休んでいます...",
+    "welcome": "素敵なものを作りましょう！",
+    "happy": "いい選択ですね！",
+    "evolveReady": "妖精が進化の準備ができました！",
+    "bondMax": "絆が最大になりました！",
+    "chooseColor": "妖精を選ぶ",
+    "colorRoseQuartz": "ローズクォーツ",
+    "colorAmethyst": "アメジスト",
+    "colorJade": "翡翠",
+    "colorOnyx": "オニキス"
+  },
+  "quests": {
+    "title": "クエスト",
+    "active": "進行中のクエスト",
+    "completed": "完了",
+    "reward": "報酬",
+    "progress": "進捗",
+    "newComplete": "クエスト達成！",
+    "claimReward": "報酬を受け取る",
+    "noActive": "全クエスト完了！また確認してください。",
+    "xp": "経験値",
+    "energyReward": "エネルギー",
+    "bondReward": "絆"
+  },
+  "energy": {
+    "title": "結晶エネルギー",
+    "total": "合計エネルギー",
+    "fromGrids": "グリッドから",
+    "fromQuests": "クエストから",
+    "fairyPower": "妖精のパワー",
+    "generate": "グリッドを作成してエネルギーを生成"
+  },
+  "shop": {
+    "title": "クリスタルショップ",
+    "crystalPacks": "クリスタルパック",
+    "rareCrystals": "レアクリスタル",
+    "energyPacks": "エネルギーパック",
+    "fairyOutfits": "妖精の衣装",
+    "buy": "購入",
+    "owned": "所持済み",
+    "includes": "含まれるもの",
+    "comingSoon": "近日公開"
+  },
+  "music": {
+    "title": "ヒーリングミュージック",
+    "nowPlaying": "再生中",
+    "categories": "カテゴリー",
+    "all": "すべて",
+    "meditation": "瞑想",
+    "nature": "自然",
+    "crystalBowls": "クリスタルボウル",
+    "binaural": "バイノーラル",
+    "play": "再生",
+    "pause": "一時停止",
+    "duration": "{{minutes}}分"
+  },
+  "wallpaper": {
+    "scale": "サイズ",
+    "rotation": "角度",
+    "reset": "リセット"
   }
 }
