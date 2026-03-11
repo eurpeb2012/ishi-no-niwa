@@ -9,11 +9,15 @@ import { useStoneStore } from "../../stores/stoneStore";
 import { useProgressionStore } from "../../stores/progressionStore";
 import { useCanvasStore } from "../../stores/canvasStore";
 import { useCollectionStore } from "../../stores/collectionStore";
+import { useQuestStore } from "../../stores/questStore";
 import { useFairyStore, FAIRY_COLORS, EVOLUTION_STAGES, CRYSTAL_STAGES } from "../../stores/fairyStore";
 import { GemStone } from "../../components/common/GemStone";
 import { CrystalFairy } from "../../components/common/CrystalFairy";
 import { getZodiacForBirthMonth } from "../../data/zodiac";
 import { IAP_PRODUCTS } from "../../data/iapProducts";
+import { ALL_OUTFITS, getUnlockedOutfits, type OutfitSlot } from "../../data/fairyOutfits";
+import { FAIRY_LAND_BIOMES, FAIRY_LAND_STRUCTURES, getStructuresByBiome, type FairyLandBiome } from "../../data/fairyLand";
+import { CRYSTAL_SHOPS, getFeaturedShops } from "../../data/crystalShops";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ProfileScreen() {
@@ -40,8 +44,23 @@ export default function ProfileScreen() {
   const wallpaperScale = user?.wallpaperScale ?? 1;
   const wallpaperRotation = user?.wallpaperRotation ?? 0;
 
+  const questStore = useQuestStore();
+
   const [showShop, setShowShop] = useState(false);
   const [shopTab, setShopTab] = useState<"crystals" | "energy" | "outfits">("crystals");
+  const [showOutfits, setShowOutfits] = useState(false);
+  const [outfitSlot, setOutfitSlot] = useState<OutfitSlot>("wings");
+  const [showFairyLand, setShowFairyLand] = useState(false);
+  const [landBiome, setLandBiome] = useState<FairyLandBiome>("meadow");
+  const [showPartners, setShowPartners] = useState(false);
+
+  const unlockedOutfits = getUnlockedOutfits(
+    fairy.evolutionStage,
+    questStore.completedQuestIds,
+    fairy.purchasedOutfitIds,
+  );
+  const structuresByBiome = getStructuresByBiome();
+  const featuredShops = getFeaturedShops();
 
   const handleSetWallpaper = (gridId: string) => {
     const newId = user?.profileGridId === gridId ? null : gridId;
@@ -141,11 +160,13 @@ export default function ProfileScreen() {
           <View style={{ alignItems: "center", zIndex: 2 }}>
             <CrystalFairy
               colorHex={fairyColorInfo.hex}
+              accentHex={fairyColorInfo.accent}
               size={80}
               level={level}
               isStatic
               evolutionStage={fairy.evolutionStage}
               crystalStage={fairy.crystalStage}
+              equippedOutfits={fairy.equippedOutfits}
             />
             <View style={{ marginTop: 4 }}>
               <GemStone stoneId={avatarStone.id} colorHex={avatarStone.color_hex} size={36} />
@@ -194,6 +215,249 @@ export default function ProfileScreen() {
             <View style={[styles.bondBarFill, { width: `${fairy.bondLevel}%` }]} />
           </View>
         </View>
+      </View>
+
+      {/* Fairy Outfit Customization (#3) */}
+      <View style={styles.section}>
+        <TouchableOpacity style={styles.sectionHeader} onPress={() => setShowOutfits(!showOutfits)}>
+          <Text style={styles.sectionTitle}>{isJp ? "妖精の衣装" : "Fairy Outfits"}</Text>
+          <Text style={styles.expandArrow}>{showOutfits ? "\u25B2" : "\u25BC"}</Text>
+        </TouchableOpacity>
+
+        {showOutfits && (
+          <View style={styles.shopContainer}>
+            {/* Outfit preview */}
+            <View style={{ alignItems: "center", marginBottom: spacing.md }}>
+              <CrystalFairy
+                colorHex={fairyColorInfo.hex}
+                accentHex={fairyColorInfo.accent}
+                size={100}
+                level={level}
+                evolutionStage={fairy.evolutionStage}
+                crystalStage={fairy.crystalStage}
+                equippedOutfits={fairy.equippedOutfits}
+                mood="happy"
+              />
+            </View>
+
+            {/* Slot tabs */}
+            <View style={styles.shopTabs}>
+              {(["wings", "dress", "crown", "accessory"] as OutfitSlot[]).map((slot) => (
+                <TouchableOpacity
+                  key={slot}
+                  style={[styles.shopTab, outfitSlot === slot && styles.shopTabActive]}
+                  onPress={() => setOutfitSlot(slot)}
+                >
+                  <Text style={[styles.shopTabText, outfitSlot === slot && styles.shopTabTextActive]}>
+                    {slot === "wings" ? (isJp ? "\u7FBD" : "Wings")
+                      : slot === "dress" ? (isJp ? "\u30C9\u30EC\u30B9" : "Dress")
+                      : slot === "crown" ? (isJp ? "\u51A0" : "Crown")
+                      : (isJp ? "\u30A2\u30AF\u30BB\u30B5\u30EA\u30FC" : "Acc.")}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Outfit items for selected slot */}
+            {ALL_OUTFITS
+              .filter((o) => o.slot === outfitSlot)
+              .map((outfit) => {
+                const isUnlocked = unlockedOutfits.some((u) => u.id === outfit.id);
+                const isEquipped = fairy.equippedOutfits[outfitSlot] === outfit.id;
+                return (
+                  <TouchableOpacity
+                    key={outfit.id}
+                    style={[styles.shopItem, isEquipped && { borderColor: colors.primary, borderWidth: 2 }]}
+                    onPress={() => isUnlocked ? fairy.equipOutfit(outfitSlot, outfit.id) : undefined}
+                    disabled={!isUnlocked}
+                  >
+                    <Text style={[styles.shopItemGlyph, !isUnlocked && { opacity: 0.3 }]}>{outfit.style.glyph}</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.shopItemName, !isUnlocked && { opacity: 0.4 }]}>
+                        {isJp ? outfit.name_jp : outfit.name_en}
+                      </Text>
+                      <Text style={styles.shopItemDesc}>
+                        {!isUnlocked
+                          ? (outfit.obtainMethod === "evolution"
+                            ? (isJp ? `進化ステージ ${outfit.evolutionStage} で解放` : `Unlocks at evolution ${outfit.evolutionStage}`)
+                            : outfit.obtainMethod === "quest"
+                            ? (isJp ? "クエスト報酬" : "Quest reward")
+                            : (isJp ? "ショップで購入" : "Available in shop"))
+                          : (isJp ? outfit.desc_jp : outfit.desc_en)}
+                      </Text>
+                    </View>
+                    {isEquipped && (
+                      <Text style={{ color: colors.primary, fontSize: fontSize.sm, fontWeight: "600" }}>
+                        {isJp ? "\u88C5\u5099\u4E2D" : "Equipped"}
+                      </Text>
+                    )}
+                    {!isUnlocked && (
+                      <Text style={{ color: colors.textMuted, fontSize: 16 }}>{"\u{1F512}"}</Text>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+          </View>
+        )}
+      </View>
+
+      {/* Fairy Land (#4) */}
+      <View style={styles.section}>
+        <TouchableOpacity style={styles.sectionHeader} onPress={() => setShowFairyLand(!showFairyLand)}>
+          <Text style={styles.sectionTitle}>{isJp ? "\u5996\u7CBE\u306E\u4E16\u754C" : "Fairy Land"}</Text>
+          <Text style={styles.expandArrow}>{showFairyLand ? "\u25B2" : "\u25BC"}</Text>
+        </TouchableOpacity>
+
+        {showFairyLand && (
+          <View style={styles.shopContainer}>
+            {/* Energy display */}
+            <View style={[styles.fairyStatusRow, { marginBottom: spacing.sm }]}>
+              <View style={[styles.fairyStatItem, { backgroundColor: colors.canvas }]}>
+                <Text style={styles.fairyStatGlyph}>{"\u26A1"}</Text>
+                <Text style={styles.fairyStatValue}>{fairy.totalEnergy}</Text>
+                <Text style={styles.fairyStatLabel}>{isJp ? "\u30A8\u30CD\u30EB\u30AE\u30FC" : "Energy"}</Text>
+              </View>
+              <View style={[styles.fairyStatItem, { backgroundColor: colors.canvas }]}>
+                <Text style={styles.fairyStatGlyph}>{"\u{1F3D7}"}</Text>
+                <Text style={styles.fairyStatValue}>{fairy.builtStructureIds.length}/{FAIRY_LAND_STRUCTURES.length}</Text>
+                <Text style={styles.fairyStatLabel}>{isJp ? "\u5EFA\u7BC9\u6E08" : "Built"}</Text>
+              </View>
+              <View style={[styles.fairyStatItem, { backgroundColor: colors.canvas }]}>
+                <Text style={styles.fairyStatGlyph}>{"\u{1F30D}"}</Text>
+                <Text style={styles.fairyStatValue}>{fairy.unlockedBiomes.length}/5</Text>
+                <Text style={styles.fairyStatLabel}>{isJp ? "\u30D0\u30A4\u30AA\u30FC\u30E0" : "Biomes"}</Text>
+              </View>
+            </View>
+
+            {/* Biome tabs */}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: spacing.sm }}>
+              {(Object.keys(FAIRY_LAND_BIOMES) as FairyLandBiome[]).map((biome) => {
+                const biomeInfo = FAIRY_LAND_BIOMES[biome];
+                const isUnlocked = fairy.unlockedBiomes.includes(biome);
+                const canUnlock = fairy.totalEnergy >= biomeInfo.unlockEnergy;
+                return (
+                  <TouchableOpacity
+                    key={biome}
+                    style={[
+                      styles.biomeTab,
+                      { backgroundColor: isUnlocked ? biomeInfo.bgColor : colors.surfaceLight },
+                      landBiome === biome && { borderColor: colors.primary, borderWidth: 2 },
+                    ]}
+                    onPress={() => {
+                      if (isUnlocked) {
+                        setLandBiome(biome);
+                      } else if (canUnlock) {
+                        fairy.unlockBiome(biome);
+                        setLandBiome(biome);
+                      }
+                    }}
+                  >
+                    <Text style={{ fontSize: 18 }}>{isUnlocked ? biomeInfo.glyph : "\u{1F512}"}</Text>
+                    <Text style={[styles.biomeTabText, !isUnlocked && { opacity: 0.5 }]}>
+                      {isJp ? biomeInfo.name_jp : biomeInfo.name_en}
+                    </Text>
+                    {!isUnlocked && (
+                      <Text style={{ fontSize: 8, color: colors.textMuted }}>{biomeInfo.unlockEnergy} {"\u26A1"}</Text>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+
+            {/* Structures for selected biome */}
+            {fairy.unlockedBiomes.includes(landBiome) && structuresByBiome[landBiome].map((structure) => {
+              const isBuilt = fairy.builtStructureIds.includes(structure.id);
+              const canBuild = !isBuilt && fairy.totalEnergy >= structure.energyCost && fairy.evolutionStage >= structure.minEvolution;
+              return (
+                <View
+                  key={structure.id}
+                  style={[
+                    styles.shopItem,
+                    { backgroundColor: isBuilt ? structure.tintColor + "40" : colors.surfaceLight },
+                  ]}
+                >
+                  <Text style={[styles.shopItemGlyph, !isBuilt && !canBuild && { opacity: 0.3 }]}>
+                    {structure.glyph}
+                  </Text>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.shopItemName}>{isJp ? structure.name_jp : structure.name_en}</Text>
+                    <Text style={styles.shopItemDesc}>{isJp ? structure.desc_jp : structure.desc_en}</Text>
+                    {!isBuilt && (
+                      <Text style={{ fontSize: 9, color: colors.textMuted, marginTop: 2 }}>
+                        {structure.energyCost} {"\u26A1"} {structure.minEvolution > fairy.evolutionStage
+                          ? `· ${isJp ? `\u9032\u5316${structure.minEvolution}\u4EE5\u4E0A` : `Evo ${structure.minEvolution}+`}`
+                          : ""}
+                      </Text>
+                    )}
+                  </View>
+                  {isBuilt ? (
+                    <Text style={{ color: colors.success, fontSize: fontSize.sm, fontWeight: "600" }}>
+                      {isJp ? "\u5B8C\u6210" : "Built"}
+                    </Text>
+                  ) : (
+                    <TouchableOpacity
+                      style={[styles.buyButton, !canBuild && { opacity: 0.4 }]}
+                      onPress={() => canBuild && fairy.buildStructure(structure.id, structure.energyCost)}
+                      disabled={!canBuild}
+                    >
+                      <Text style={styles.buyButtonText}>{structure.energyCost} {"\u26A1"}</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              );
+            })}
+          </View>
+        )}
+      </View>
+
+      {/* Crystal Shop Partners (#5) */}
+      <View style={styles.section}>
+        <TouchableOpacity style={styles.sectionHeader} onPress={() => setShowPartners(!showPartners)}>
+          <Text style={styles.sectionTitle}>{isJp ? "\u30AF\u30EA\u30B9\u30BF\u30EB\u30B7\u30E7\u30C3\u30D7" : "Crystal Shops"}</Text>
+          <Text style={styles.expandArrow}>{showPartners ? "\u25B2" : "\u25BC"}</Text>
+        </TouchableOpacity>
+
+        {showPartners && (
+          <View style={styles.shopContainer}>
+            {CRYSTAL_SHOPS.map((shop) => (
+              <View
+                key={shop.id}
+                style={[styles.shopItem, shop.isFeatured && { borderLeftWidth: 3, borderLeftColor: shop.accentColor }]}
+              >
+                <Text style={[styles.shopItemGlyph, { backgroundColor: shop.accentColor + "20", borderRadius: 8, padding: 2 }]}>
+                  {shop.glyph}
+                </Text>
+                <View style={{ flex: 1 }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.xs }}>
+                    <Text style={styles.shopItemName}>{isJp ? shop.name_jp : shop.name_en}</Text>
+                    {shop.isFeatured && (
+                      <View style={{ backgroundColor: shop.accentColor + "20", paddingHorizontal: 6, paddingVertical: 1, borderRadius: 4 }}>
+                        <Text style={{ fontSize: 8, color: shop.accentColor, fontWeight: "600" }}>
+                          {isJp ? "\u304A\u3059\u3059\u3081" : "Featured"}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                  <Text style={{ fontSize: fontSize.xs, color: colors.textMuted, marginTop: 1 }}>
+                    {isJp ? shop.location_jp : shop.location_en}
+                  </Text>
+                  <Text style={styles.shopItemDesc}>{isJp ? shop.desc_jp : shop.desc_en}</Text>
+                  <View style={{ flexDirection: "row", gap: 4, marginTop: spacing.xs }}>
+                    {shop.specialtyStoneIds.slice(0, 4).map((sid) => {
+                      const st = getStone(sid);
+                      return st ? (
+                        <GemStone key={sid} stoneId={st.id} colorHex={st.color_hex} size={14} />
+                      ) : null;
+                    })}
+                    {shop.specialtyStoneIds.length > 4 && (
+                      <Text style={{ fontSize: 9, color: colors.textMuted }}>+{shop.specialtyStoneIds.length - 4}</Text>
+                    )}
+                  </View>
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
       </View>
 
       {/* Zodiac & Birth Crystals */}
@@ -567,4 +831,13 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs, paddingHorizontal: spacing.md,
   },
   buyButtonText: { color: colors.buttonText, fontSize: fontSize.sm, fontWeight: "600" },
+
+  // Biome tabs (#4 Fairy Land)
+  biomeTab: {
+    paddingVertical: spacing.sm, paddingHorizontal: spacing.md,
+    borderRadius: borderRadius.md, marginRight: spacing.sm,
+    alignItems: "center", minWidth: 80,
+    borderWidth: 1, borderColor: colors.border,
+  },
+  biomeTabText: { fontSize: 9, color: colors.textSecondary, marginTop: 2, textAlign: "center" },
 });

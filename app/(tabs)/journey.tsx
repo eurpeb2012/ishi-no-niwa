@@ -232,10 +232,12 @@ export default function JourneyScreen() {
         <View style={styles.fairyCard}>
           <CrystalFairy
             colorHex={FAIRY_COLORS[fairy.colorVariant].hex}
+            accentHex={FAIRY_COLORS[fairy.colorVariant].accent}
             size={72}
             level={progress.level}
             evolutionStage={fairy.evolutionStage}
             crystalStage={fairy.crystalStage}
+            equippedOutfits={fairy.equippedOutfits}
             isStatic
           />
           <View style={styles.fairyInfo}>

@@ -1,16 +1,19 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { asyncStorage } from "./asyncStorageAdapter";
+import type { OutfitSlot } from "../data/fairyOutfits";
+import type { FairyLandBiome } from "../data/fairyLand";
 
-export type FairyColor = "rose_quartz" | "amethyst" | "jade" | "onyx";
+export type FairyColor = "rose_quartz" | "amethyst" | "peridot" | "onyx";
 export type EvolutionStage = 1 | 2 | 3 | 4 | 5;
 export type CrystalStage = 1 | 2 | 3 | 4 | 5;
 
-export const FAIRY_COLORS: Record<FairyColor, { hex: string; name_en: string; name_jp: string }> = {
-  rose_quartz: { hex: "#F4A0B5", name_en: "Rose Quartz", name_jp: "ローズクォーツ" },
-  amethyst: { hex: "#9B59B6", name_en: "Amethyst", name_jp: "アメジスト" },
-  jade: { hex: "#5B8C5A", name_en: "Jade", name_jp: "翡翠" },
-  onyx: { hex: "#4A4A6A", name_en: "Onyx", name_jp: "オニキス" },
+/** Updated colors to match Takae's watercolor concept art */
+export const FAIRY_COLORS: Record<FairyColor, { hex: string; name_en: string; name_jp: string; accent: string }> = {
+  rose_quartz: { hex: "#F4A0B5", name_en: "Rose Quartz", name_jp: "ローズクォーツ", accent: "#FFD6E0" },
+  amethyst: { hex: "#9B7CB8", name_en: "Amethyst", name_jp: "アメジスト", accent: "#D4C4E8" },
+  peridot: { hex: "#7CB87C", name_en: "Peridot", name_jp: "ペリドット", accent: "#C4E8C4" },
+  onyx: { hex: "#4A5080", name_en: "Onyx", name_jp: "オニキス", accent: "#8890B8" },
 };
 
 export const EVOLUTION_STAGES: Record<EvolutionStage, { name_en: string; name_jp: string; minLevel: number; glyph: string }> = {
@@ -40,6 +43,15 @@ interface FairyState {
   isAwake: boolean;
   lastInteraction: string;
 
+  // Outfit system (#3 avatar customization)
+  equippedOutfits: Record<OutfitSlot, string>; // slot -> outfit ID
+  purchasedOutfitIds: string[];
+
+  // Fairy Land (#4 world-building)
+  builtStructureIds: string[];
+  unlockedBiomes: FairyLandBiome[];
+  totalEnergySpent: number;
+
   // Actions
   setColor: (color: FairyColor) => void;
   addBond: (amount: number) => void;
@@ -51,6 +63,14 @@ interface FairyState {
   wakeUp: () => void;
   getEvolutionInfo: () => { stage: EvolutionStage; name_en: string; name_jp: string; glyph: string };
   getCrystalInfo: () => { stage: CrystalStage; name_en: string; name_jp: string };
+
+  // Outfit actions
+  equipOutfit: (slot: OutfitSlot, outfitId: string) => void;
+  purchaseOutfit: (outfitId: string) => void;
+
+  // Fairy Land actions
+  buildStructure: (structureId: string, cost: number) => boolean;
+  unlockBiome: (biome: FairyLandBiome) => void;
 }
 
 export const useFairyStore = create<FairyState>()(
@@ -65,6 +85,20 @@ export const useFairyStore = create<FairyState>()(
       intentionCounts: {},
       isAwake: true,
       lastInteraction: new Date().toISOString().split("T")[0],
+
+      // Outfit defaults
+      equippedOutfits: {
+        wings: "wings_default",
+        dress: "dress_default",
+        crown: "crown_default",
+        accessory: "",
+      },
+      purchasedOutfitIds: [],
+
+      // Fairy Land defaults
+      builtStructureIds: [],
+      unlockedBiomes: ["meadow"],
+      totalEnergySpent: 0,
 
       setColor: (color) => set({ colorVariant: color }),
 
@@ -140,6 +174,39 @@ export const useFairyStore = create<FairyState>()(
         const state = get();
         return { stage: state.crystalStage, ...CRYSTAL_STAGES[state.crystalStage] };
       },
+
+      // Outfit actions
+      equipOutfit: (slot, outfitId) =>
+        set((state) => ({
+          equippedOutfits: { ...state.equippedOutfits, [slot]: outfitId },
+        })),
+
+      purchaseOutfit: (outfitId) =>
+        set((state) => ({
+          purchasedOutfitIds: state.purchasedOutfitIds.includes(outfitId)
+            ? state.purchasedOutfitIds
+            : [...state.purchasedOutfitIds, outfitId],
+        })),
+
+      // Fairy Land actions
+      buildStructure: (structureId, cost) => {
+        const state = get();
+        if (state.totalEnergy < cost) return false;
+        if (state.builtStructureIds.includes(structureId)) return false;
+        set({
+          totalEnergy: state.totalEnergy - cost,
+          totalEnergySpent: state.totalEnergySpent + cost,
+          builtStructureIds: [...state.builtStructureIds, structureId],
+        });
+        return true;
+      },
+
+      unlockBiome: (biome) =>
+        set((state) => ({
+          unlockedBiomes: state.unlockedBiomes.includes(biome)
+            ? state.unlockedBiomes
+            : [...state.unlockedBiomes, biome],
+        })),
     }),
     {
       name: "ishi-fairy",
@@ -154,6 +221,11 @@ export const useFairyStore = create<FairyState>()(
         intentionCounts: state.intentionCounts,
         isAwake: state.isAwake,
         lastInteraction: state.lastInteraction,
+        equippedOutfits: state.equippedOutfits,
+        purchasedOutfitIds: state.purchasedOutfitIds,
+        builtStructureIds: state.builtStructureIds,
+        unlockedBiomes: state.unlockedBiomes,
+        totalEnergySpent: state.totalEnergySpent,
       }),
     }
   )
