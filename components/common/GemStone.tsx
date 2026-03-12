@@ -1,4 +1,5 @@
-import { View, StyleSheet } from "react-native";
+import { View, Image, StyleSheet } from "react-native";
+import { STONE_SPRITES, hasSprite } from "../../assets/stones";
 
 // Per-stone visual profile: shape, colors, texture
 interface GemProfile {
@@ -276,6 +277,19 @@ export function GemStone({ stoneId, colorHex, size, useNatural, noShadow }: GemS
   } else {
     w = natW;
     h = natH;
+  }
+
+  // Use photo sprite if available
+  if (hasSprite(stoneId)) {
+    return (
+      <View style={[{ width: w, height: h }, !noShadow && s.shadow]}>
+        <Image
+          source={STONE_SPRITES[stoneId]}
+          style={{ width: w, height: h, borderRadius: Math.min(w, h) * 0.1 }}
+          resizeMode="contain"
+        />
+      </View>
+    );
   }
 
   const m = Math.min(w, h);
