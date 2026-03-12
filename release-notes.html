@@ -483,6 +483,47 @@
   <span class="tag tag-new">New</span>
 </div>
 
+<!-- ==================== PHOTO-REALISTIC CRYSTAL SPRITES ==================== -->
+<h2><span class="emoji">📷</span>Photo-Realistic Crystal Sprites</h2>
+
+<div class="card">
+  <div class="card-title">121 Real Crystal Photos Extracted</div>
+  <div class="card-desc">
+    Individual crystal and gem sprites have been extracted from Takae's reference photographs
+    using morphological image processing (erosion + flood fill separation). Each sprite has a
+    transparent background and is ready for in-game use.
+  </div>
+  <div class="items-grid">
+    <span class="item-chip">💎 77 from image 1</span>
+    <span class="item-chip">✨ 44 from image 2</span>
+  </div>
+  <span class="tag tag-new">New</span>
+</div>
+
+<div class="card">
+  <div class="card-title">All 25 Game Crystals Mapped to Photos</div>
+  <div class="card-desc">
+    Every stone type in the game now displays a real crystal photo instead of the
+    programmatic View-based rendering. The GemStone component automatically uses the
+    photo sprite when available, with the old rendering as fallback.
+  </div>
+  <table class="quest-table">
+    <tr><th>Crystal</th><th>Photo</th></tr>
+    <tr><td>Clear Quartz</td><td>Stunning quartz points cluster</td></tr>
+    <tr><td>Amethyst</td><td>Purple amethyst crystal cluster</td></tr>
+    <tr><td>Rose Quartz</td><td>Raw pink chunk</td></tr>
+    <tr><td>Tiger's Eye</td><td>Polished banded slab</td></tr>
+    <tr><td>Malachite</td><td>Raw green malachite cluster</td></tr>
+    <tr><td>Turquoise</td><td>Turquoise raw chunk</td></tr>
+    <tr><td>Citrine</td><td>Golden citrine cluster</td></tr>
+    <tr><td>Fluorite</td><td>Green-purple crystal cluster</td></tr>
+    <tr><td>Agate</td><td>Banded agate slice</td></tr>
+    <tr><td>Garnet</td><td>Red faceted oval gem</td></tr>
+    <tr><td colspan="2"><em>…and 15 more (moonstone, lapis lazuli, aquamarine, obsidian, etc.)</em></td></tr>
+  </table>
+  <span class="tag tag-new">New</span>
+</div>
+
 <!-- ==================== CRYSTAL SHOPS ==================== -->
 <h2><span class="emoji">🏪</span>Crystal Shop Partnerships</h2>
 
@@ -647,13 +688,12 @@
 <h2><span class="emoji">📷</span>Real Crystal Photos (#14)</h2>
 
 <div class="card">
-  <div class="card-title">Photo Support Ready</div>
+  <div class="card-title">Photo Support Ready → Completed in v2.3</div>
   <div class="card-desc">
-    The Stone data model now supports real crystal photographs with <code>photoUrl</code> and
-    <code>photoCredit</code> fields. Awaiting uploads from crystal contributors.
-    When photos arrive, they'll display in the Crystal Collection detail view.
+    121 real crystal sprites extracted from reference photos and mapped to all 25 in-game stone types.
+    See v2.3 release notes above for full details.
   </div>
-  <span class="tag tag-improved">Prepared</span>
+  <span class="tag tag-new">Completed</span>
 </div>
 
 <!-- ==================== HEALING MUSIC ==================== -->
@@ -889,7 +929,6 @@
 <div class="card">
   <div class="card-desc">
     • Audio playback for healing music tracks<br>
-    • Real crystal photos from contributors (Google Drive upload in progress)<br>
     • Native Android &amp; iOS app versions<br>
     • iPad-optimized prototype<br>
     • AR View — place grids on real surfaces<br>
