@@ -13,6 +13,7 @@ import { useQuestStore } from "../../stores/questStore";
 import { useFairyStore, FAIRY_COLORS, EVOLUTION_STAGES, CRYSTAL_STAGES } from "../../stores/fairyStore";
 import { GemStone } from "../../components/common/GemStone";
 import { CrystalFairy } from "../../components/common/CrystalFairy";
+import { BiomeScene } from "../../components/common/BiomeScene";
 import { getZodiacForBirthMonth } from "../../data/zodiac";
 import { IAP_PRODUCTS } from "../../data/iapProducts";
 import { ALL_OUTFITS, getUnlockedOutfits, type OutfitSlot } from "../../data/fairyOutfits";
@@ -363,6 +364,18 @@ export default function ProfileScreen() {
                 );
               })}
             </ScrollView>
+
+            {/* Biome scene visualization */}
+            {fairy.unlockedBiomes.includes(landBiome) && (
+              <View style={{ alignItems: "center", marginBottom: spacing.sm }}>
+                <BiomeScene
+                  biome={landBiome}
+                  builtStructureIds={fairy.builtStructureIds}
+                  fairyColorHex={fairyColorInfo.hex}
+                  width={isDesktop ? 400 : isTablet ? 360 : 300}
+                />
+              </View>
+            )}
 
             {/* Structures for selected biome */}
             {fairy.unlockedBiomes.includes(landBiome) && structuresByBiome[landBiome].map((structure) => {

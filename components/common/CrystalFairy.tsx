@@ -264,8 +264,10 @@ export function CrystalFairy({
   const crystalCY = bodyCY + bodyH * 0.1;
   const crystalGlow = crystalStage >= 4;
 
-  // Sparkle positions
-  const numSparkles = Math.min(evolutionStage + 2, 8);
+  // Sparkle positions — outfit sparkle flags add more
+  const outfitSparkleBoost = [wingsOutfit, dressOutfit, crownOutfit, accessoryOutfit]
+    .filter((o) => o?.sparkle).length;
+  const numSparkles = Math.min(evolutionStage + 2 + outfitSparkleBoost, 12);
 
   // --- Animations ---
   const floatY = useSharedValue(0);
@@ -426,6 +428,14 @@ export function CrystalFairy({
               <Stop offset="100%" stopColor="#FFD700" stopOpacity="0.2" />
             </RadialGradient>
           )}
+          {/* Aurora gradient for outfit patterns */}
+          <LinearGradient id="auroraGrad" x1="0" y1="0" x2="1" y2="1">
+            <Stop offset="0%" stopColor="#7FFFD4" stopOpacity="0.4" />
+            <Stop offset="25%" stopColor="#87CEEB" stopOpacity="0.35" />
+            <Stop offset="50%" stopColor="#9B7CB8" stopOpacity="0.3" />
+            <Stop offset="75%" stopColor="#FFB6C1" stopOpacity="0.35" />
+            <Stop offset="100%" stopColor="#FFD700" stopOpacity="0.3" />
+          </LinearGradient>
         </Defs>
 
         {/* Background glow */}
@@ -443,8 +453,8 @@ export function CrystalFairy({
           fill="url(#wingGrad)"
           opacity={0.8}
         />
-        {/* Wing vein/detail lines */}
-        {evolutionStage >= 3 && (
+        {/* Wing vein/detail lines (evo3+ OR petal/crystal pattern) */}
+        {(evolutionStage >= 3 || wingsOutfit?.pattern === "petal" || wingsOutfit?.pattern === "crystal") && (
           <Path
             d={`M ${cx - headR * 0.3} ${shoulderY}
                 Q ${cx - wingW * 0.4} ${shoulderY - wingH * 0.35}, ${cx - wingW * 0.7} ${shoulderY - wingH * 0.25}`}
@@ -454,7 +464,7 @@ export function CrystalFairy({
             opacity={0.5}
           />
         )}
-        {evolutionStage >= 4 && (
+        {(evolutionStage >= 4 || wingsOutfit?.pattern === "crystal") && (
           <Path
             d={`M ${cx - headR * 0.3} ${shoulderY}
                 Q ${cx - wingW * 0.3} ${shoulderY - wingH * 0.5}, ${cx - wingW * 0.55} ${shoulderY - wingH * 0.45}`}
@@ -464,6 +474,35 @@ export function CrystalFairy({
             opacity={0.4}
           />
         )}
+        {/* Wing pattern overlays — left */}
+        {wingsOutfit?.pattern === "sakura" && (
+          <G opacity={0.5}>
+            <Ellipse cx={cx - wingW * 0.45} cy={shoulderY - wingH * 0.3} rx={3} ry={2} fill="#FFB7C5" transform={`rotate(-20 ${cx - wingW * 0.45} ${shoulderY - wingH * 0.3})`} />
+            <Ellipse cx={cx - wingW * 0.6} cy={shoulderY - wingH * 0.15} rx={2.5} ry={1.8} fill="#FFB7C5" transform={`rotate(15 ${cx - wingW * 0.6} ${shoulderY - wingH * 0.15})`} />
+            <Ellipse cx={cx - wingW * 0.35} cy={shoulderY - wingH * 0.45} rx={2} ry={1.5} fill="#FFD6E0" transform={`rotate(-35 ${cx - wingW * 0.35} ${shoulderY - wingH * 0.45})`} />
+          </G>
+        )}
+        {wingsOutfit?.pattern === "aurora" && (
+          <Path
+            d={wingPath(cx - headR * 0.3, shoulderY, wingW, wingH, -1, wingShapeName, evolutionStage)}
+            fill="url(#auroraGrad)"
+            opacity={0.35}
+          />
+        )}
+        {wingsOutfit?.pattern === "starry" && (
+          <G opacity={0.55}>
+            <Circle cx={cx - wingW * 0.4} cy={shoulderY - wingH * 0.3} r={1.5} fill="#FFFFFF" />
+            <Circle cx={cx - wingW * 0.6} cy={shoulderY - wingH * 0.1} r={1.2} fill="#FFFFFF" />
+            <Circle cx={cx - wingW * 0.3} cy={shoulderY - wingH * 0.45} r={1} fill="#FFFFFF" />
+            <Circle cx={cx - wingW * 0.5} cy={shoulderY - wingH * 0.5} r={0.8} fill="#FFFFFF" />
+          </G>
+        )}
+        {wingsOutfit?.sparkle && (
+          <G opacity={0.7}>
+            <Circle cx={cx - wingW * 0.85} cy={shoulderY - wingH * 0.25} r={1.5} fill="#FFFFFF" />
+            <Circle cx={cx - wingW * 0.7} cy={shoulderY - wingH * 0.5} r={1.2} fill="#FFFFFF" />
+          </G>
+        )}
 
         {/* Right wing */}
         <Path
@@ -471,7 +510,7 @@ export function CrystalFairy({
           fill="url(#wingGrad)"
           opacity={0.8}
         />
-        {evolutionStage >= 3 && (
+        {(evolutionStage >= 3 || wingsOutfit?.pattern === "petal" || wingsOutfit?.pattern === "crystal") && (
           <Path
             d={`M ${cx + headR * 0.3} ${shoulderY}
                 Q ${cx + wingW * 0.4} ${shoulderY - wingH * 0.35}, ${cx + wingW * 0.7} ${shoulderY - wingH * 0.25}`}
@@ -481,7 +520,7 @@ export function CrystalFairy({
             opacity={0.5}
           />
         )}
-        {evolutionStage >= 4 && (
+        {(evolutionStage >= 4 || wingsOutfit?.pattern === "crystal") && (
           <Path
             d={`M ${cx + headR * 0.3} ${shoulderY}
                 Q ${cx + wingW * 0.3} ${shoulderY - wingH * 0.5}, ${cx + wingW * 0.55} ${shoulderY - wingH * 0.45}`}
@@ -490,6 +529,35 @@ export function CrystalFairy({
             fill="none"
             opacity={0.4}
           />
+        )}
+        {/* Wing pattern overlays — right */}
+        {wingsOutfit?.pattern === "sakura" && (
+          <G opacity={0.5}>
+            <Ellipse cx={cx + wingW * 0.45} cy={shoulderY - wingH * 0.3} rx={3} ry={2} fill="#FFB7C5" transform={`rotate(20 ${cx + wingW * 0.45} ${shoulderY - wingH * 0.3})`} />
+            <Ellipse cx={cx + wingW * 0.6} cy={shoulderY - wingH * 0.15} rx={2.5} ry={1.8} fill="#FFB7C5" transform={`rotate(-15 ${cx + wingW * 0.6} ${shoulderY - wingH * 0.15})`} />
+            <Ellipse cx={cx + wingW * 0.35} cy={shoulderY - wingH * 0.45} rx={2} ry={1.5} fill="#FFD6E0" transform={`rotate(35 ${cx + wingW * 0.35} ${shoulderY - wingH * 0.45})`} />
+          </G>
+        )}
+        {wingsOutfit?.pattern === "aurora" && (
+          <Path
+            d={wingPath(cx + headR * 0.3, shoulderY, wingW, wingH, 1, wingShapeName, evolutionStage)}
+            fill="url(#auroraGrad)"
+            opacity={0.35}
+          />
+        )}
+        {wingsOutfit?.pattern === "starry" && (
+          <G opacity={0.55}>
+            <Circle cx={cx + wingW * 0.4} cy={shoulderY - wingH * 0.3} r={1.5} fill="#FFFFFF" />
+            <Circle cx={cx + wingW * 0.6} cy={shoulderY - wingH * 0.1} r={1.2} fill="#FFFFFF" />
+            <Circle cx={cx + wingW * 0.3} cy={shoulderY - wingH * 0.45} r={1} fill="#FFFFFF" />
+            <Circle cx={cx + wingW * 0.5} cy={shoulderY - wingH * 0.5} r={0.8} fill="#FFFFFF" />
+          </G>
+        )}
+        {wingsOutfit?.sparkle && (
+          <G opacity={0.7}>
+            <Circle cx={cx + wingW * 0.85} cy={shoulderY - wingH * 0.25} r={1.5} fill="#FFFFFF" />
+            <Circle cx={cx + wingW * 0.7} cy={shoulderY - wingH * 0.5} r={1.2} fill="#FFFFFF" />
+          </G>
         )}
 
         {/* === HAIR (behind head) === */}
@@ -705,13 +773,53 @@ export function CrystalFairy({
           opacity={0.6}
         />
 
-        {/* Dress pattern overlay for non-solid outfits */}
-        {dressOutfit && dressOutfit.pattern === "starry" && (
-          <>
-            <Circle cx={cx - bodyW * 0.15} cy={bodyCY} r={1.5} fill="#FFFFFF" opacity={0.5} />
-            <Circle cx={cx + bodyW * 0.2} cy={bodyCY - bodyH * 0.1} r={1} fill="#FFFFFF" opacity={0.4} />
-            <Circle cx={cx} cy={bodyCY + bodyH * 0.2} r={1.2} fill="#FFFFFF" opacity={0.45} />
-          </>
+        {/* Dress pattern overlays */}
+        {dressOutfit?.pattern === "starry" && (
+          <G opacity={0.5}>
+            <Circle cx={cx - bodyW * 0.15} cy={bodyCY} r={1.5} fill="#FFFFFF" />
+            <Circle cx={cx + bodyW * 0.2} cy={bodyCY - bodyH * 0.1} r={1} fill="#FFFFFF" />
+            <Circle cx={cx} cy={bodyCY + bodyH * 0.2} r={1.2} fill="#FFFFFF" />
+            <Circle cx={cx - bodyW * 0.05} cy={bodyCY - bodyH * 0.2} r={0.8} fill="#FFFFFF" />
+            <Circle cx={cx + bodyW * 0.1} cy={bodyCY + bodyH * 0.1} r={0.9} fill="#FFFFFF" />
+          </G>
+        )}
+        {dressOutfit?.pattern === "petal" && (
+          <G opacity={0.4}>
+            <Ellipse cx={cx - bodyW * 0.1} cy={bodyCY} rx={3} ry={2} fill={lighten(dressColor, 0.4)} transform={`rotate(-15 ${cx - bodyW * 0.1} ${bodyCY})`} />
+            <Ellipse cx={cx + bodyW * 0.15} cy={bodyCY + bodyH * 0.15} rx={2.5} ry={1.5} fill={lighten(dressColor, 0.4)} transform={`rotate(20 ${cx + bodyW * 0.15} ${bodyCY + bodyH * 0.15})`} />
+            <Ellipse cx={cx} cy={bodyCY + bodyH * 0.3} rx={2} ry={1.5} fill={lighten(dressColor, 0.5)} />
+          </G>
+        )}
+        {dressOutfit?.pattern === "crystal" && (
+          <G opacity={0.35}>
+            <Path d={`M ${cx - bodyW * 0.2} ${bodyCY - bodyH * 0.15} L ${cx} ${bodyCY + bodyH * 0.1} L ${cx + bodyW * 0.15} ${bodyCY - bodyH * 0.1}`} stroke={lighten(dressColor, 0.4)} strokeWidth="0.8" fill="none" />
+            <Path d={`M ${cx - bodyW * 0.1} ${bodyCY + bodyH * 0.05} L ${cx + bodyW * 0.1} ${bodyCY + bodyH * 0.25}`} stroke={lighten(dressColor, 0.5)} strokeWidth="0.6" fill="none" />
+          </G>
+        )}
+        {dressOutfit?.pattern === "sakura" && (
+          <G opacity={0.45}>
+            <Ellipse cx={cx - bodyW * 0.1} cy={bodyCY + bodyH * 0.05} rx={2.5} ry={1.5} fill="#FFB7C5" transform={`rotate(-10 ${cx - bodyW * 0.1} ${bodyCY + bodyH * 0.05})`} />
+            <Ellipse cx={cx + bodyW * 0.12} cy={bodyCY + bodyH * 0.2} rx={2} ry={1.2} fill="#FFD6E0" transform={`rotate(25 ${cx + bodyW * 0.12} ${bodyCY + bodyH * 0.2})`} />
+            <Ellipse cx={cx} cy={bodyCY - bodyH * 0.05} rx={1.8} ry={1.2} fill="#FFB7C5" />
+          </G>
+        )}
+        {dressOutfit?.pattern === "aurora" && (
+          <Path
+            d={`M ${cx - bodyW * 0.3} ${bodyCY - bodyH * 0.4}
+                Q ${cx - bodyW * 0.35} ${bodyCY - bodyH * 0.2}, ${cx - bodyW * 0.55} ${bodyCY + bodyH * 0.4}
+                Q ${cx} ${bodyCY + bodyH * 0.55}, ${cx + bodyW * 0.55} ${bodyCY + bodyH * 0.4}
+                Q ${cx + bodyW * 0.35} ${bodyCY - bodyH * 0.2}, ${cx + bodyW * 0.3} ${bodyCY - bodyH * 0.4}
+                Q ${cx} ${bodyCY - bodyH * 0.45}, ${cx - bodyW * 0.3} ${bodyCY - bodyH * 0.4} Z`}
+            fill="url(#auroraGrad)"
+            opacity={0.3}
+          />
+        )}
+        {dressOutfit?.sparkle && (
+          <G opacity={0.6}>
+            <Circle cx={cx - bodyW * 0.3} cy={bodyCY + bodyH * 0.35} r={1.2} fill="#FFFFFF" />
+            <Circle cx={cx + bodyW * 0.3} cy={bodyCY + bodyH * 0.35} r={1} fill="#FFFFFF" />
+            <Circle cx={cx} cy={bodyCY + bodyH * 0.4} r={0.8} fill="#FFFFFF" />
+          </G>
         )}
 
         {/* Feet (tiny) */}
@@ -737,55 +845,113 @@ export function CrystalFairy({
           opacity={0.35}
         />
 
-        {/* === CROWN / HEADPIECE === */}
-        {evolutionStage >= 4 ? (
-          // Crystal tiara
-          <G>
-            <Path
-              d={crownPath(cx, headCY - headR * 0.95, headR * 0.7, headR * 0.4)}
-              fill={hasGoldAura ? "#FFD700" : lighten(colorHex, 0.3)}
-              opacity={0.85}
-              stroke={hasGoldAura ? "#DAA520" : darken(colorHex, 0.1)}
-              strokeWidth="0.5"
-            />
-            {/* Center gem on crown */}
-            <Circle cx={cx} cy={headCY - headR * 1.15} r={headR * 0.08} fill={colorHex} />
-          </G>
-        ) : evolutionStage >= 3 ? (
-          // Flower crown
-          <G opacity={0.85}>
-            <Circle cx={cx - headR * 0.3} cy={headCY - headR * 0.9} r={headR * 0.12} fill={cheekColor} />
-            <Circle cx={cx} cy={headCY - headR * 0.98} r={headR * 0.14} fill={lighten(colorHex, 0.4)} />
-            <Circle cx={cx + headR * 0.3} cy={headCY - headR * 0.9} r={headR * 0.12} fill={cheekColor} />
-            {/* Tiny leaves */}
-            <Ellipse cx={cx - headR * 0.15} cy={headCY - headR * 0.85} rx={headR * 0.08} ry={headR * 0.04} fill="#7CB87C" opacity={0.6} />
-            <Ellipse cx={cx + headR * 0.15} cy={headCY - headR * 0.85} rx={headR * 0.08} ry={headR * 0.04} fill="#7CB87C" opacity={0.6} />
-          </G>
-        ) : evolutionStage >= 2 ? (
-          // Tiny sprout
-          <Path
-            d={`M ${cx} ${headCY - headR * 0.95}
-                Q ${cx - headR * 0.15} ${headCY - headR * 1.3}, ${cx - headR * 0.05} ${headCY - headR * 1.15}
-                M ${cx} ${headCY - headR * 0.95}
-                Q ${cx + headR * 0.15} ${headCY - headR * 1.3}, ${cx + headR * 0.05} ${headCY - headR * 1.15}`}
-            stroke="#7CB87C"
-            strokeWidth="1.5"
-            fill="none"
-            strokeLinecap="round"
-          />
-        ) : null}
+        {/* === CROWN / HEADPIECE (outfit-driven) === */}
+        {(() => {
+          const crownId = equippedOutfits.crown || "";
+          const crownColor = crownOutfit?.colorOverride || (hasGoldAura ? "#FFD700" : lighten(colorHex, 0.3));
+          const crownStroke = hasGoldAura ? "#DAA520" : darken(colorHex, 0.1);
 
-        {/* === ACCESSORY === */}
+          // Crown Master — gold crown with star sparkles
+          if (crownId === "crown_master") return (
+            <G>
+              <Path
+                d={crownPath(cx, headCY - headR * 0.95, headR * 0.75, headR * 0.45)}
+                fill="#FFD700"
+                opacity={0.9}
+                stroke="#DAA520"
+                strokeWidth="0.6"
+              />
+              <Circle cx={cx} cy={headCY - headR * 1.18} r={headR * 0.1} fill="#FFD700" />
+              <Rect x={cx - 0.5} y={headCY - headR * 1.18 - headR * 0.15} width={1} height={headR * 0.3} rx={0.5} fill="#FFFFFF" opacity={0.6} />
+              <Rect x={cx - headR * 0.15} y={headCY - headR * 1.18 - 0.5} width={headR * 0.3} height={1} rx={0.5} fill="#FFFFFF" opacity={0.6} />
+            </G>
+          );
+
+          // Crystal Tiara — faceted crown with center gem
+          if (crownId === "crown_crystal" || (crownId === "" && evolutionStage >= 4)) return (
+            <G>
+              <Path
+                d={crownPath(cx, headCY - headR * 0.95, headR * 0.7, headR * 0.4)}
+                fill={crownColor}
+                opacity={0.85}
+                stroke={crownStroke}
+                strokeWidth="0.5"
+              />
+              <Circle cx={cx} cy={headCY - headR * 1.15} r={headR * 0.08} fill={colorHex} />
+              {crownOutfit?.sparkle && (
+                <G opacity={0.6}>
+                  <Circle cx={cx - headR * 0.25} cy={headCY - headR * 1.05} r={1} fill="#FFFFFF" />
+                  <Circle cx={cx + headR * 0.25} cy={headCY - headR * 1.05} r={1} fill="#FFFFFF" />
+                </G>
+              )}
+            </G>
+          );
+
+          // Flower Crown — 3 flowers with leaves
+          if (crownId === "crown_flower" || (crownId === "" && evolutionStage >= 3)) return (
+            <G opacity={0.85}>
+              <Circle cx={cx - headR * 0.3} cy={headCY - headR * 0.9} r={headR * 0.12} fill={cheekColor} />
+              <Circle cx={cx} cy={headCY - headR * 0.98} r={headR * 0.14} fill={lighten(colorHex, 0.4)} />
+              <Circle cx={cx + headR * 0.3} cy={headCY - headR * 0.9} r={headR * 0.12} fill={cheekColor} />
+              <Ellipse cx={cx - headR * 0.15} cy={headCY - headR * 0.85} rx={headR * 0.08} ry={headR * 0.04} fill="#7CB87C" opacity={0.6} />
+              <Ellipse cx={cx + headR * 0.15} cy={headCY - headR * 0.85} rx={headR * 0.08} ry={headR * 0.04} fill="#7CB87C" opacity={0.6} />
+            </G>
+          );
+
+          // Seedling Sprout (default or evo 2)
+          if (crownId === "crown_default" || evolutionStage >= 2) return (
+            <Path
+              d={`M ${cx} ${headCY - headR * 0.95}
+                  Q ${cx - headR * 0.15} ${headCY - headR * 1.3}, ${cx - headR * 0.05} ${headCY - headR * 1.15}
+                  M ${cx} ${headCY - headR * 0.95}
+                  Q ${cx + headR * 0.15} ${headCY - headR * 1.3}, ${cx + headR * 0.05} ${headCY - headR * 1.15}`}
+              stroke="#7CB87C"
+              strokeWidth="1.5"
+              fill="none"
+              strokeLinecap="round"
+            />
+          );
+
+          return null;
+        })()}
+
+        {/* === ACCESSORY (outfit-driven) === */}
         {accessoryOutfit && (
-          <Circle
-            cx={cx + bodyW * 0.55}
-            cy={bodyCY - bodyH * 0.1}
-            r={bodyW * 0.1}
-            fill={lighten(colorHex, 0.3)}
-            stroke={colorHex}
-            strokeWidth="0.5"
-            opacity={0.8}
-          />
+          <G>
+            {/* Glow behind accessory */}
+            {accessoryOutfit.sparkle && (
+              <Circle cx={cx} cy={bodyCY - bodyH * 0.05} r={bodyW * 0.2} fill={colorHex} opacity={0.15} />
+            )}
+            {/* Crystal-pattern accessory: small gem shape on chest */}
+            {accessoryOutfit.pattern === "crystal" ? (
+              <G>
+                <Path
+                  d={crystalPath(cx, bodyCY - bodyH * 0.15, bodyW * 0.18, bodyW * 0.22)}
+                  fill={lighten(colorHex, 0.3)}
+                  stroke={colorHex}
+                  strokeWidth="0.5"
+                  opacity={0.85}
+                />
+                <Path
+                  d={`M ${cx} ${bodyCY - bodyH * 0.15 - bodyW * 0.11}
+                      L ${cx + bodyW * 0.04} ${bodyCY - bodyH * 0.15 - bodyW * 0.03}
+                      L ${cx - bodyW * 0.04} ${bodyCY - bodyH * 0.15 - bodyW * 0.02} Z`}
+                  fill="#FFFFFF"
+                  opacity={0.4}
+                />
+              </G>
+            ) : (
+              <Circle
+                cx={cx + bodyW * 0.55}
+                cy={bodyCY - bodyH * 0.1}
+                r={bodyW * 0.1}
+                fill={lighten(colorHex, 0.3)}
+                stroke={colorHex}
+                strokeWidth="0.5"
+                opacity={0.8}
+              />
+            )}
+          </G>
         )}
 
         {/* === SPARKLES === */}
@@ -798,8 +964,8 @@ export function CrystalFairy({
           return (
             <G key={i}>
               <Circle cx={sx} cy={sy} r={sr} fill={colorHex} opacity={0.6} />
-              {/* Four-point star sparkle for higher evolutions */}
-              {evolutionStage >= 4 && (
+              {/* Four-point star sparkle for higher evolutions or outfit sparkle */}
+              {(evolutionStage >= 4 || outfitSparkleBoost > 0) && (
                 <>
                   <Rect x={sx - 0.4} y={sy - sr * 1.5} width={0.8} height={sr * 3} rx={0.4} fill={colorHex} opacity={0.35} />
                   <Rect x={sx - sr * 1.5} y={sy - 0.4} width={sr * 3} height={0.8} rx={0.4} fill={colorHex} opacity={0.35} />
@@ -821,7 +987,7 @@ export function CrystalFairy({
         )}
       </Svg>
     );
-  }, [activeMood, evolutionStage, crystalStage, colorHex, s, wingShapeName, dressColor, isSleeping, hasGoldAura, accent]);
+  }, [activeMood, evolutionStage, crystalStage, colorHex, s, wingShapeName, dressColor, isSleeping, hasGoldAura, accent, equippedOutfits, outfitSparkleBoost]);
 
   // Stage 1 (Seed Sprite) — simplified orb
   if (evolutionStage === 1) {
