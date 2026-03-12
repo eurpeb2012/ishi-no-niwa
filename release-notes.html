@@ -180,6 +180,104 @@
     border-bottom: 1px solid var(--border);
     color: var(--text-dim);
   }
+  .rarity-row {
+    display: flex;
+    gap: 8px;
+    margin: 8px 0;
+    flex-wrap: wrap;
+  }
+  .rarity-chip {
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    flex: 1;
+    text-align: center;
+    min-width: 80px;
+  }
+  .biome-row {
+    display: flex;
+    gap: 6px;
+    margin: 8px 0;
+    flex-wrap: wrap;
+  }
+  .biome-chip {
+    background: var(--surface-light);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 10px;
+    text-align: center;
+    font-size: 11px;
+    flex: 1;
+    min-width: 80px;
+  }
+  .biome-chip .glyph { font-size: 18px; display: block; margin-bottom: 3px; }
+  .outfit-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0;
+    font-size: 12px;
+  }
+  .outfit-table th {
+    text-align: left;
+    padding: 6px 8px;
+    border-bottom: 2px solid var(--border);
+    color: var(--text-dim);
+    font-weight: 600;
+  }
+  .outfit-table td {
+    padding: 5px 8px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+  .shop-card {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 8px;
+  }
+  .shop-card .shop-icon {
+    font-size: 24px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+  }
+  .shop-card .shop-info {
+    flex: 1;
+  }
+  .shop-card .shop-name {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text);
+  }
+  .shop-card .shop-loc {
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+  .svg-detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0;
+    font-size: 12px;
+  }
+  .svg-detail-table td {
+    padding: 4px 8px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+  .svg-detail-table td:first-child {
+    font-weight: 600;
+    color: var(--text);
+    width: 40%;
+  }
   .cta {
     display: block;
     text-align: center;
@@ -226,62 +324,144 @@
 <h1>石の庭 Release Notes</h1>
 <p class="subtitle">Ishi no Niwa — Crystal Garden</p>
 
-<!-- ==================== CRYSTAL RARITY ==================== -->
-<h2><span class="emoji">💎</span>Crystal Rarity System (#2)</h2>
+<!-- ==================== SVG FAIRY REWRITE ==================== -->
+<h2><span class="emoji">🧚</span>SVG Fairy Avatar Rewrite</h2>
 
 <div class="card">
-  <div class="card-title">4-Tier Crystal Rarity</div>
+  <div class="card-title">Full SVG Watercolor Kawaii Redesign</div>
   <div class="card-desc">
-    Crystals now have real-world based rarity tiers: <strong>Common</strong> (Rose Quartz, Amethyst),
-    <strong>Uncommon</strong> (Citrine, Moonstone), <strong>Rare</strong> (Labradorite, Sugilite),
-    and <strong>Legendary / Gem Quality</strong> (Ruby, Sapphire, Emerald).
+    The Crystal Fairy has been completely rewritten using SVG vector graphics (react-native-svg),
+    inspired by Takae's concept art. The fairy now features hand-drawn bezier curves, radial gradients,
+    and translucent watercolor layering instead of simple View rectangles.
+  </div>
+  <table class="svg-detail-table">
+    <tr><td>Head &amp; Face</td><td>Radial skin gradient, shaped bangs with side locks, subtle nose</td></tr>
+    <tr><td>Eyes</td><td>Ellipse eyes with dual sparkle highlights, eyelashes (stage 3+), curved closed-eyes when sleeping</td></tr>
+    <tr><td>Hair</td><td>Gradient-filled volume, side strands (stage 3+), long flowing back strands (stage 4+), shaped bangs with bezier curves</td></tr>
+    <tr><td>Wings</td><td>Full bezier path wings in 5 shapes, radial gradient fill, vein detail lines (stage 3+, 4+)</td></tr>
+    <tr><td>Body</td><td>Curved dress silhouette, ruffle hem line, collar/neckline detail, starry pattern overlay</td></tr>
+    <tr><td>Arms &amp; Hands</td><td>Curved arm paths with round hands positioned to hold the crystal</td></tr>
+    <tr><td>Crystal</td><td>Faceted gem SVG path with 3-stop gradient, facet highlight, glow aura (stage 4+)</td></tr>
+    <tr><td>Crown</td><td>Sprout curves (stage 2), flower circles + leaves (stage 3), SVG crown path with center gem (stage 4+)</td></tr>
+    <tr><td>Feet</td><td>Tiny ellipses peeking below dress hem</td></tr>
+    <tr><td>Sparkles</td><td>Circles + four-point star crosses (stage 4+)</td></tr>
+    <tr><td>Sleeping</td><td>Ascending bubble ellipses instead of text "zzz"</td></tr>
+  </table>
+  <span class="tag tag-improved">Major Redesign</span>
+</div>
+
+<div class="card">
+  <div class="card-title">Updated Color Variants</div>
+  <div class="card-desc">
+    4 fairy colors updated to match Takae's watercolor concept art, each with a primary and accent shade:
+  </div>
+  <div class="color-row">
+    <div class="color-swatch" style="background:#F4A0B5" title="Rose Quartz"></div>
+    <div class="color-swatch" style="background:#9B7CB8" title="Amethyst"></div>
+    <div class="color-swatch" style="background:#7CB87C" title="Peridot"></div>
+    <div class="color-swatch" style="background:#4A5080" title="Onyx"></div>
+  </div>
+  <div class="card-desc" style="margin-top:4px">
+    Rose Quartz (pink) · Amethyst (purple) · Peridot (green, renamed from Jade) · Onyx (navy)
+  </div>
+  <span class="tag tag-changed">Changed</span>
+</div>
+
+<!-- ==================== CRYSTAL RARITY ==================== -->
+<h2><span class="emoji">💎</span>Crystal Rarity System</h2>
+
+<div class="card">
+  <div class="card-title">4-Tier Rarity Based on Real-World Value</div>
+  <div class="card-desc">
+    Every crystal now has a rarity tier based on its real-world scarcity and market value.
     Rarer crystals provide higher energy multipliers when used in grids.
+  </div>
+  <div class="rarity-row">
+    <div class="rarity-chip" style="background:#E0E0E0; color:#616161">Common · 1x</div>
+    <div class="rarity-chip" style="background:#E0F2F1; color:#00796B">Uncommon · 1.5x</div>
+    <div class="rarity-chip" style="background:#EDE7F6; color:#6A1B9A">Rare · 2x</div>
+    <div class="rarity-chip" style="background:#FFF8E1; color:#F57F17">Legendary · 3x</div>
+  </div>
+  <div class="card-desc" style="margin-top:6px">
+    <strong>Common:</strong> Rose Quartz, Amethyst, Clear Quartz, Tiger's Eye, Obsidian<br>
+    <strong>Uncommon:</strong> Citrine, Moonstone, Peridot, Fluorite, Lapis Lazuli, Turquoise<br>
+    <strong>Rare:</strong> Labradorite, Sugilite, Malachite, Tanzanite, Moldavite<br>
+    <strong>Legendary:</strong> Ruby, Sapphire, Emerald, Diamond, Black Opal
   </div>
   <span class="tag tag-new">New</span>
 </div>
 
 <!-- ==================== AVATAR OUTFITS ==================== -->
-<h2><span class="emoji">👗</span>Avatar Outfit Customization (#3)</h2>
+<h2><span class="emoji">👗</span>Avatar Outfit Customization</h2>
 
 <div class="card">
-  <div class="card-title">Watercolor Kawaii Fairy Redesign</div>
+  <div class="card-title">4 Equipment Slots</div>
   <div class="card-desc">
-    Fairy avatar completely redesigned to match Takae's concept art — soft watercolor style
-    with translucent wings, flowing hair, chibi proportions, and blush cheeks.
-    4 color variants: Rose Quartz (pink), Amethyst (purple), Peridot (green), Onyx (navy).
+    Customize your fairy's appearance by equipping items in 4 slots.
+    Browse and equip outfits from the new <strong>Fairy Outfits</strong> section on your Profile.
+    A live fairy preview shows your current outfit combination.
   </div>
-  <span class="tag tag-improved">Redesigned</span>
-</div>
-
-<div class="card">
-  <div class="card-title">Outfit Customization System</div>
-  <div class="card-desc">
-    Equip different <strong>wings</strong>, <strong>dresses</strong>, <strong>crowns</strong>,
-    and <strong>accessories</strong> on your fairy. Outfits unlock via evolution stages,
-    quest rewards, or in-app purchase. 15 unique outfits including Sakura Wings,
-    Moonlight Gown, Crystal Tiara, and Guardian Wings.
+  <div class="items-grid">
+    <span class="item-chip">🪽 Wings</span>
+    <span class="item-chip">👗 Dress</span>
+    <span class="item-chip">👑 Crown</span>
+    <span class="item-chip">🛡️ Accessory</span>
   </div>
   <span class="tag tag-new">New</span>
 </div>
 
 <div class="card">
-  <div class="card-title">Wing Shape Variations</div>
+  <div class="card-title">15 Unique Outfits</div>
   <div class="card-desc">
-    5 wing shapes: Round (basic), Petal (Bloom Fairy), Butterfly (purchasable),
-    Crystal (stage 4), and Feather (Guardian). Each has unique proportions.
+    Outfits are unlocked through 3 different methods — evolving your fairy, completing quests, or purchasing from the shop.
+  </div>
+  <table class="outfit-table">
+    <tr><th>Outfit</th><th>Slot</th><th>How to Get</th></tr>
+    <tr><td>Basic Wings / Crystal Dress / Seedling Sprout</td><td>Wings / Dress / Crown</td><td>Default</td></tr>
+    <tr><td>Petal Wings</td><td>Wings</td><td>Evolution stage 2</td></tr>
+    <tr><td>Flower Crown</td><td>Crown</td><td>Evolution stage 3</td></tr>
+    <tr><td>Crystal Wings / Crystal Tiara</td><td>Wings / Crown</td><td>Evolution stage 4</td></tr>
+    <tr><td>Guardian Wings / Guardian Gown</td><td>Wings / Dress</td><td>Evolution stage 5</td></tr>
+    <tr><td>Heart Blossom Dress</td><td>Dress</td><td>Complete "Love Master" quest</td></tr>
+    <tr><td>Protection Charm</td><td>Accessory</td><td>Complete "Shield Weaver" quest</td></tr>
+    <tr><td>Grand Master Crown</td><td>Crown</td><td>Complete 50 grids</td></tr>
+    <tr><td>Sakura Wings / Aurora Wings</td><td>Wings</td><td>In-App Purchase</td></tr>
+    <tr><td>Moonlight Gown</td><td>Dress</td><td>In-App Purchase</td></tr>
+  </table>
+  <span class="tag tag-new">New</span>
+</div>
+
+<div class="card">
+  <div class="card-title">5 Wing Shapes</div>
+  <div class="card-desc">
+    Each wing outfit uses a different SVG bezier path shape, giving a distinct silhouette:
+  </div>
+  <div class="items-grid">
+    <span class="item-chip">⭕ Round (basic)</span>
+    <span class="item-chip">🌸 Petal (teardrop)</span>
+    <span class="item-chip">🦋 Butterfly (dual-lobe)</span>
+    <span class="item-chip">💎 Crystal (angular facets)</span>
+    <span class="item-chip">🪶 Feather (layered curves)</span>
   </div>
   <span class="tag tag-new">New</span>
 </div>
 
 <!-- ==================== FAIRY LAND ==================== -->
-<h2><span class="emoji">🏰</span>Fairy Land World Building (#4)</h2>
+<h2><span class="emoji">🏰</span>Fairy Land World Building</h2>
 
 <div class="card">
-  <div class="card-title">5 Biomes to Explore</div>
+  <div class="card-title">5 Biomes to Unlock &amp; Explore</div>
   <div class="card-desc">
-    Crystal Meadow → Crystal Garden → Enchanted Forest → Crystal Cave → Sky Realm.
-    Each biome unlocks at higher energy thresholds. Build structures using crystal energy
-    earned from creating grids.
+    Spend Crystal Energy to unlock new biomes and build structures within them.
+    Each biome requires a minimum energy threshold to unlock, and structures require
+    both energy and a minimum evolution stage.
+  </div>
+  <div class="biome-row">
+    <div class="biome-chip"><span class="glyph">🌿</span>Crystal Meadow<br><em>Free</em></div>
+    <div class="biome-chip"><span class="glyph">🌸</span>Crystal Garden<br><em>50 ⚡</em></div>
+    <div class="biome-chip"><span class="glyph">🌲</span>Enchanted Forest<br><em>150 ⚡</em></div>
+    <div class="biome-chip"><span class="glyph">💎</span>Crystal Cave<br><em>300 ⚡</em></div>
+    <div class="biome-chip"><span class="glyph">☁</span>Sky Realm<br><em>500 ⚡</em></div>
   </div>
   <span class="tag tag-new">New</span>
 </div>
@@ -289,29 +469,68 @@
 <div class="card">
   <div class="card-title">18 Structures to Build</div>
   <div class="card-desc">
-    From a cozy Fairy House to a Crystal Aquarium to a floating Cloud Palace.
-    Structures include: Crystal Lamp, Flower Patch, Crystal Fountain, Rose Quartz Arbor,
-    Butterfly Grove, Fairy Ring, Crystal Pond, Amethyst Cluster, Gem Throne,
-    Rainbow Bridge, Star Garden, and more.
+    Each biome has 3-4 structures inspired by Takae's concept art — fairy house, crystal aquarium,
+    and more. Build costs range from 8 to 200 energy.
   </div>
+  <table class="quest-table">
+    <tr><th>Biome</th><th>Structures</th></tr>
+    <tr><td>Meadow</td><td>Fairy House (妖精の家), Crystal Lamp, Flower Patch, Crystal Path</td></tr>
+    <tr><td>Garden</td><td>Crystal Fountain, Rose Quartz Arbor, Butterfly Grove, Wishing Well</td></tr>
+    <tr><td>Forest</td><td>Crystal Tree, Fairy Ring, Crystal Pond</td></tr>
+    <tr><td>Cave</td><td>Amethyst Cluster, Crystal Aquarium (クリスタル水槽), Gem Throne</td></tr>
+    <tr><td>Sky</td><td>Cloud Palace, Rainbow Bridge, Star Garden (星の庭)</td></tr>
+  </table>
   <span class="tag tag-new">New</span>
 </div>
 
 <!-- ==================== CRYSTAL SHOPS ==================== -->
-<h2><span class="emoji">🏪</span>Crystal Shop Partnerships (#5)</h2>
+<h2><span class="emoji">🏪</span>Crystal Shop Partnerships</h2>
 
 <div class="card">
-  <div class="card-title">Partner Crystal Shops</div>
+  <div class="card-title">5 Partner Crystal Shops</div>
   <div class="card-desc">
-    Browse featured crystal shops in the profile section. Partners include
-    Shibuya Crystal Gallery, Healing Stones Japan, Crystal Mineral Market,
-    Gem Palace Kyoto, and Earth Crystal Online. Each shop shows their
-    specialty crystals and location.
+    Browse real crystal shops from the new <strong>Crystal Shops</strong> section on your Profile.
+    Featured shops are highlighted with their specialty crystals.
+  </div>
+  <div class="shop-card">
+    <div class="shop-icon" style="background:#9B59B620">💎</div>
+    <div class="shop-info">
+      <div class="shop-name">Shibuya Crystal Gallery</div>
+      <div class="shop-loc">渋谷, Tokyo · Japanese native crystals &amp; rare imports</div>
+    </div>
+  </div>
+  <div class="shop-card">
+    <div class="shop-icon" style="background:#F4A0B520">✨</div>
+    <div class="shop-info">
+      <div class="shop-name">Healing Stones Japan</div>
+      <div class="shop-loc">原宿, Tokyo · Curated healing &amp; power stones</div>
+    </div>
+  </div>
+  <div class="shop-card">
+    <div class="shop-icon" style="background:#E8B86D20">💎</div>
+    <div class="shop-info">
+      <div class="shop-name">Crystal Mineral Market</div>
+      <div class="shop-loc">池袋, Tokyo · Raw &amp; polished crystals, fair prices</div>
+    </div>
+  </div>
+  <div class="shop-card">
+    <div class="shop-icon" style="background:#FFD70020">👑</div>
+    <div class="shop-info">
+      <div class="shop-name">Gem Palace Kyoto</div>
+      <div class="shop-loc">祇園, Kyoto · Gem-quality crystals, traditional setting</div>
+    </div>
+  </div>
+  <div class="shop-card">
+    <div class="shop-icon" style="background:#4ECDC420">🌍</div>
+    <div class="shop-info">
+      <div class="shop-name">Earth Crystal Online</div>
+      <div class="shop-loc">Online · Worldwide delivery with certificates</div>
+    </div>
   </div>
   <span class="tag tag-new">New</span>
 </div>
 
-<br>
+<div class="divider"></div>
 
 <!-- ================================================================ -->
 <!--  v2.2 — March 10, 2026                                          -->
@@ -669,14 +888,14 @@
 <h2><span class="emoji">🔜</span>Coming Soon</h2>
 <div class="card">
   <div class="card-desc">
-    • Crystal Sanctuary (Fairyland) — decoratable fairy habitat<br>
-    • Fairy outfit customization (wings, crown, dress, accessories)<br>
     • Audio playback for healing music tracks<br>
-    • Real crystal photos from contributors<br>
-    • Native Android & iOS app versions<br>
+    • Real crystal photos from contributors (Google Drive upload in progress)<br>
+    • Native Android &amp; iOS app versions<br>
+    • iPad-optimized prototype<br>
     • AR View — place grids on real surfaces<br>
-    • Partner crystal shop integration<br>
-    • Social sharing with in-app image generation
+    • Social sharing with in-app image generation<br>
+    • Fairy Land visual scene rendering (animated biome backgrounds)<br>
+    • Avatar outfit visual rendering in SVG (wing/dress/crown appearance changes)
   </div>
 </div>
 
