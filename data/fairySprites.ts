@@ -49,11 +49,11 @@ type SpriteKey = `${FairyColor}_${EvolutionStage}_${FairyMood}`;
 // Placeholder: returns null when no sprite exists yet
 const SPRITES: Partial<Record<SpriteKey, ImageSourcePropType>> = {
   // ── Amethyst ──────────────────────────────────────────────
-  // amethyst_1_idle: require("../assets/fairy/amethyst_1_idle.png"),
-  // amethyst_1_happy: require("../assets/fairy/amethyst_1_happy.png"),
-  // amethyst_1_excited: require("../assets/fairy/amethyst_1_excited.png"),
-  // amethyst_1_thinking: require("../assets/fairy/amethyst_1_thinking.png"),
-  // amethyst_1_sleeping: require("../assets/fairy/amethyst_1_sleeping.png"),
+  amethyst_1_idle: require("../assets/fairy/amethyst_1_idle.png"),
+  amethyst_1_happy: require("../assets/fairy/amethyst_1_happy.png"),
+  amethyst_1_excited: require("../assets/fairy/amethyst_1_excited.png"),
+  amethyst_1_thinking: require("../assets/fairy/amethyst_1_thinking.png"),
+  amethyst_1_sleeping: require("../assets/fairy/amethyst_1_sleeping.png"),
   // amethyst_2_idle: require("../assets/fairy/amethyst_2_idle.png"),
   // amethyst_2_happy: require("../assets/fairy/amethyst_2_happy.png"),
   // amethyst_2_excited: require("../assets/fairy/amethyst_2_excited.png"),
