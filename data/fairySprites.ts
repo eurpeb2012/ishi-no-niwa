@@ -76,12 +76,20 @@ const SPRITES: Partial<Record<SpriteKey, ImageSourcePropType>> = {
   // amethyst_5_sleeping: require("../assets/fairy/amethyst_5_sleeping.png"),
 
   // ── Rose Quartz ───────────────────────────────────────────
-  // rose_quartz_1_idle: require("../assets/fairy/rose_quartz_1_idle.png"),
-  // ... (same pattern for all 25 combos)
+  rose_quartz_1_idle: require("../assets/fairy/rose_quartz_1_idle.png"),
+  rose_quartz_1_happy: require("../assets/fairy/rose_quartz_1_happy.png"),
+  rose_quartz_1_excited: require("../assets/fairy/rose_quartz_1_excited.png"),
+  rose_quartz_1_thinking: require("../assets/fairy/rose_quartz_1_thinking.png"),
+  rose_quartz_1_sleeping: require("../assets/fairy/rose_quartz_1_sleeping.png"),
+  // ... (remaining rose_quartz stages)
 
   // ── Peridot ───────────────────────────────────────────────
-  // peridot_1_idle: require("../assets/fairy/peridot_1_idle.png"),
-  // ... (same pattern for all 25 combos)
+  peridot_3_idle: require("../assets/fairy/peridot_3_idle.png"),
+  peridot_3_happy: require("../assets/fairy/peridot_3_happy.png"),
+  peridot_3_excited: require("../assets/fairy/peridot_3_excited.png"),
+  peridot_3_thinking: require("../assets/fairy/peridot_3_thinking.png"),
+  peridot_3_sleeping: require("../assets/fairy/peridot_3_sleeping.png"),
+  // ... (remaining peridot stages)
 
   // ── Onyx ──────────────────────────────────────────────────
   // onyx_1_idle: require("../assets/fairy/onyx_1_idle.png"),
