@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls *.docx)",
+      "Bash(python3 -c \"\nfrom docx import Document\ndoc = Document\\('Crystal Garden Game Design Meeting_3_10.docx'\\)\nfor p in doc.paragraphs:\n    print\\(p.text\\)\n\" 2>/dev/null || python -c \"\nfrom docx import Document\ndoc = Document\\('Crystal Garden Game Design Meeting_3_10.docx'\\)\nfor p in doc.paragraphs:\n    print\\(p.text\\)\n\" 2>/dev/null || echo \"NEED_INSTALL\")",
+      "Bash(cd C:/ishi-no-niwa && npx tsc --noEmit --pretty 2>&1 | head -50)",
+      "Bash(cd C:/ishi-no-niwa && npx tsc --noEmit --pretty 2>&1 | head -30)",
+      "Bash(cd C:/ishi-no-niwa && npm ls react-native-svg 2>&1 | head -5)",
+      "Bash(cd C:/ishi-no-niwa && npm ls 2>&1 | grep -i svg)",
+      "Bash(cd C:/ishi-no-niwa && npx expo install react-native-svg 2>&1 | tail -10)",
+      "Bash(cd C:/ishi-no-niwa && npx tsc --noEmit --pretty 2>&1 | head -40)",
+      "Bash(cd C:/ishi-no-niwa && node -e \"require\\('react-native-svg'\\)\" 2>&1 | head -5)",
+      "Bash(cd C:/ishi-no-niwa && npm run deploy 2>&1)",
+      "Bash(cd \"C:/ishi-no-niwa\" && npx tsc --noEmit 2>&1 | head -30)",
+      "Bash(python --version 2>&1 && python -c \"from PIL import Image; print\\('Pillow OK'\\)\" 2>&1)",
+      "Bash(python -c \"import numpy; print\\('numpy', numpy.__version__\\)\" 2>&1)",
+      "Bash(pip install:*)",
+      "Bash(cd \"C:/ishi-no-niwa\" && npx tsc --noEmit 2>&1 | head -20)",
+      "Bash(cd \"C:/ishi-no-niwa\" && npx expo export --platform web 2>&1 | tail -5)",
+      "Bash(cd \"C:/ishi-no-niwa\" && npx gh-pages -d dist 2>&1)",
+      "mcp__jira-server__search_issues",
+      "Bash(cd \"C:/ishi-no-niwa\" && npx expo export --platform web 2>&1 | tail -3)",
+      "Bash(cd \"C:/ishi-no-niwa\" && cp release-notes.html dist/ && npx gh-pages -d dist 2>&1)",
+      "Bash(find \"C:\\\\ishi-no-niwa\" -maxdepth 1 -type f -name \"*.json\" 2>/dev/null | head -5)",
+      "Bash(git -C \"C:\\\\ishi-no-niwa\" log --all --oneline --grep=\"3_10\\\\|March 10\\\\|meeting\\\\|feedback\" | head -20)",
+      "Bash(git -C \"C:\\\\ishi-no-niwa\" show 00c6159 --stat | head -40)",
+      "Bash(cd \"C:/ishi-no-niwa\" && npx expo export --platform web 2>&1)",
+      "Bash(cd \"C:/ishi-no-niwa\" && npx expo export --platform web 2>&1 && node fix-html.js 2>&1 && npx gh-pages -d dist 2>&1)",
+      "Bash(cd \"C:/ishi-no-niwa\" && node fix-html.js 2>&1 && npx gh-pages -d dist 2>&1)",
+      "Bash(npx tsc:*)",
+      "Bash(cd C:/ishi-no-niwa && python3 -c \"from PIL import Image; print\\('Pillow available'\\)\" 2>&1 || pip install Pillow 2>&1 | tail -3)",
+      "Bash(cd C:/ishi-no-niwa && python -c \"from PIL import Image; img = Image.open\\('assets/fairy/test.png'\\); print\\(f'Size: {img.size}, Mode: {img.mode}'\\)\")",
+      "Bash(cd C:/ishi-no-niwa && python assets/fairy/split_spritesheet.py assets/fairy/test.png)",
+      "Bash(ls C:/ishi-no-niwa/assets/fairy/*.png | grep -v amethyst_1_ | grep -v test.png | grep -v amethyst_3_idle)",
+      "Bash(cd C:/ishi-no-niwa && python -c \"\nfrom PIL import Image\nfor f in ['assets/fairy/ChatGPT Image Mar 13, 2026, 08_08_06 AM.png', 'assets/fairy/ChatGPT Image Mar 13, 2026, 08_09_51 AM.png']:\n    img = Image.open\\(f\\)\n    print\\(f'{f}: {img.size} {img.mode}'\\)\n\")",
+      "Bash(ls -t C:/ishi-no-niwa/assets/fairy/*.png | head -10)",
+      "Bash(ls -t C:/ishi-no-niwa/assets/fairy/ChatGPT* 2>/dev/null; ls -t C:/ishi-no-niwa/*.png 2>/dev/null; ls -t C:/ishi-no-niwa/Images/*.png 2>/dev/null)",
+      "Bash(ls -t C:/ishi-no-niwa/assets/fairy/ChatGPT*.png)",
+      "Bash(cd C:/ishi-no-niwa && python -c \"\nimport sys\nsys.path.insert\\(0, 'assets/fairy'\\)\nfrom split_spritesheet import make_white_transparent, trim_whitespace, fit_to_square\nfrom PIL import Image\nfrom pathlib import Path\n\nsrc = Image.open\\('assets/fairy/ChatGPT Image Mar 13, 2026, 08_52_25 AM.png'\\)\nw, h = src.size\ncols, rows = 5, 2\ncell_w, cell_h = w // cols, h // rows\nmoods = ['idle','happy','excited','sleeping','thinking','sad','surprised','angry','shy','waving']\nout_dir = Path\\('assets/fairy'\\)\nfor row in range\\(rows\\):\n    for col in range\\(cols\\):\n        idx = row * cols + col\n        x1, y1 = col * cell_w, row * cell_h\n        cell = src.crop\\(\\(x1, y1, x1 + cell_w, y1 + cell_h\\)\\)\n        cell = make_white_transparent\\(cell\\)\n        cell = trim_whitespace\\(cell\\)\n        cell = fit_to_square\\(cell, 512\\)\n        name = f'onyx_3_{moods[idx]}'\n        \\(out_dir / f'{name}.png'\\).save_data if False else cell.save\\(str\\(out_dir / f'{name}.png'\\), 'PNG'\\)\n        print\\(f'  {name}.png'\\)\nprint\\('Done!'\\)\n\" 2>&1)"
+    ]
+  }
+}
