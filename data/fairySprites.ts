@@ -92,8 +92,11 @@ const SPRITES: Partial<Record<SpriteKey, ImageSourcePropType>> = {
   // ... (remaining peridot stages)
 
   // ── Onyx ──────────────────────────────────────────────────
-  // onyx_1_idle: require("../assets/fairy/onyx_1_idle.png"),
-  // ... (remaining onyx stages)
+  onyx_3_idle: require("../assets/fairy/onyx_3_idle.png"),
+  onyx_3_happy: require("../assets/fairy/onyx_3_happy.png"),
+  onyx_3_excited: require("../assets/fairy/onyx_3_excited.png"),
+  onyx_3_thinking: require("../assets/fairy/onyx_3_thinking.png"),
+  onyx_3_sleeping: require("../assets/fairy/onyx_3_sleeping.png"),
 
   // ── Ruby ──────────────────────────────────────────────────
   ruby_3_idle: require("../assets/fairy/ruby_3_idle.png"),
