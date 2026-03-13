@@ -93,7 +93,31 @@ const SPRITES: Partial<Record<SpriteKey, ImageSourcePropType>> = {
 
   // ── Onyx ──────────────────────────────────────────────────
   // onyx_1_idle: require("../assets/fairy/onyx_1_idle.png"),
-  // ... (same pattern for all 25 combos)
+  // ... (remaining onyx stages)
+
+  // ── Topaz ─────────────────────────────────────────────────
+  topaz_3_idle: require("../assets/fairy/topaz_3_idle.png"),
+  topaz_3_happy: require("../assets/fairy/topaz_3_happy.png"),
+  topaz_3_excited: require("../assets/fairy/topaz_3_excited.png"),
+  topaz_3_thinking: require("../assets/fairy/topaz_3_thinking.png"),
+  topaz_3_sleeping: require("../assets/fairy/topaz_3_sleeping.png"),
+  // ... (remaining topaz stages)
+
+  // ── Sapphire ──────────────────────────────────────────────
+  sapphire_3_idle: require("../assets/fairy/sapphire_3_idle.png"),
+  sapphire_3_happy: require("../assets/fairy/sapphire_3_happy.png"),
+  sapphire_3_excited: require("../assets/fairy/sapphire_3_excited.png"),
+  sapphire_3_thinking: require("../assets/fairy/sapphire_3_thinking.png"),
+  sapphire_3_sleeping: require("../assets/fairy/sapphire_3_sleeping.png"),
+  // ... (remaining sapphire stages)
+
+  // ── Aquamarine ────────────────────────────────────────────
+  aquamarine_3_idle: require("../assets/fairy/aquamarine_3_idle.png"),
+  aquamarine_3_happy: require("../assets/fairy/aquamarine_3_happy.png"),
+  aquamarine_3_excited: require("../assets/fairy/aquamarine_3_excited.png"),
+  aquamarine_3_thinking: require("../assets/fairy/aquamarine_3_thinking.png"),
+  aquamarine_3_sleeping: require("../assets/fairy/aquamarine_3_sleeping.png"),
+  // ... (remaining aquamarine stages)
 };
 
 /**

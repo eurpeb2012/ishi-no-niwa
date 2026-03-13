@@ -4,7 +4,7 @@ import { asyncStorage } from "./asyncStorageAdapter";
 import type { OutfitSlot } from "../data/fairyOutfits";
 import type { FairyLandBiome } from "../data/fairyLand";
 
-export type FairyColor = "rose_quartz" | "amethyst" | "peridot" | "onyx";
+export type FairyColor = "rose_quartz" | "amethyst" | "peridot" | "onyx" | "topaz" | "sapphire" | "aquamarine";
 export type EvolutionStage = 1 | 2 | 3 | 4 | 5;
 export type CrystalStage = 1 | 2 | 3 | 4 | 5;
 
@@ -14,6 +14,9 @@ export const FAIRY_COLORS: Record<FairyColor, { hex: string; name_en: string; na
   amethyst: { hex: "#9B7CB8", name_en: "Amethyst", name_jp: "アメジスト", accent: "#D4C4E8" },
   peridot: { hex: "#7CB87C", name_en: "Peridot", name_jp: "ペリドット", accent: "#C4E8C4" },
   onyx: { hex: "#4A5080", name_en: "Onyx", name_jp: "オニキス", accent: "#8890B8" },
+  topaz: { hex: "#E8B86D", name_en: "Topaz", name_jp: "トパーズ", accent: "#F5DCA8" },
+  sapphire: { hex: "#4A7BDB", name_en: "Sapphire", name_jp: "サファイア", accent: "#A0BEF0" },
+  aquamarine: { hex: "#5EC4B8", name_en: "Aquamarine", name_jp: "アクアマリン", accent: "#B0E8E0" },
 };
 
 export const EVOLUTION_STAGES: Record<EvolutionStage, { name_en: string; name_jp: string; minLevel: number; glyph: string }> = {
