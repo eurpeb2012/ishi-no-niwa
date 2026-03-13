@@ -95,6 +95,48 @@ const SPRITES: Partial<Record<SpriteKey, ImageSourcePropType>> = {
   // onyx_1_idle: require("../assets/fairy/onyx_1_idle.png"),
   // ... (remaining onyx stages)
 
+  // ── Ruby ──────────────────────────────────────────────────
+  ruby_3_idle: require("../assets/fairy/ruby_3_idle.png"),
+  ruby_3_happy: require("../assets/fairy/ruby_3_happy.png"),
+  ruby_3_excited: require("../assets/fairy/ruby_3_excited.png"),
+  ruby_3_thinking: require("../assets/fairy/ruby_3_thinking.png"),
+  ruby_3_sleeping: require("../assets/fairy/ruby_3_sleeping.png"),
+
+  // ── Moonstone ─────────────────────────────────────────────
+  moonstone_3_idle: require("../assets/fairy/moonstone_3_idle.png"),
+  moonstone_3_happy: require("../assets/fairy/moonstone_3_happy.png"),
+  moonstone_3_excited: require("../assets/fairy/moonstone_3_excited.png"),
+  moonstone_3_thinking: require("../assets/fairy/moonstone_3_thinking.png"),
+  moonstone_3_sleeping: require("../assets/fairy/moonstone_3_sleeping.png"),
+
+  // ── Garnet Peridot ────────────────────────────────────────
+  garnet_peridot_3_idle: require("../assets/fairy/garnet_peridot_3_idle.png"),
+  garnet_peridot_3_happy: require("../assets/fairy/garnet_peridot_3_happy.png"),
+  garnet_peridot_3_excited: require("../assets/fairy/garnet_peridot_3_excited.png"),
+  garnet_peridot_3_thinking: require("../assets/fairy/garnet_peridot_3_thinking.png"),
+  garnet_peridot_3_sleeping: require("../assets/fairy/garnet_peridot_3_sleeping.png"),
+
+  // ── Opal ──────────────────────────────────────────────────
+  opal_3_idle: require("../assets/fairy/opal_3_idle.png"),
+  opal_3_happy: require("../assets/fairy/opal_3_happy.png"),
+  opal_3_excited: require("../assets/fairy/opal_3_excited.png"),
+  opal_3_thinking: require("../assets/fairy/opal_3_thinking.png"),
+  opal_3_sleeping: require("../assets/fairy/opal_3_sleeping.png"),
+
+  // ── Garnet Sapphire ───────────────────────────────────────
+  garnet_sapphire_3_idle: require("../assets/fairy/garnet_sapphire_3_idle.png"),
+  garnet_sapphire_3_happy: require("../assets/fairy/garnet_sapphire_3_happy.png"),
+  garnet_sapphire_3_excited: require("../assets/fairy/garnet_sapphire_3_excited.png"),
+  garnet_sapphire_3_thinking: require("../assets/fairy/garnet_sapphire_3_thinking.png"),
+  garnet_sapphire_3_sleeping: require("../assets/fairy/garnet_sapphire_3_sleeping.png"),
+
+  // ── Citrine ───────────────────────────────────────────────
+  citrine_3_idle: require("../assets/fairy/citrine_3_idle.png"),
+  citrine_3_happy: require("../assets/fairy/citrine_3_happy.png"),
+  citrine_3_excited: require("../assets/fairy/citrine_3_excited.png"),
+  citrine_3_thinking: require("../assets/fairy/citrine_3_thinking.png"),
+  citrine_3_sleeping: require("../assets/fairy/citrine_3_sleeping.png"),
+
   // ── Topaz ─────────────────────────────────────────────────
   topaz_3_idle: require("../assets/fairy/topaz_3_idle.png"),
   topaz_3_happy: require("../assets/fairy/topaz_3_happy.png"),

@@ -4,7 +4,7 @@ import { asyncStorage } from "./asyncStorageAdapter";
 import type { OutfitSlot } from "../data/fairyOutfits";
 import type { FairyLandBiome } from "../data/fairyLand";
 
-export type FairyColor = "rose_quartz" | "amethyst" | "peridot" | "onyx" | "topaz" | "sapphire" | "aquamarine";
+export type FairyColor = "rose_quartz" | "amethyst" | "peridot" | "onyx" | "topaz" | "sapphire" | "aquamarine" | "ruby" | "moonstone" | "garnet_peridot" | "opal" | "garnet_sapphire" | "citrine";
 export type EvolutionStage = 1 | 2 | 3 | 4 | 5;
 export type CrystalStage = 1 | 2 | 3 | 4 | 5;
 
@@ -17,6 +17,12 @@ export const FAIRY_COLORS: Record<FairyColor, { hex: string; name_en: string; na
   topaz: { hex: "#E8B86D", name_en: "Topaz", name_jp: "トパーズ", accent: "#F5DCA8" },
   sapphire: { hex: "#4A7BDB", name_en: "Sapphire", name_jp: "サファイア", accent: "#A0BEF0" },
   aquamarine: { hex: "#5EC4B8", name_en: "Aquamarine", name_jp: "アクアマリン", accent: "#B0E8E0" },
+  ruby: { hex: "#E05080", name_en: "Ruby", name_jp: "ルビー", accent: "#F0A0B8" },
+  moonstone: { hex: "#B0B8D8", name_en: "Moonstone", name_jp: "ムーンストーン", accent: "#D8DCF0" },
+  garnet_peridot: { hex: "#C86830", name_en: "Garnet Peridot", name_jp: "ガーネットペリドット", accent: "#E8C080" },
+  opal: { hex: "#D890C8", name_en: "Opal", name_jp: "オパール", accent: "#F0C8E8" },
+  garnet_sapphire: { hex: "#A04088", name_en: "Garnet Sapphire", name_jp: "ガーネットサファイア", accent: "#D090C0" },
+  citrine: { hex: "#E89040", name_en: "Citrine", name_jp: "シトリン", accent: "#F8C888" },
 };
 
 export const EVOLUTION_STAGES: Record<EvolutionStage, { name_en: string; name_jp: string; minLevel: number; glyph: string }> = {
