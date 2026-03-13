@@ -282,10 +282,10 @@ export function GemStone({ stoneId, colorHex, size, useNatural, noShadow }: GemS
   // Use photo sprite if available
   if (hasSprite(stoneId)) {
     return (
-      <View style={[{ width: w, height: h }, !noShadow && s.shadow]}>
+      <View style={{ width: w, height: h }}>
         <Image
           source={STONE_SPRITES[stoneId]}
-          style={{ width: w, height: h, borderRadius: Math.min(w, h) * 0.1 }}
+          style={{ width: w, height: h }}
           resizeMode="contain"
         />
       </View>

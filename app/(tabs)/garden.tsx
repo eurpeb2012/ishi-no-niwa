@@ -24,7 +24,8 @@ import { useCanvasStore, CANVAS_BG_COLORS } from "../../stores/canvasStore";
 import { useStoneStore } from "../../stores/stoneStore";
 import { useProgressionStore } from "../../stores/progressionStore";
 import { useInsightStore } from "../../stores/insightStore";
-import { useFairyStore } from "../../stores/fairyStore";
+import { useFairyStore, FAIRY_COLORS } from "../../stores/fairyStore";
+import { CrystalFairy } from "../../components/common/CrystalFairy";
 import { useResponsive } from "../../hooks/useResponsive";
 import { XP_REWARDS } from "../../types";
 import { GemStone, getGemSize } from "../../components/common/GemStone";
@@ -420,9 +421,11 @@ export default function GardenScreen() {
   const addXP = useProgressionStore((s) => s.addXP);
   const incrementGrids = useProgressionStore((s) => s.incrementGrids);
   const trackStonePlaced = useInsightStore((s) => s.trackStonePlaced);
-  const fairyAddEnergy = useFairyStore((s) => s.addEnergy);
-  const fairyAddBond = useFairyStore((s) => s.addBond);
-  const fairyTrackIntention = useFairyStore((s) => s.trackGridIntention);
+  const fairy = useFairyStore();
+  const fairyAddEnergy = fairy.addEnergy;
+  const fairyAddBond = fairy.addBond;
+  const fairyTrackIntention = fairy.trackGridIntention;
+  const fairyColor = FAIRY_COLORS[fairy.colorVariant];
 
   const [showTemplates, setShowTemplates] = useState(false);
   const [showSaveAd, setShowSaveAd] = useState(false);
@@ -781,6 +784,20 @@ export default function GardenScreen() {
               />
             );
           })}
+
+          {/* Fairy avatar inside canvas, centered near bottom */}
+          <View style={{ position: "absolute", bottom: CANVAS_SIZE * 0.15, left: CANVAS_SIZE / 2 - 24 }} pointerEvents="none">
+            <CrystalFairy
+              colorHex={fairyColor.hex}
+              accentHex={fairyColor.accent}
+              size={48}
+              level={level}
+              evolutionStage={fairy.evolutionStage}
+              crystalStage={fairy.crystalStage}
+              equippedOutfits={fairy.equippedOutfits}
+              isStatic
+            />
+          </View>
         </View>
       </View>
 
