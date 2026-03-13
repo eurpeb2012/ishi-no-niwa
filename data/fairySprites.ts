@@ -104,9 +104,21 @@ export function getFairySprite(
   const idle: SpriteKey = `${color}_${evolution}_idle`;
   if (SPRITES[idle]) return SPRITES[idle]!;
 
-  // Fall back to stage 1 idle (absolute fallback)
-  const base: SpriteKey = `${color}_1_idle`;
-  if (SPRITES[base]) return SPRITES[base]!;
+  // Fall back to any evolution stage (nearest first, then any idle)
+  const stages: EvolutionStage[] = [1, 2, 3, 4, 5];
+  for (const s of stages) {
+    const key: SpriteKey = `${color}_${s}_idle`;
+    if (SPRITES[key]) return SPRITES[key]!;
+  }
+
+  // Absolute fallback: any sprite at all for this color
+  for (const s of stages) {
+    const moods: FairyMood[] = ["idle", "happy", "excited", "thinking", "sleeping"];
+    for (const m of moods) {
+      const key: SpriteKey = `${color}_${s}_${m}`;
+      if (SPRITES[key]) return SPRITES[key]!;
+    }
+  }
 
   return null;
 }
