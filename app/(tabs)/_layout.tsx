@@ -8,7 +8,6 @@ import { GemStone } from "../../components/common/GemStone";
 const TAB_STONES: Record<string, { stoneId: string; colorHex: string }> = {
   garden: { stoneId: "jade_jadeite", colorHex: "#5B8C5A" },
   stones: { stoneId: "amethyst", colorHex: "#9B59B6" },
-  guide: { stoneId: "clear_quartz", colorHex: "#E8E4E0" },
   journey: { stoneId: "citrine", colorHex: "#F0C75E" },
   community: { stoneId: "rose_quartz", colorHex: "#F7CAC9" },
   profile: { stoneId: "moonstone", colorHex: "#C5D0E6" },
@@ -39,8 +38,8 @@ export default function TabLayout() {
           styles.tabBar,
           isWide && styles.tabBarWide,
         ],
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textMuted,
+        tabBarActiveTintColor: colors.primaryDark,
+        tabBarInactiveTintColor: colors.textSecondary,
         tabBarLabelStyle: [
           styles.tabLabel,
           isWide && styles.tabLabelWide,
@@ -62,15 +61,6 @@ export default function TabLayout() {
           title: t("tabs.stones"),
           tabBarIcon: ({ focused }) => (
             <TabCrystalIcon tab="stones" focused={focused} size={iconSize} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="guide"
-        options={{
-          title: t("tabs.guide"),
-          tabBarIcon: ({ focused }) => (
-            <TabCrystalIcon tab="guide" focused={focused} size={iconSize} />
           ),
         }}
       />
@@ -120,10 +110,11 @@ const styles = StyleSheet.create({
     paddingTop: 16,
   },
   tabLabel: {
-    fontSize: fontSize.xs,
-    fontWeight: "500",
+    fontSize: 11,
+    fontWeight: "600",
   },
   tabLabelWide: {
     fontSize: fontSize.sm,
+    fontWeight: "600",
   },
 });

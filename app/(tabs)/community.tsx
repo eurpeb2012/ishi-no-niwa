@@ -14,7 +14,7 @@ import { useCanvasStore } from "../../stores/canvasStore";
 import { useStoneStore } from "../../stores/stoneStore";
 import { GemStone } from "../../components/common/GemStone";
 
-type Tab = "gallery" | "shared" | "workshops";
+type Tab = "gallery" | "shared";
 
 // Mock community grids for the gallery
 const COMMUNITY_GRIDS = [
@@ -26,12 +26,6 @@ const COMMUNITY_GRIDS = [
   { id: "c6", author: "Mika", authorJp: "美花", name: "Spiritual Ascent", nameJp: "精神の上昇", intention: "spiritual", likes: 44, stones: ["sugilite", "labradorite", "amethyst"] },
 ];
 
-const WORKSHOPS = [
-  { id: "w1", title_en: "Full Moon Crystal Charging", title_jp: "満月クリスタル浄化", host: "Master Tanaka", date: "Mar 14", spots: 12, price: "Free" },
-  { id: "w2", title_en: "Beginner's Grid Workshop", title_jp: "初心者グリッドワークショップ", host: "Sensei Yuki", date: "Mar 21", spots: 8, price: "$9.99" },
-  { id: "w3", title_en: "Advanced Sacred Geometry", title_jp: "上級神聖幾何学", host: "Master Sato", date: "Mar 28", spots: 6, price: "$19.99" },
-  { id: "w4", title_en: "Group Meditation Circle", title_jp: "グループ瞑想サークル", host: "Sensei Hana", date: "Apr 4", spots: 20, price: "Free" },
-];
 
 export default function CommunityScreen() {
   const { t, i18n } = useTranslation();
@@ -63,7 +57,7 @@ export default function CommunityScreen() {
 
       {/* Tab bar */}
       <View style={[styles.tabBar, { paddingHorizontal: contentPadding }]}>
-        {(["gallery", "shared", "workshops"] as Tab[]).map((tab) => (
+        {(["gallery", "shared"] as Tab[]).map((tab) => (
           <TouchableOpacity
             key={tab}
             style={[styles.tab, activeTab === tab && styles.tabActive]}
@@ -72,9 +66,7 @@ export default function CommunityScreen() {
             <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>
               {tab === "gallery"
                 ? isJp ? "ギャラリー" : "Gallery"
-                : tab === "shared"
-                ? isJp ? "あなたの共有" : "Your Shared"
-                : isJp ? "ワークショップ" : "Workshops"}
+                : isJp ? "あなたの共有" : "Your Shared"}
             </Text>
           </TouchableOpacity>
         ))}
@@ -109,38 +101,6 @@ export default function CommunityScreen() {
               </View>
             ))}
 
-            {/* Mentorship section */}
-            <View style={styles.mentorSection}>
-              <Text style={styles.sectionTitle}>
-                {isJp ? "クリスタルガイド" : "Crystal Guides"}
-              </Text>
-              <Text style={styles.mentorDesc}>
-                {isJp
-                  ? "経験豊富なクリスタルプラクティショナーとつながりましょう"
-                  : "Connect with experienced crystal practitioners"}
-              </Text>
-              {[
-                { name: "Master Tanaka", nameJp: "田中師範", specialty_en: "Sacred Geometry", specialty_jp: "神聖幾何学", level: 20 },
-                { name: "Sensei Yuki", nameJp: "雪先生", specialty_en: "Chakra Healing", specialty_jp: "チャクラヒーリング", level: 18 },
-              ].map((guide) => (
-                <View key={guide.name} style={styles.mentorCard}>
-                  <View style={styles.mentorAvatar}>
-                    <Text style={styles.mentorAvatarText}>
-                      {guide.nameJp.charAt(0)}
-                    </Text>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.mentorName}>{isJp ? guide.nameJp : guide.name}</Text>
-                    <Text style={styles.mentorSpecialty}>
-                      {isJp ? guide.specialty_jp : guide.specialty_en}
-                    </Text>
-                  </View>
-                  <TouchableOpacity style={styles.connectButton}>
-                    <Text style={styles.connectText}>{isJp ? "相談" : "Connect"}</Text>
-                  </TouchableOpacity>
-                </View>
-              ))}
-            </View>
           </>
         )}
 
@@ -193,47 +153,6 @@ export default function CommunityScreen() {
           </>
         )}
 
-        {/* Workshops */}
-        {activeTab === "workshops" && (
-          <>
-            <Text style={styles.sectionSubtitle}>
-              {isJp ? "今後のワークショップ" : "Upcoming Workshops"}
-            </Text>
-            {WORKSHOPS.map((ws) => (
-              <View key={ws.id} style={styles.workshopCard}>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.workshopTitle}>
-                    {isJp ? ws.title_jp : ws.title_en}
-                  </Text>
-                  <Text style={styles.workshopHost}>{ws.host}</Text>
-                  <Text style={styles.workshopMeta}>
-                    {ws.date} · {ws.spots} {isJp ? "席" : "spots"} · {ws.price}
-                  </Text>
-                </View>
-                <TouchableOpacity style={styles.joinButton}>
-                  <Text style={styles.joinText}>{isJp ? "参加" : "Join"}</Text>
-                </TouchableOpacity>
-              </View>
-            ))}
-
-            {/* Group sessions placeholder */}
-            <View style={styles.groupSection}>
-              <Text style={styles.sectionTitle}>
-                {isJp ? "グループセッション" : "Group Sessions"}
-              </Text>
-              <Text style={styles.groupDesc}>
-                {isJp
-                  ? "リアルタイムで他のユーザーと一緒にクリスタルグリッドを作成しましょう。近日公開！"
-                  : "Create crystal grids together with other users in real-time. Coming soon!"}
-              </Text>
-              <TouchableOpacity style={styles.notifyButton}>
-                <Text style={styles.notifyText}>
-                  {isJp ? "通知を受け取る" : "Notify Me"}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </>
-        )}
       </ScrollView>
     </View>
   );
@@ -303,54 +222,4 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs, paddingHorizontal: spacing.md,
   },
   shareButtonText: { color: colors.buttonText, fontSize: fontSize.xs, fontWeight: "600" },
-  mentorSection: { marginTop: spacing.lg },
-  mentorDesc: { color: colors.textMuted, fontSize: fontSize.sm, marginBottom: spacing.md },
-  mentorCard: {
-    flexDirection: "row", alignItems: "center",
-    backgroundColor: colors.surfaceLight, borderRadius: borderRadius.md,
-    padding: spacing.md, marginBottom: spacing.sm, gap: spacing.md,
-    borderWidth: 1, borderColor: colors.border,
-  },
-  mentorAvatar: {
-    width: 40, height: 40, borderRadius: 20,
-    backgroundColor: colors.primary, alignItems: "center", justifyContent: "center",
-  },
-  mentorAvatarText: { color: colors.buttonText, fontSize: fontSize.lg, fontWeight: "700" },
-  mentorName: { color: colors.textPrimary, fontSize: fontSize.md, fontWeight: "600" },
-  mentorSpecialty: { color: colors.textMuted, fontSize: fontSize.xs },
-  connectButton: {
-    backgroundColor: colors.surface, borderRadius: borderRadius.sm,
-    paddingVertical: spacing.xs, paddingHorizontal: spacing.md,
-    borderWidth: 1, borderColor: colors.primary,
-  },
-  connectText: { color: colors.primary, fontSize: fontSize.xs, fontWeight: "600" },
-  workshopCard: {
-    flexDirection: "row", alignItems: "center",
-    backgroundColor: colors.surfaceLight, borderRadius: borderRadius.md,
-    padding: spacing.md, marginBottom: spacing.sm,
-    borderWidth: 1, borderColor: colors.border,
-  },
-  workshopTitle: { color: colors.textPrimary, fontSize: fontSize.md, fontWeight: "600" },
-  workshopHost: { color: colors.textMuted, fontSize: fontSize.xs, marginTop: 2 },
-  workshopMeta: { color: colors.textSecondary, fontSize: fontSize.xs, marginTop: spacing.xs },
-  joinButton: {
-    backgroundColor: colors.primary, borderRadius: borderRadius.sm,
-    paddingVertical: spacing.sm, paddingHorizontal: spacing.md,
-  },
-  joinText: { color: colors.buttonText, fontSize: fontSize.sm, fontWeight: "600" },
-  groupSection: {
-    backgroundColor: colors.surfaceLight, borderRadius: borderRadius.lg,
-    padding: spacing.lg, marginTop: spacing.lg,
-    borderWidth: 1, borderColor: colors.primary + "40",
-    alignItems: "center",
-  },
-  groupDesc: {
-    color: colors.textSecondary, fontSize: fontSize.sm, textAlign: "center",
-    lineHeight: 20, marginBottom: spacing.md,
-  },
-  notifyButton: {
-    backgroundColor: colors.primary, borderRadius: borderRadius.md,
-    paddingVertical: spacing.sm, paddingHorizontal: spacing.xl,
-  },
-  notifyText: { color: colors.buttonText, fontSize: fontSize.md, fontWeight: "600" },
 });

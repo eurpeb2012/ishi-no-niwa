@@ -238,9 +238,6 @@ function FairyPlaceholder({
           </Text>
         ) : null}
       </View>
-      <Text style={[styles.placeholderLabel, { fontSize: Math.max(7, size * 0.1) }]}>
-        Sprite needed
-      </Text>
     </View>
   );
 }
@@ -271,9 +268,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 1.5,
     borderStyle: "dashed",
-  },
-  placeholderLabel: {
-    color: "#B09898",
-    marginTop: 2,
   },
 });

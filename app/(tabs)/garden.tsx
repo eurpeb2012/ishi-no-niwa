@@ -24,8 +24,7 @@ import { useCanvasStore, CANVAS_BG_COLORS } from "../../stores/canvasStore";
 import { useStoneStore } from "../../stores/stoneStore";
 import { useProgressionStore } from "../../stores/progressionStore";
 import { useInsightStore } from "../../stores/insightStore";
-import { useFairyStore, FAIRY_COLORS } from "../../stores/fairyStore";
-import { CrystalFairy } from "../../components/common/CrystalFairy";
+import { useFairyStore } from "../../stores/fairyStore";
 import { useResponsive } from "../../hooks/useResponsive";
 import { XP_REWARDS } from "../../types";
 import { GemStone, getGemSize } from "../../components/common/GemStone";
@@ -91,19 +90,22 @@ interface DraggableStoneProps {
   canvasSize: number;
   onDragEnd: (index: number, newX: number, newY: number, newRotation?: number) => void;
   onSelect: (index: number) => void;
+  onLongPress: (index: number) => void;
   selected: boolean;
+  enlarged: boolean;
   pulsing: boolean;
   photoMode: boolean;
   hapticsEnabled: boolean;
 }
 
 function DraggableStone({
-  placement, index, stone, canvasSize, onDragEnd, onSelect, selected, pulsing, photoMode, hapticsEnabled,
+  placement, index, stone, canvasSize, onDragEnd, onSelect, onLongPress, selected, enlarged, pulsing, photoMode, hapticsEnabled,
 }: DraggableStoneProps) {
   const [gemW, gemH] = getGemSize(stone.id);
+  const enlargeScale = enlarged ? 2.2 : 1;
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
-  const scale = useSharedValue(1);
+  const scale = useSharedValue(enlargeScale);
   const persistedRotation = useSharedValue(placement.rotation || 0);
   const activeRotation = useSharedValue(0);
   const savedRotation = useSharedValue(placement.rotation || 0);
@@ -121,6 +123,11 @@ function DraggableStone({
     persistedRotation.value = placement.rotation || 0;
     savedRotation.value = placement.rotation || 0;
   }, [placement.rotation]);
+
+  useEffect(() => {
+    scale.value = withTiming(enlargeScale, { duration: 200 });
+    zIdx.value = enlarged ? 150 : 0;
+  }, [enlarged]);
 
   useEffect(() => {
     if (pulsing) {
@@ -155,9 +162,9 @@ function DraggableStone({
     .onStart(() => {
       savedTranslateX.value = translateX.value;
       savedTranslateY.value = translateY.value;
-      scale.value = withTiming(1.15, { duration: 100 });
+      scale.value = withTiming(enlargeScale * 1.15, { duration: 100 });
       glowOpacity.value = withTiming(1, { duration: 150 });
-      zIdx.value = 100;
+      zIdx.value = 150;
       runOnJS(triggerHaptic)();
     })
     .onUpdate((event) => {
@@ -166,10 +173,10 @@ function DraggableStone({
       dragTilt.value = event.translationX * 0.15;
     })
     .onEnd(() => {
-      scale.value = withTiming(1, { duration: 100 });
+      scale.value = withTiming(enlargeScale, { duration: 100 });
       glowOpacity.value = withTiming(0, { duration: 300 });
       dragTilt.value = withTiming(0, { duration: 200 });
-      zIdx.value = 0;
+      zIdx.value = enlarged ? 150 : 0;
       const newPixelX = baseLeft + gemW / 2 + translateX.value;
       const newPixelY = baseTop + gemH / 2 + translateY.value;
       const clampedX = Math.max(0, Math.min(newPixelX / canvasSize, 1));
@@ -182,7 +189,9 @@ function DraggableStone({
       savedTranslateX.value = 0;
       savedTranslateY.value = 0;
     })
-    .minDistance(5);
+    .minDistance(3)
+    .activeOffsetX([-5, 5])
+    .activeOffsetY([-5, 5]);
 
   const rotationGesture = Gesture.Rotation()
     .onStart(() => {
@@ -201,11 +210,21 @@ function DraggableStone({
       runOnJS(onDragEnd)(index, placement.x, placement.y, finalRot);
     });
 
+  const longPressGesture = Gesture.LongPress()
+    .minDuration(400)
+    .onEnd((_event, success) => {
+      if (success) {
+        runOnJS(triggerHaptic)();
+        runOnJS(onLongPress)(index);
+      }
+    });
+
   const tapGesture = Gesture.Tap()
     .onEnd(() => { runOnJS(handleTap)(index); });
 
   const composedGesture = Gesture.Race(
     Gesture.Simultaneous(panGesture, rotationGesture),
+    longPressGesture,
     tapGesture
   );
 
@@ -272,18 +291,21 @@ interface DraggableDecorProps {
   canvasSize: number;
   onDragEnd: (index: number, newX: number, newY: number, newRotation?: number) => void;
   onSelect: (index: number) => void;
+  onLongPress: (index: number) => void;
   selected: boolean;
+  enlarged: boolean;
   photoMode: boolean;
   hapticsEnabled: boolean;
 }
 
 function DraggableDecorItem({
-  placement, index, glyph, canvasSize, onDragEnd, onSelect, selected, photoMode, hapticsEnabled,
+  placement, index, glyph, canvasSize, onDragEnd, onSelect, onLongPress, selected, enlarged, photoMode, hapticsEnabled,
 }: DraggableDecorProps) {
   const itemSize = 36;
+  const enlargeScale = enlarged ? 2.2 : 1;
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
-  const scale = useSharedValue(1);
+  const scale = useSharedValue(enlargeScale);
   const persistedRotation = useSharedValue(placement.rotation || 0);
   const activeRotation = useSharedValue(0);
   const savedRotation = useSharedValue(placement.rotation || 0);
@@ -298,6 +320,11 @@ function DraggableDecorItem({
     persistedRotation.value = placement.rotation || 0;
     savedRotation.value = placement.rotation || 0;
   }, [placement.rotation]);
+
+  useEffect(() => {
+    scale.value = withTiming(enlargeScale, { duration: 200 });
+    zIdx.value = enlarged ? 150 : 0;
+  }, [enlarged]);
 
   const triggerHaptic = useCallback(() => {
     if (hapticsEnabled && Platform.OS !== "web") {
@@ -314,8 +341,8 @@ function DraggableDecorItem({
     .onStart(() => {
       savedTranslateX.value = translateX.value;
       savedTranslateY.value = translateY.value;
-      scale.value = withTiming(1.2, { duration: 100 });
-      zIdx.value = 100;
+      scale.value = withTiming(enlargeScale * 1.2, { duration: 100 });
+      zIdx.value = 150;
       runOnJS(triggerHaptic)();
     })
     .onUpdate((event) => {
@@ -323,8 +350,8 @@ function DraggableDecorItem({
       translateY.value = savedTranslateY.value + event.translationY;
     })
     .onEnd(() => {
-      scale.value = withTiming(1, { duration: 100 });
-      zIdx.value = 0;
+      scale.value = withTiming(enlargeScale, { duration: 100 });
+      zIdx.value = enlarged ? 150 : 0;
       const newPixelX = baseLeft + itemSize / 2 + translateX.value;
       const newPixelY = baseTop + itemSize / 2 + translateY.value;
       const clampedX = Math.max(0, Math.min(newPixelX / canvasSize, 1));
@@ -337,7 +364,9 @@ function DraggableDecorItem({
       savedTranslateX.value = 0;
       savedTranslateY.value = 0;
     })
-    .minDistance(5);
+    .minDistance(3)
+    .activeOffsetX([-5, 5])
+    .activeOffsetY([-5, 5]);
 
   const rotationGesture = Gesture.Rotation()
     .onStart(() => {
@@ -356,11 +385,21 @@ function DraggableDecorItem({
       runOnJS(onDragEnd)(index, placement.x, placement.y, finalRot);
     });
 
+  const longPressGesture = Gesture.LongPress()
+    .minDuration(400)
+    .onEnd((_event, success) => {
+      if (success) {
+        runOnJS(triggerHaptic)();
+        runOnJS(onLongPress)(index);
+      }
+    });
+
   const tapGesture = Gesture.Tap()
     .onEnd(() => { runOnJS(handleTap)(index); });
 
   const composedGesture = Gesture.Race(
     Gesture.Simultaneous(panGesture, rotationGesture),
+    longPressGesture,
     tapGesture
   );
 
@@ -425,7 +464,6 @@ export default function GardenScreen() {
   const fairyAddEnergy = fairy.addEnergy;
   const fairyAddBond = fairy.addBond;
   const fairyTrackIntention = fairy.trackGridIntention;
-  const fairyColor = FAIRY_COLORS[fairy.colorVariant];
 
   const [showTemplates, setShowTemplates] = useState(false);
   const [showSaveAd, setShowSaveAd] = useState(false);
@@ -437,6 +475,7 @@ export default function GardenScreen() {
   const [showAmbientPicker, setShowAmbientPicker] = useState(false);
   const [replaying, setReplaying] = useState(false);
   const [trayCategory, setTrayCategory] = useState<"crystals" | "flowers" | "sea" | "nature" | "seasonal">("crystals");
+  const [zoomedIdx, setZoomedIdx] = useState<number | null>(null);
 
   const seasonalItems = useMemo(() => getCurrentSeasonalItems(), []);
   const othersItems = useMemo(() => getOthersItems(), []);
@@ -535,7 +574,15 @@ export default function GardenScreen() {
   );
 
   const handleSelect = useCallback(
-    (index: number) => { setSelectedIdx((prev) => (prev === index ? null : index)); },
+    (index: number) => {
+      setSelectedIdx((prev) => (prev === index ? null : index));
+      setZoomedIdx(null);
+    },
+    []
+  );
+
+  const handleLongPressZoom = useCallback(
+    (index: number) => { setZoomedIdx((prev) => (prev === index ? null : index)); },
     []
   );
 
@@ -640,8 +687,8 @@ export default function GardenScreen() {
               return (
                 <DraggableDecorItem
                   key={`decor-${i}`} placement={placement} index={i} glyph={item.glyph}
-                  canvasSize={photoSize} onDragEnd={handleDragEnd} onSelect={handleSelect}
-                  selected={false} photoMode hapticsEnabled={false}
+                  canvasSize={photoSize} onDragEnd={handleDragEnd} onSelect={handleSelect} onLongPress={handleLongPressZoom}
+                  selected={false} enlarged={false} photoMode hapticsEnabled={false}
                 />
               );
             }
@@ -650,8 +697,8 @@ export default function GardenScreen() {
             return (
               <DraggableStone
                 key={`stone-${i}`} placement={placement} index={i} stone={stone}
-                canvasSize={photoSize} onDragEnd={handleDragEnd} onSelect={handleSelect}
-                selected={false} pulsing={false} photoMode hapticsEnabled={false}
+                canvasSize={photoSize} onDragEnd={handleDragEnd} onSelect={handleSelect} onLongPress={handleLongPressZoom}
+                selected={false} enlarged={false} pulsing={false} photoMode hapticsEnabled={false}
               />
             );
           })}
@@ -716,7 +763,10 @@ export default function GardenScreen() {
 
       {/* Canvas with evolution */}
       <View style={styles.canvasContainer}>
-        <View style={[styles.canvas, { width: CANVAS_SIZE, height: CANVAS_SIZE, borderRadius: CANVAS_SIZE / 2, backgroundColor: CANVAS_BG_COLORS[canvas.canvasBg] }, evolutionStyle]}>
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={() => { setZoomedIdx(null); setSelectedIdx(null); }}
+          style={[styles.canvas, { width: CANVAS_SIZE, height: CANVAS_SIZE, borderRadius: borderRadius.md, backgroundColor: CANVAS_BG_COLORS[canvas.canvasBg] }]}>
           {/* Environment decorations based on level */}
           {canvasDecor.includes("grass") && (
             <>
@@ -768,8 +818,8 @@ export default function GardenScreen() {
               return (
                 <DraggableDecorItem
                   key={`decor-${i}`} placement={placement} index={i} glyph={item.glyph}
-                  canvasSize={CANVAS_SIZE} onDragEnd={handleDragEnd} onSelect={handleSelect}
-                  selected={selectedIdx === i} photoMode={false} hapticsEnabled={hapticsEnabled}
+                  canvasSize={CANVAS_SIZE} onDragEnd={handleDragEnd} onSelect={handleSelect} onLongPress={handleLongPressZoom}
+                  selected={selectedIdx === i} enlarged={zoomedIdx === i} photoMode={false} hapticsEnabled={hapticsEnabled}
                 />
               );
             }
@@ -778,27 +828,14 @@ export default function GardenScreen() {
             return (
               <DraggableStone
                 key={`stone-${i}`} placement={placement} index={i} stone={stone}
-                canvasSize={CANVAS_SIZE} onDragEnd={handleDragEnd} onSelect={handleSelect}
-                selected={selectedIdx === i} pulsing={pulsing} photoMode={false}
+                canvasSize={CANVAS_SIZE} onDragEnd={handleDragEnd} onSelect={handleSelect} onLongPress={handleLongPressZoom}
+                selected={selectedIdx === i} enlarged={zoomedIdx === i} pulsing={pulsing} photoMode={false}
                 hapticsEnabled={hapticsEnabled}
               />
             );
           })}
 
-          {/* Fairy avatar inside canvas, centered near bottom */}
-          <View style={{ position: "absolute", bottom: CANVAS_SIZE * 0.15, left: CANVAS_SIZE / 2 - 24 }} pointerEvents="none">
-            <CrystalFairy
-              colorHex={fairyColor.hex}
-              accentHex={fairyColor.accent}
-              size={48}
-              level={level}
-              evolutionStage={fairy.evolutionStage}
-              crystalStage={fairy.crystalStage}
-              equippedOutfits={fairy.equippedOutfits}
-              isStatic
-            />
-          </View>
-        </View>
+        </TouchableOpacity>
       </View>
 
       {/* Remove bar */}
@@ -969,6 +1006,7 @@ export default function GardenScreen() {
           ))}
         </ScrollView>
       </View>
+
     </View>
   );
 }
@@ -994,6 +1032,8 @@ const styles = StyleSheet.create({
   canvas: {
     backgroundColor: colors.canvas,
     position: "relative" as const, overflow: "hidden" as const,
+    // @ts-ignore — web-only property to prevent page scroll during grid drag
+    touchAction: "none",
   },
   guidePoint: {
     position: "absolute", width: 12, height: 12, borderRadius: 6,
